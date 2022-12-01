@@ -31,7 +31,7 @@ I like to work on Reinforcement Learning, NLP and Vision. Although my current wo
 
 I like Japan
 
-My greatest failure
+My greatest failure, and resolve. 
 ======
 Back in 2019, I was awarded a scholarship by [Japan Internation Cooperation Agency](https://www.jica.go.jp/english/index.html)(JICA) to study for my masters at any university in Japan. 
 
@@ -41,7 +41,7 @@ Back in 2019, I was awarded a scholarship by [Japan Internation Cooperation Agen
 
 My entire life trajectory would have been different had I dared and pursued my masters at Tokyo University. 
 
-I made a promise to myself to complete my masters at Boston University and go to Matsuo lab and do my Ph.D
+I made a promise to myself to complete my masters at Boston University and go to Matsuo lab and do my Ph.D. 
 
 
 
@@ -61,21 +61,9 @@ My History
 | 2021   | Published [Sloshing noise analysis and classification with CNNs](https://asa.scitation.org/doi/abs/10.1121/10.0004829) at JASA         |
 | 2021   | Joined Boston University, MS in Artificial Intelligence         |
 | 2022      | Published [Towards Fast Crash-Consistent Cluster Checkpointing](https://ieeexplore.ieee.org/abstract/document/9926330), IEEE HPEC         |
-
-Site-wide configuration
-------
-
-Create content & metadata
-------
-
-**Markdown generator**
+| 2022      | Abstract Submission and Poster presentation [Feature understanding and Analysis](https://www.miua2022.com/) , [MIUA](https://www.miua2022.com/), 2022         |
 
 
-How to edit your site's GitHub repository
-------
-
-Example: editing a markdown file for a talk
-![Editing a markdown file for a talk](/images/editing-talk.png)
-
-For more info
-------
+Ongoing projects
+======
+< this section has to be updated >
