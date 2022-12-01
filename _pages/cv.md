@@ -17,25 +17,14 @@ Education
 Work experience
 ======
 * Summer 2019: Data Analyst Intern,
-  * Takenaka Corporation
+  * [Takenaka Corporation](https://www.takenaka.co.jp/takenaka_e/)
   * Duties included: Data analysis and prediction
   * Supervisor: Kei Aizawa, Keizo Iwashita
 
-* Fall 2021: Teaching Assistant, Boston University
-  * CS101 (Intro to Computer Science)
-  * Duties included: Conducting Lab sessions, help with course content. 
-  * Instructor: [Ibrahim Ahmed](https://ca.linkedin.com/in/ahmedfakhriibrahim)
+* Oct, 2020 - Aug, 2021: Imagineer,
+  * [Fractal Analytics](https://fractal.ai/)
+  * Duties included: Cloud Services, maintaining data pipelines
 
-* Spring 2022: Teaching Assistant, Boston University
-  * CS506 (Computational Tools for Data Science)
-  * Duties included: Conducting Lab sessions, help with course content. 
-  * Instructor: [Lance Galletti](https://www.bu.edu/cs/profiles/galletti/)
-
-* Summer 2022: Teaching Assistant, Boston University
-  * CS101 (Computer Systems)
-  * Duties included: Conducting Lab sessions, help with course content. 
-  * Instructor: [Perry Donham](https://www.bu.edu/cs/profiles/perry-donham/)
-  
 Skills
 ======
 Need to update this section
