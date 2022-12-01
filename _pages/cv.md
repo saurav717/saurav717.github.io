@@ -11,30 +11,34 @@ redirect_from:
 
 Education
 ======
-* B.S. in GitHub, GitHub University, 2012
-* M.S. in Jekyll, GitHub University, 2014
-* Ph.D in Version Control Theory, GitHub University, 2018 (expected)
+* B.Tech. in Engineering Sciences, IIT Hyderabad, 2020
+* M.S. in Jekyll, GitHub University, 2023 (ongoing)
 
 Work experience
 ======
-* Summer 2015: Research Assistant
-  * Github University
-  * Duties included: Tagging issues
-  * Supervisor: Professor Git
+* Summer 2019: Data Analyst Intern,
+  * Takenaka Corporation
+  * Duties included: Data analysis and prediction
+  * Supervisor: Kei Aizawa, Keizo Iwashita
 
-* Fall 2015: Research Assistant
-  * Github University
-  * Duties included: Merging pull requests
-  * Supervisor: Professor Hub
+* Fall 2021: Teaching Assistant, Boston University
+  * CS101 (Intro to Computer Science)
+  * Duties included: Conducting Lab sessions, help with course content. 
+  * Instructor: [Ibrahim Ahmed](https://ca.linkedin.com/in/ahmedfakhriibrahim)
+
+* Spring 2022: Teaching Assistant, Boston University
+  * CS506 (Computational Tools for Data Science)
+  * Duties included: Conducting Lab sessions, help with course content. 
+  * Instructor: [Lance Galletti](https://www.bu.edu/cs/profiles/galletti/)
+
+* Summer 2022: Teaching Assistant, Boston University
+  * CS101 (Computer Systems)
+  * Duties included: Conducting Lab sessions, help with course content. 
+  * Instructor: [Perry Donham](https://www.bu.edu/cs/profiles/perry-donham/)
   
 Skills
 ======
-* Skill 1
-* Skill 2
-  * Sub-skill 2.1
-  * Sub-skill 2.2
-  * Sub-skill 2.3
-* Skill 3
+Need to update this section
 
 Publications
 ======
