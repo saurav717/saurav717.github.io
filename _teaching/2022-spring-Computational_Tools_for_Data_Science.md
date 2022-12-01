@@ -21,3 +21,7 @@ Tools Used
 ======
 Github, Python, Kaggle
 
+Instructor
+======
+[Lance Galletti](https://www.bu.edu/cs/profiles/galletti/)
+
