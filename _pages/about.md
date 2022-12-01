@@ -16,8 +16,8 @@ I am being advised by [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/).
 My current area of research is on pattern recognition, and image understanding of different MRI scans for different tasks related to Aphasia in collaboration with [Aphasia Research Lab](https://www.bu.edu/aphasiaresearch/), Boston University. This work is jointly being collaborated with [Dr. Prakash Ishwar](https://sites.bu.edu/pi/), [Dr. Archana Venkataraman](https://www.linkedin.com/in/archana-venkataraman-340632219?original_referer=https%3A%2F%2Fwww.google.com%2F) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) 
 
 
-Work During my Undergrad
-======
+<!-- Work During my Undergrad
+====== -->
 
 Before Joining Boston University, I was an undergraduate student in the department of Engineering Sciences at IIT Hyderabad.
 
@@ -58,7 +58,9 @@ My History
 | 2022      | Abstract Submission and Poster presentation [Feature understanding and Analysis](https://drive.google.com/drive/folders/1g7Lx0pfP39dUVCBgDXtNb2iSi1DnJipc) , [MIUA](https://www.miua2022.com/), 2022         |
 
 
-
+Research Interests
+======
+< need to add this section >
 
 My Journey in AI
 ======
