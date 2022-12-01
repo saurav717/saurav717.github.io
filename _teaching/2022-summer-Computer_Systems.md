@@ -1,7 +1,7 @@
 ---
-title: "Teaching Assistant"
+title: "CS210 Computer Systems"
 collection: teaching
-type: "Undergraduate course"
+type: "Teaching Assistant"
 permalink: /teaching/2022-summer-Computer_Systems
 venue: "Boston University, Department of Computer Science"
 date: 2022-05-01
