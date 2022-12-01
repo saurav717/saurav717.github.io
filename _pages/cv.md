@@ -1,6 +1,6 @@
 ---
 layout: archive
-title: "CV"
+# title: "CV"
 permalink: /cv/
 author_profile: true
 redirect_from:
@@ -9,8 +9,8 @@ redirect_from:
 
 {% include base_path %}
 
-Education
-======
+# Education
+
 * B.Tech. in Engineering Sciences, IIT Hyderabad, 2020
 * M.S. in Artificial Intelligence, Boston University, 2023 (ongoing)
 
