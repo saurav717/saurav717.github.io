@@ -65,7 +65,7 @@ My Journey in AI
 My Journey to Deep Learning and applications started with Control systems. My interest on automating things via control systems has drawn me close to working on different projects as a part of the robotics club at IITH. Eventually, my interest in automation drawn me towards AI since the end of my sophomore year. By then, I became the head of robotics club and focused on an intersection of both these fields. From my Junior year, I used to work with Dr. Srijith P.K and Dr. Shantanu Desai on Bayesian Optimization and with Dr. Sumohana Chennappaya on generative approaches on images and videos. These interests evolved and led me to be interested in working on applications of vision and Deep Learning in different fields. I have various other interests in an intersection of Reinforcement Learning and Videos, Bayesian Modelling, and NLP. I would like to pursue work in any of these areas as a next step of my career in my Ph.D.
 
 
-My greatest failure, and resolve. 
+<!-- My greatest failure, and resolve. 
 ======
 Back in 2019, I was awarded a scholarship by [Japan Internation Cooperation Agency](https://www.jica.go.jp/english/index.html)(JICA) to study for my masters at any university in Japan. 
 
@@ -75,5 +75,5 @@ Back in 2019, I was awarded a scholarship by [Japan Internation Cooperation Agen
 
 My entire life trajectory would have been different had I dared and pursued my masters at Tokyo University. 
 
-I made a promise to myself to complete my masters at Boston University and go to Matsuo lab and do my Ph.D. 
+I made a promise to myself to complete my masters at Boston University and go to Matsuo lab and do my Ph.D.  -->
 
