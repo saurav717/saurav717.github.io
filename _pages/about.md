@@ -16,14 +16,14 @@ I am being advised by [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/).
 My current area of research is on pattern recognition, and image understanding of different MRI scans for different tasks related to Aphasia in collaboration with [Aphasia Research Lab](https://www.bu.edu/aphasiaresearch/), Boston University. This work is jointly being collaborated with [Dr. Prakash Ishwar](https://sites.bu.edu/pi/), [Dr. Archana Venkataraman](https://www.linkedin.com/in/archana-venkataraman-340632219?original_referer=https%3A%2F%2Fwww.google.com%2F) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) 
 
 
-<!-- Work During my Undergrad
+Work During my Undergrad
 ======
 
 Before Joining Boston University, I was an undergraduate student in the department of Engineering Sciences at IIT Hyderabad.
 
 During my Undergraduate at IIT Hyderabad, I worked with Dr. [K Sri Rama Murthy](https://www.iith.ac.in/ee/ksrm/), [Dr. Venkatesham](https://sites.google.com/mae.iith.ac.in/venkatesham?pli=1) and [Dr. Siva Teja golla](https://in.linkedin.com/in/sivatejagolla) on Sloshing Noise analysis and classification in Fuel tanks of Hybrid Vehicles. We published our work on [Journal of Acoustic Society of America](https://asa.scitation.org/journal/jas)
 
-I also used to work on Bayesian Optimization on Gravitational wave dataset with Dr. Srijith Pk and Dr. Shantanu Desai. On Generative approaches on Images and videos with Dr. Sumohana Chennappaya -->
+<!-- I also used to work on Bayesian Optimization on Gravitational wave dataset with Dr. Srijith Pk and Dr. Shantanu Desai. On Generative approaches on Images and videos with Dr. Sumohana Chennappaya -->
 
 
 
@@ -60,12 +60,12 @@ My History
 
 
 
-<!-- My Journey in AI
+My Journey in AI
 ======
-My Journey to Deep Learning and applications started with Control systems. My interest on automating things via control systems has drawn me close to working on different projects as a part of the robotics club at IITH. Eventually, my interest in automation drawn me towards AI since the end of my sophomore year. By then, I became the head of robotics club and focused on an intersection of both these fields. From my Junior year, I used to work with Dr. Srijith P.K and Dr. Shantanu Desai on Bayesian Optimization and with Dr. Sumohana Chennappaya on generative approaches on images and videos. These interests evolved and led me to be interested in working on applications of vision and Deep Learning in different fields. I have various other interests in an intersection of Reinforcement Learning and Videos, Bayesian Modelling, and NLP. I would like to pursue work in any of these areas as a next step of my career in my Ph.D. -->
+My Journey to Deep Learning and applications started with Control systems. My interest on automating things via control systems has drawn me close to working on different projects as a part of the robotics club at IITH. Eventually, my interest in automation drawn me towards AI since the end of my sophomore year. By then, I became the head of robotics club and focused on an intersection of both these fields. From my Junior year, I used to work with Dr. Srijith P.K and Dr. Shantanu Desai on Bayesian Optimization and with Dr. Sumohana Chennappaya on generative approaches on images and videos. These interests evolved and led me to be interested in working on applications of vision and Deep Learning in different fields. I have various other interests in an intersection of Reinforcement Learning and Videos, Bayesian Modelling, and NLP. I would like to pursue work in any of these areas as a next step of my career in my Ph.D.
 
 
-<!-- My greatest failure, and resolve. 
+My greatest failure, and resolve. 
 ======
 Back in 2019, I was awarded a scholarship by [Japan Internation Cooperation Agency](https://www.jica.go.jp/english/index.html)(JICA) to study for my masters at any university in Japan. 
 
@@ -75,5 +75,5 @@ Back in 2019, I was awarded a scholarship by [Japan Internation Cooperation Agen
 
 My entire life trajectory would have been different had I dared and pursued my masters at Tokyo University. 
 
-I made a promise to myself to complete my masters at Boston University and go to Matsuo lab and do my Ph.D.  -->
+I made a promise to myself to complete my masters at Boston University and go to Matsuo lab and do my Ph.D. 
 
