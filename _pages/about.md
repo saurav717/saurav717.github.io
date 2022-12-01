@@ -1,6 +1,6 @@
 ---
 permalink: /
-title: "Hello! stranger"
+# title: "Hello! stranger"
 excerpt: "About me"
 author_profile: true
 redirect_from: 
@@ -61,7 +61,7 @@ My History
 | 2021   | Published [Sloshing noise analysis and classification with CNNs](https://asa.scitation.org/doi/abs/10.1121/10.0004829) at JASA         |
 | 2021   | Joined Boston University, MS in Artificial Intelligence         |
 | 2022      | Published [Towards Fast Crash-Consistent Cluster Checkpointing](https://ieeexplore.ieee.org/abstract/document/9926330), IEEE HPEC         |
-| 2022      | Abstract Submission and Poster presentation [Feature understanding and Analysis](https://www.miua2022.com/) , [MIUA](https://www.miua2022.com/), 2022         |
+| 2022      | Abstract Submission and Poster presentation [Feature understanding and Analysis](https://drive.google.com/drive/folders/1g7Lx0pfP39dUVCBgDXtNb2iSi1DnJipc) , [MIUA](https://www.miua2022.com/), 2022         |
 
 
 Ongoing projects
