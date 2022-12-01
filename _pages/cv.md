@@ -12,7 +12,7 @@ redirect_from:
 Education
 ======
 * B.Tech. in Engineering Sciences, IIT Hyderabad, 2020
-* M.S. in Jekyll, GitHub University, 2023 (ongoing)
+* M.S. in Artificial Intelligence, Boston University, 2023 (ongoing)
 
 Work experience
 ======
