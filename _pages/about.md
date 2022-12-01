@@ -8,8 +8,8 @@ redirect_from:
   - /about.html
 ---
 
-About Me
-======
+<!-- About Me
+====== -->
 Hai, I am currently a masters student at Boston University in my third semester.  
 
 I am being advised by [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/). 
