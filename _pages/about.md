@@ -1,15 +1,15 @@
 ---
 permalink: /
-# title: "Hello! stranger"
+title: "About me"
 # excerpt: "About me"
 author_profile: true
-# redirect_from: 
-#   - /about/
+redirect_from: 
+  - /about/
   - /about.html
 ---
 
-About Me
-======
+<!-- About Me
+====== -->
 Hai, I am currently a masters student at Boston University in my third semester.  
 
 I am being advised by [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/). 
