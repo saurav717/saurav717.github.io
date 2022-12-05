@@ -181,12 +181,12 @@ collections:
   publications:
     output: true
     permalink: /:collection/:path/
-  portfolio:
-    output: False
-    permalink: /:collection/:path/
-  talks:
-    output: False
-    permalink: /:collection/:path/
+  # portfolio:
+  #   output: False
+  #   permalink: /:collection/:path/
+  # talks:
+  #   output: False
+  #   permalink: /:collection/:path/
 
 
 # Defaults
@@ -228,22 +228,22 @@ defaults:
       share: true
       comments: true
   # _portfolio
-  - scope:
-      path: ""
-      type: portfolio
-    values:
-      layout: single
-      author_profile: False
-      share: False
-      comment: False
+  # - scope:
+  #     path: ""
+  #     type: portfolio
+  #   values:
+  #     layout: single
+  #     author_profile: False
+  #     share: False
+  #     comment: False
   # _talks
-  - scope:
-      path: ""
-      type: talks
-    values:
-      layout: talk
-      author_profile: False
-      share: False
+  # - scope:
+  #     path: ""
+  #     type: talks
+  #   values:
+  #     layout: talk
+  #     author_profile: False
+  #     share: False
 
 # Sass/SCSS
 sass:
