@@ -12,17 +12,10 @@ redirect_from:
 ====== -->
 I am looking for **job/residency/PhD positions** starting **May 2023**
 # About me
-I am currently a masters student at Boston University. I am advised by [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/). My current area of research is on pattern recognition, and image understanding of different MRI scans for various tasks related to Aphasia recovery and severity, done in collaboration with [Aphasia Research Lab](https://www.bu.edu/aphasiaresearch/), Boston University. This work is jointly being collaborated with [Dr. Prakash Ishwar](https://sites.bu.edu/pi/), [Dr. Archana Venkataraman](https://www.linkedin.com/in/archana-venkataraman-340632219?original_referer=https%3A%2F%2Fwww.google.com%2F) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) 
-
-
+I completed my masters in Artificial Intelligence from Boston University. My research work was mostly done in collaboration with [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/), [Dr. Prakash Ishwar](https://sites.bu.edu/pi/) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) supported by [Aphasia Research Lab](https://www.bu.edu/aphasiaresearch/).
 <!-- Work During my Undergrad
 ====== -->
 
-Before Joining Boston University, I was an undergraduate student in the department of Engineering Sciences at IIT Hyderabad.
-
-During my Undergraduate at IIT Hyderabad, I worked with Dr. [K Sri Rama Murthy](https://www.iith.ac.in/ee/ksrm/), [Dr. Venkatesham](https://sites.google.com/mae.iith.ac.in/venkatesham?pli=1) and [Dr. Siva Teja golla](https://in.linkedin.com/in/sivatejagolla) on Sloshing Noise analysis and classification in Fuel tanks of Hybrid Vehicles. We published our work on [Journal of Acoustic Society of America](https://asa.scitation.org/journal/jas)
-
-<!-- I also used to work on Bayesian Optimization on Gravitational wave dataset with Dr. Srijith Pk and Dr. Shantanu Desai. On Generative approaches on Images and videos with Dr. Sumohana Chennappaya -->
 
 
 
