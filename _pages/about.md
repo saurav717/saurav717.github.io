@@ -52,7 +52,7 @@ My History
 
 Research Interests
 ======
-< need to add this section >
+Computer Vision, Reinforcement Learning
 
 My Journey in AI
 ======
