@@ -83,7 +83,7 @@ analytics:
 author:
   name             : "Saurav vara prasad Chennuri"
   avatar           : "profile2.png"
-  bio              : "Boston University, advised by Prof. Margrit Betke"
+  bio              : "Boston University | IIT Hyd"
   location         : "Boston, MA"
   employer         :
   googlescholar    : "https://scholar.google.com/citations?user=5WyCoaoAAAAJ&hl=en&oi=sra"
@@ -228,22 +228,22 @@ defaults:
       share: true
       comments: true
   # _portfolio
-  # - scope:
-  #     path: ""
-  #     type: portfolio
-  #   values:
-  #     layout: single
-  #     author_profile: True
-  #     share: True
-  #     comment: True
-  # # _talks
-  # - scope:
-  #     path: ""
-  #     type: talks
-  #   values:
-  #     layout: talk
-  #     author_profile: True
-  #     share: True
+  - scope:
+      path: ""
+      type: portfolio
+    values:
+      layout: single
+      author_profile: True
+      share: True
+      comment: True
+  # _talks
+  - scope:
+      path: ""
+      type: talks
+    values:
+      layout: talk
+      author_profile: True
+      share: True
 
 # Sass/SCSS
 sass:
