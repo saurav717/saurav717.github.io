@@ -12,6 +12,5 @@ citation: 'Saurav Chennuri, Sha Lai, Anne Billot, Maria Varkanitsa, Emily Braun,
 
 [Download paper here](https://openaccess.thecvf.com/content/ICCV2023W/CVAMD/papers/Chennuri_Fusion_Approaches_to_Predict_Post-Stroke_Aphasia_Severity_from_Multimodal_Neuroimaging_ICCVW_2023_paper.pdf)
 
-[Recommended citation](https://scholar.google.com/scholar?oi=bibs&hl=en&cluster=9046504171760872757#d=gs_cit&t=1698069360220&u=%2Fscholar%3Fq%3Dinfo%3ANW3lIJ2ji30J%3Ascholar.google.com%2F%26output%3Dcite%26scirp%3D0%26scfhb%3D1%26hl%3Den) 
 
  
