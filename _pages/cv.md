@@ -29,7 +29,7 @@ Resume
 ======
 
 
-<embed src="https://saurav717.github.io/files/saurav-chennuri--s.pdf" type="application/pdf" />
+<embed src="https://saurav717.github.io/assets/saurav-chennuri--s.pdf" type="application/pdf" />
 
 Publications
 ======
