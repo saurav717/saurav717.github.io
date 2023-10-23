@@ -12,4 +12,4 @@ citation: 'Andrew Wood, Moshik Hershcovitch, Ilias Ennmouri, Weiyu Zong, Saurav 
 
 [Download paper here](http://academicpages.github.io/files/paper1.pdf)
 
-Recommended citation: Andrew Wood, Moshik Hershcovitch, Ilias Ennmouri, Weiyu Zong, Saurav Chennuri, Sarel Cohen, Swaminathan Sundararaman, Daniel Waddington, Peter Chin. (2020).; <i>IEEE High Performance Extreme Computing</i>.
+Recommended citation: Andrew Wood, Moshik Hershcovitch, Ilias Ennmouri, Weiyu Zong, Saurav Chennuri, Sarel Cohen, Swaminathan Sundararaman, Daniel Waddington, Peter Chin. (2022).; <i>IEEE High Performance Extreme Computing</i>.
