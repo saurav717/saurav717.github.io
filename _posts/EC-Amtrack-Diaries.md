@@ -1,7 +1,7 @@
 ---
 title: 'East Coast Amtrack Diaries'
 date: 2023-10-23
-permalink: /posts/EC/Amtrack/Diaries/
+permalink: /posts/2023/10/EC-Amtrack-Diaries/
 tags:
   - Life
   - Journey
