@@ -8,7 +8,6 @@ venue: 'Journal of Acoustic Society of America'
 paperurl: 'https://asa.scitation.org/doi/abs/10.1121/10.0004829'
 citation: 'Golla Siva Teja, Chennuri Saurav Vara Prasad, B Venkatesham, K. Sri Rama Murthy. (2021). ; <i>Journal of Acoustic Society of America</i>.'
 ---
-This paper is about the number 2. The number 3 is left for future work.
 
 [Download paper here](http://academicpages.github.io/files/paper2.pdf)
 
