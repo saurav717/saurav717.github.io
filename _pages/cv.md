@@ -28,7 +28,7 @@ Work experience
 Resume
 ======
 
-<embed src="https://saurav717.github.io/assets/saurav-chennuru--s.pdf" type="application/pdf" height="400px"/>
+<embed src="https://saurav717.github.io/assets/saurav-chennuri--s.pdf" type="application/pdf" height="200px"/>
 
 Publications
 ======
