@@ -12,7 +12,7 @@ redirect_from:
 ====== -->
 I am looking for **ful-time positions** along **ML research or engineering** starting **Nov-Dec 2023**
 
-Here is my [**Resume**](https://github.com/saurav717/saurav717.github.io/blob/master/_data/saurav-chennuri--s.pdf) 
+Here is my [**Resume**](https://saurav717.github.io/assets/saurav-chennuri--s.pdf) 
 
 # About me
 I completed my masters in Artificial Intelligence from Boston University. My research work was mostly done in collaboration with [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/), [Dr. Prakash Ishwar](https://sites.bu.edu/pi/) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) supported by [Aphasia Research Lab](https://www.bu.edu/aphasiaresearch/).
@@ -21,11 +21,6 @@ I completed my masters in Artificial Intelligence from Boston University. My res
 Research Interests
 ======
 Computer Vision, NLP, Pattern Recognition. 
-
-Resume 
-------
-<embed src="https://saurav717.github.io/assets/saurav-chennuri--s.pdf" type="application/pdf" />
-
 
 My History
 ======
