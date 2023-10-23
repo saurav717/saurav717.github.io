@@ -10,11 +10,16 @@ redirect_from:
 
 <!-- About Me
 ====== -->
-I am looking for **ful-time / residency / PhD positions** starting **May 2023**
+I am looking for **ful-time positions along ML research or engineering** starting **August 2023**
 # About me
 I completed my masters in Artificial Intelligence from Boston University. My research work was mostly done in collaboration with [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/), [Dr. Prakash Ishwar](https://sites.bu.edu/pi/) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) supported by [Aphasia Research Lab](https://www.bu.edu/aphasiaresearch/).
+
+<embed src="saurav-chennuti--s.pdf" type="application/pdf" width="100%" height="600px">
+
+
 <!-- Work During my Undergrad
 ====== -->
+
 
 
 
