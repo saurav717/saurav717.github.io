@@ -20,9 +20,11 @@ I completed my masters in Artificial Intelligence from Boston University. My res
 
 Research Interests
 ======
-Computer Vision, NLP, Reinforcement Learning
+Computer Vision, NLP, Pattern Recognition. 
 
-
+Resume 
+------
+<embed src="https://saurav717.github.io/assets/saurav-chennuri--s.pdf" type="application/pdf" />
 
 
 My History
