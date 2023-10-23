@@ -11,28 +11,16 @@ redirect_from:
 <!-- About Me
 ====== -->
 I am looking for **ful-time positions** along **ML research or engineering** starting **August 2023**
+
+Here is my [**Resume**](https://github.com/saurav717/saurav717.github.io/blob/master/_data/saurav-chennuri--s.pdf) 
+
 # About me
 I completed my masters in Artificial Intelligence from Boston University. My research work was mostly done in collaboration with [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/), [Dr. Prakash Ishwar](https://sites.bu.edu/pi/) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) supported by [Aphasia Research Lab](https://www.bu.edu/aphasiaresearch/).
 
-<iframe src="https://github.com/saurav717/saurav717.github.io/blob/master/_pages/saurav-chennuri--s.pdf" width="100%" height="600"></iframe>
 
-
-
-<!-- Work During my Undergrad
-====== -->
-
-
-
-
-
-
-
-<!-- What I like
+Research Interests
 ======
-I like to work on Reinforcement Learning, NLP and Vision. Although my current works are not related in this area, i am looking for a transition for my PhD.
- -->
-<!-- I like Japan -->
-
+Computer Vision, NLP, Reinforcement Learning
 
 
 
@@ -57,24 +45,6 @@ My History
 | 2023    | Graduate with Masters in AI from Boston University |
 | 2023    | Published [Fusion Approaches on Multi-Modal Neuroimaging Data](https://openaccess.thecvf.com/content/ICCV2023W/CVAMD/papers/Chennuri_Fusion_Approaches_to_Predict_Post-Stroke_Aphasia_Severity_from_Multimodal_Neuroimaging_ICCVW_2023_paper.pdf) work at the ICCV 2023 workshop CVAMD.| 
 
-Research Interests
-======
-Computer Vision, Reinforcement Learning
-
-My Journey in AI
-======
-My Journey to Deep Learning and applications started with Control systems. My interest on automating things via control systems has drawn me close to working on different projects as a part of the robotics club at IITH. Eventually, my interest in automation drawn me towards AI since the end of my sophomore year. By then, I became the head of robotics club and focused on an intersection of both these fields. From my Junior year, I used to work with Dr. Srijith P.K and Dr. Shantanu Desai on Bayesian Optimization and with Dr. Sumohana Chennappaya on generative approaches on images and videos. These interests evolved and led me to be interested in working on applications of vision and Deep Learning in different fields. I have various other interests in an intersection of Reinforcement Learning and Videos, Bayesian Modelling, and NLP. I would like to pursue work in any of these areas as a next step of my career in my Ph.D.
 
 
-<!-- My greatest failure, and resolve. 
-======
-Back in 2019, I was awarded a scholarship by [Japan Internation Cooperation Agency](https://www.jica.go.jp/english/index.html)(JICA) to study for my masters at any university in Japan. 
-
-  - I was admitted to [Matsuo lab](https://weblab.t.u-tokyo.ac.jp/en/), School of Engineering, Tokyo University, under [Dr. Yutaka Matsuo](http://ymatsuo.com/). Which was a huge honour to be admitted.
-  - Financial condition was bad at home, to an extent I had to intervene and help at home by working. I tried to defer my admission for one year, but I cannot defer according to the scholarship agreement.
-  - So, with a heavy heart, I had to give up the scholarship and take up a job to support my family.
-
-My entire life trajectory would have been different had I dared and pursued my masters at Tokyo University. 
-
-I made a promise to myself to complete my masters at Boston University and go to Matsuo lab and do my Ph.D.  -->
 
