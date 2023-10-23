@@ -26,7 +26,8 @@ Work experience
 
 Skills
 ======
-Need to update this section
+<embed src="https://github.com/saurav717/saurav717.github.io/blob/master/_pages/saurav-chennuri--s.pdf" type="application/pdf" width="100%" height="250px">
+
 
 Publications
 ======
