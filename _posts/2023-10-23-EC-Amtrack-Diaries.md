@@ -8,9 +8,7 @@ tags:
   - Destination
 ---
 
-Hello there! 
-======
-I am starting to blog my experiences in life and academia. These blogs are neither perfect nor complete. But please do read them if you are interested, and hope it connects with you in some mythical sense. 
+The life as it happens around us, the different journeys people take and my humble encounters with people in my journeys along the East Coast from Boston to Philadelphia. 
 
 -----
 ## To update
