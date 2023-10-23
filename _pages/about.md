@@ -10,7 +10,7 @@ redirect_from:
 
 <!-- About Me
 ====== -->
-I am looking for **ful-time positions** along **ML research or engineering** starting **August 2023**
+I am looking for **ful-time positions** along **ML research or engineering** starting **Nov-Dec 2023**
 
 Here is my [**Resume**](https://github.com/saurav717/saurav717.github.io/blob/master/_data/saurav-chennuri--s.pdf) 
 
