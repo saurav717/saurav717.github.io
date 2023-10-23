@@ -6,7 +6,7 @@ excerpt: 'This is an abstract of features analysis of MRI scans for prediction o
 date: 2022-07-26
 venue: 'Medical Image Understanding and Analysis'
 paperurl: 'https://drive.google.com/drive/folders/1g7Lx0pfP39dUVCBgDXtNb2iSi1DnJipc'
-citation: 'Saurav Chennuri, Prakash Ishwar, Swathi Kiran, Margrit Betke. (2022). ;<i>MIUA 1</i>.'
+citation: 'Saurav Chennuri, Prakash Ishwar, Swathi Kiran, Margrit Betke. (2022). ;<i>MIUA</i>.'
 ---
 <!-- This paper is about the number 3. The number 4 is left for future work. -->
 
