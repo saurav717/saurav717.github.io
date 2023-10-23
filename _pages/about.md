@@ -10,11 +10,12 @@ redirect_from:
 
 <!-- About Me
 ====== -->
-I am looking for **ful-time positions along ML research or engineering** starting **August 2023**
+I am looking for **ful-time positions** along **ML research or engineering** starting **August 2023**
 # About me
 I completed my masters in Artificial Intelligence from Boston University. My research work was mostly done in collaboration with [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/), [Dr. Prakash Ishwar](https://sites.bu.edu/pi/) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) supported by [Aphasia Research Lab](https://www.bu.edu/aphasiaresearch/).
 
-<embed src="saurav-chennuti--s.pdf" type="application/pdf" width="100%" height="600px">
+<iframe src="https://github.com/saurav717/saurav717.github.io/blob/master/_pages/saurav-chennuri--s.pdf" width="100%" height="600"></iframe>
+
 
 
 <!-- Work During my Undergrad
@@ -54,6 +55,7 @@ My History
 | 2022      | Published [Towards Fast Crash-Consistent Cluster Checkpointing](https://ieeexplore.ieee.org/abstract/document/9926330), IEEE HPEC         |
 | 2022      | Abstract Submission and Poster presentation [Feature understanding and Analysis](https://drive.google.com/drive/folders/1g7Lx0pfP39dUVCBgDXtNb2iSi1DnJipc) , [MIUA](https://www.miua2022.com/), 2022         |
 | 2023    | Graduate with Masters in AI from Boston University |
+| 2023    | Published [Fusion Approaches on Multi-Modal Neuroimaging Data](https://openaccess.thecvf.com/content/ICCV2023W/CVAMD/papers/Chennuri_Fusion_Approaches_to_Predict_Post-Stroke_Aphasia_Severity_from_Multimodal_Neuroimaging_ICCVW_2023_paper.pdf) work at the ICCV 2023 workshop CVAMD.| 
 
 Research Interests
 ======
