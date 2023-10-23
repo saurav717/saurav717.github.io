@@ -25,6 +25,12 @@ Work experience
   * Duties included: Cloud Services, maintaining data pipelines
 
 
+Resume
+======
+
+
+<embed src="https://saurav717.github.io/_data/saurav-chennuri--s.pdf" type="application/pdf" />
+
 Publications
 ======
   <ul>{% for post in site.publications %}
