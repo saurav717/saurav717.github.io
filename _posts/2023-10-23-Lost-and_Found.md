@@ -1,16 +1,13 @@
 ---
-title: 'East Coast Amtrack Diaries'
+title: 'Lost and Found'
 date: 2023-10-23
 permalink: /posts/2023/10/Lost-and-Found/
 tags:
   - Life
-  - Journey
-  - Destination
+  - Purpose
+  - Family
 ---
 
-Hello there! 
-======
-I am starting to blog my experiences in life and academia. These blogs are neither perfect nor complete. But please do read them if you are interested, and hope it connects with you in some mythical sense. 
-
+This is about the time when I felt lost in life, upto the moment till I was found again. 
 -----
 ## To update
