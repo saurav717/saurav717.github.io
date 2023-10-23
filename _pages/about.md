@@ -28,6 +28,7 @@ Computer Vision, NLP, Reinforcement Learning
 My History
 ======
 
+
 | Year      | Life update |
 | ----------- | ----------- |
 | 2023    | Published [Fusion Approaches on Multi-Modal Neuroimaging Data](https://openaccess.thecvf.com/content/ICCV2023W/CVAMD/papers/Chennuri_Fusion_Approaches_to_Predict_Post-Stroke_Aphasia_Severity_from_Multimodal_Neuroimaging_ICCVW_2023_paper.pdf) work at the ICCV 2023 workshop CVAMD.| 
