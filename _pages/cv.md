@@ -34,7 +34,7 @@ Resume
     </embed>
 </object> -->
 
-<iframe src="https://drive.google.com/file/d/1Rz8_MT7_5_wzYwm1tpMJTvwrNazkyoSu/view?usp=sharing" width="100%" height="500px">
+<iframe src="https://github.com/saurav717/saurav717.github.io/blob/master/_data/saurav-chennuri--s.pdf" width="100%" height="500px">
 </iframe>
 
 
