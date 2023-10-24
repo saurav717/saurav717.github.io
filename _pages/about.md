@@ -10,7 +10,7 @@ redirect_from:
 
 <!-- About Me
 ====== -->
-I am looking for **full-time positions** along **ML research or engineering / Software Development** 
+I am looking for **full-time positions** along **ML Engineering, ML Research** or related roles, **Software Engineering** 
 <!-- starting **Nov-Dec 2023** -->
 
 Here is my [**Resume**](https://saurav717.github.io/assets/saurav-chennuri--s.pdf) 
