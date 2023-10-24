@@ -16,7 +16,7 @@ I am looking for **full-time positions** along **SDE / ML Engineering, ML Resear
 Here is my [**Resume**](https://saurav717.github.io/assets/saurav-chennuri--s.pdf) 
 
 # About me
-I completed my masters in Artificial Intelligence from Boston University. My research work was mostly done in collaboration with [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/), [Dr. Prakash Ishwar](https://sites.bu.edu/pi/) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) supported by [Center for Brain Recovery](https://www.bu.edu/cbr/).
+I completed my masters in Artificial Intelligence from Boston University. My research work was mostly done in under the guidance of [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/), in collaboration with [Dr. Prakash Ishwar](https://sites.bu.edu/pi/) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/) supported by [Center for Brain Recovery](https://www.bu.edu/cbr/).
 
 
 Research Interests
