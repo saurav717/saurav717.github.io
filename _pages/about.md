@@ -10,7 +10,7 @@ redirect_from:
 
 <!-- About Me
 ====== -->
-I am looking for **full-time positions** along **SDE / ML Engineering, ML Research** or related roles. 
+I am looking for **full-time positions** along **Data Scientist / ML Engineering** or related roles. 
 <!-- starting **Nov-Dec 2023** -->
 
 <!-- Here is my [**Resume**](https://saurav717.github.io/assets/saurav-chennuri--s.pdf)  -->
