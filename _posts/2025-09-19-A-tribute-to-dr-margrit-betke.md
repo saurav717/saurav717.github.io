@@ -11,7 +11,12 @@ tags:
 
 > *"I walked among the titans, and she was the biggest of them"*
 
-<img src="/files/MargritBetke2022.jpg" alt="Dr. Margrit Betke" style="float: right; margin-left: 20px; margin-bottom: 10px; width: 300px; border-radius: 8px;">
+<div style="float: right; margin-left: 20px; margin-bottom: 10px; text-align: center;">
+  <img src="/files/MargritBetke2022.jpg" alt="Dr. Margrit Betke" style="width: 300px; border-radius: 8px;">
+  <p style="margin-top: 5px; font-style: italic; font-size: 0.9em; color: #666;">My mentor Dr. Margrit Betke</p>
+  <p style="margin-top: 2px; font-size: 0.8em; color: #888;">Margrit at the UniLu block party in 2022. Photo by Chris Pollari.</p>
+  <p style="margin-top: 2px; font-size: 0.75em; color: #999;">Source: <a href="https://www.unilu.org/in-memory-of-margrit-betke/" style="color: #999;">University Lutheran Church</a></p>
+</div>
 
 ## A Remarkable Mentor
 
