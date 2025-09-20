@@ -53,3 +53,13 @@ Even when I was working on my first full research paper, she spent an entire nig
 She remains my moral compass in determining the kind of research work I want to pursue and how I want to live my life. I will forever remember all her scoldings, guidance, cheers, celebrations and her heartfelt appreciation and hopefully carry forward the short meaningful legacy she left with me.
 
 Dr. Margrit Betke was not just an advisor; she was a mentor, a guide, and a beacon of hope during my most challenging times. Her impact on my life extends far beyond academia, and her memory will continue to inspire me throughout my career and beyond.
+
+
+## References and Memorial Links
+
+- [Wikipedia - Margrit Betke](https://en.wikipedia.org/wiki/Margrit_Betke)
+- [University Lutheran Church - Memorial Service Information](https://www.unilu.org/in-memory-of-margrit-betke/)
+- [Obituary - Bello & Dea Funeral Home](https://www.bellodeafuneralhome.com/obituary/margrit-betke)
+- [Boston University Hariri Institute - Remembering Professor Margrit Betke](https://www.bu.edu/hic/2025/08/14/remembering-professor-margrit-betke/)
+- [BU Faculty of Computing and Data Science - In Memory of BU Professor Margrit Betke](https://www.bu.edu/cds-faculty/2025/08/15/in-memory-of-bu-professor-margrit-betke/)
+- [BU Today - Margrit Betke Obituary](https://www.bu.edu/articles/2025/margrit-betke-obituary/)
