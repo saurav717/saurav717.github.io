@@ -19,7 +19,7 @@ She was a person full of heart, grace, ambition, intelligence, and faith. She un
 
 I shared many significant milestones of my career with her: my first advisor, my first research paper, my first research project, and she was the first person who had a concrete plan for my career and truly cared about my success.
 
-The world lost a precious soul, and I believe she is now among the best of people with the lord. I will miss her deeply, and I genuinely hope I will be able to give her a big hug when it is my turn to join her.
+The world lost a precious soul, and I lost a mentor and a motherly figure in my life. I truly believe she is now among the best of people with the lord. I will miss her deeply, and I genuinely hope I will be able to give her a big hug when it is my turn to join her.
 
 ## Our Journey Together
 
