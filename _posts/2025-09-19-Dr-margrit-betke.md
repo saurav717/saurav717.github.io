@@ -1,7 +1,7 @@
 ---
 title: 'A Tribute to Dr. Margrit Betke'
 date: 2025-09-19
-permalink: /posts/2025/09/A-tribute-to-dr-margrit-betke/
+permalink: /posts/2025/09/Dr-margrit-betke/
 tags:
   - Advisor
   - Professor
