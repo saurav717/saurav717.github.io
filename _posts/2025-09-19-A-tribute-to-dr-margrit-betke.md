@@ -1,5 +1,5 @@
 ---
-title: 'A tribute to Dr. Margrit Betke'
+title: 'A Tribute to Dr. Margrit Betke'
 date: 2025-09-19
 permalink: /posts/2025/09/A-tribute-to-dr-margrit-betke/
 tags:
@@ -9,30 +9,40 @@ tags:
   - Life
 ---
 
-> "*I walked among the titans, and she was the biggest of them*"
+> *"I walked among the titans, and she was the biggest of them"*
 
-> Margrit was one of the kindest, caring and smartest people that I had the privilege to have in my life. She was there in the lowest points of my life as a struggling student, and one of the few people who understood me and genuinely cared about me. I have known her for the better part of 2 years, and I am so thankful to god that it was her under whom I got to work with, and I will not give that time for anything else. 
->
-> She is a person full of heart, grace, ambition, intelligence and faith. She was a person who knew the world for what it is and mastered in dealing with it. She always had great plans and ambitions. My career is what it is because I met her, and i will make sure I will carry on the short legacy she left with me. She will forever have a special place in my life. 
->
-> I shared many milestones of my career with her. My first advisor, my first research paper, my first research project, and the first person who had a plan for my career, and cared about my well being. 
->
-> The world lost a jewel, and god has one of His best with Him right now. I will miss her, and I really hope I will be able to give her a big hug when it is my turn. 
+## A Remarkable Mentor
 
+Margrit was one of the kindest, most caring, and smartest people I have ever had the privilege to know. She was there during the lowest points of my life as a struggling student, and one of the few people who truly understood me and genuinely cared about my well-being. I had the honor of knowing her for the better part of two years, and I am so thankful that she was the person under whom I got to work. I would not trade that time for anything else.
 
+She was a person full of heart, grace, ambition, intelligence, and faith. She understood the world for what it is and had mastered the art of navigating it with wisdom. She always had great plans and ambitious visions for the future. My career is what it is today because I met her, and I will make sure to carry on the legacy she left with me. She will forever hold a special place in my heart.
 
+I shared many significant milestones of my career with her: my first advisor, my first research paper, my first research project, and she was the first person who had a concrete plan for my career and truly cared about my success.
 
-I studied under Margrit as a masters student from 2021-2023. I initially started as a project volunteer in 2021 in one of her research works with Dr. Michael hesselmo. Then eventually beginning of 2022, I started as a research assistant with her in her research on usage of ML in predicting the severity of the condition called Aphasia. I was able to make two publications under her, one abstract at the conference of Medical Imaging and Understanding Analysis and another at A CVPR workshop called "CVAMD". We had a lot of ups and downs in our collaboration together but she was nothing but kind and Understanding towards me. 
+The world lost a precious soul, and I believe she is now among the best of people with the lord. I will miss her deeply, and I genuinely hope I will be able to give her a big hug when it is my turn to join her.
 
+## Our Journey Together
 
-There are few profound moments in my life with her. In my summer of 2022, I just made my first publications, an abstract. She was really happy with me given this is a significant milestone in my career. I was a struggling masters student at the time finding it hard to pay my rent and health insurance. After my publications, she immediately called me and asked about my goals, dreams and the kind of career I wanted. She understood my struggles and provided a research assistantship for the summer supported by Dr Swathi Kiran at the center for brain recovery in Sargent College.
+I studied under Margrit as a master's student from 2021 to 2023. I initially started as a project volunteer in 2021, working on one of her research projects with Dr. Michael Hasselmo. By early 2022, I had begun working as a research assistant with her on groundbreaking research using machine learning to predict the severity of aphasia.
 
+During our collaboration, I was able to make two publications under her guidance: one abstract at the Conference of Medical Imaging and Understanding Analysis, and another at a CVPR workshop called "CVAMD." We experienced many ups and downs in our work together, but she remained nothing but kind and understanding toward me throughout.
 
-She explained to me in detail how she was when she was pursuing her masters and how profound research is for her, and how I need to conduct myself if I were to pursue the similar career path. And then she provided me a thought out plan on how I can overcome my financial struggles and offered me a PhD position with her. There are no words which I can use to explain how this all felt for me, or the regret that I have that I have not taken up on her offer, being the naive shortsighted masters student that I was. I instead mentioned her I would like to finish my masters with a thesis. 
+## Moments That Changed Everything
 
+There are a few profound moments from my time with her that I will treasure forever.
 
-Even when I was publishing my first full research paper, she spent the whole night with me on a Zoom call editing my paper and making revisions so the paper is as close to perfection as it can be. No professor would go to such extent in guiding a naive masters student, sacrificing their time at midnight and also during daytime, and sometimes weekends. She really cared about me and I would forever cherish these memories. 
+**Summer 2022** marked a turning point in my life. I had just published my first abstract—a significant milestone in my career that filled her with pride for my achievement. At the time, I was a struggling master's student, finding it difficult to afford rent and health insurance. 
 
+After my publication, she immediately called me to discuss my goals, dreams, and the kind of career I envisioned for myself. Understanding my financial struggles, she provided me with a research assistantship for the summer, supported by Dr. Swathi Kiran at the Center for Brain Recovery in Sargent College.
 
-She is my moral compass in the kind of research work I would like to do and how I want to live my life. I will forever remember all her scoldings, guidance and appreciation throughout my life and hopefully carry with me the short legacy she left with me. 
+During that conversation, she shared intimate details about her own journey as a master's student, explaining how profound research had been in her life and what it would take if I chose to pursue a similar career path. She then presented me with a thoughtful plan to overcome my financial struggles and offered me a PhD position under her supervision.
 
+There are no words adequate to express how this gesture felt to me, or the regret I carry for not accepting her generous offer. Being the naive, shortsighted master's student that I was, I told her I preferred to finish my master's with a thesis instead.
+
+Even when I was working on my first full research paper, she spent an entire night with me on a Zoom call, meticulously editing and revising the manuscript until it was as close to perfection as possible. Few professors would go to such lengths for a naive master's student, sacrificing their time at midnight, during the day, and even on weekends. She truly cared about me, and I will forever cherish these precious memories.
+
+## Her Lasting Legacy
+
+She remains my moral compass in determining the kind of research work I want to pursue and how I want to live my life. I will forever remember all her scoldings, guidance, cheers, celebrations and her heartfelt appreciation and hopefully carry forward the short meaningful legacy she left with me.
+
+Dr. Margrit Betke was not just an advisor; she was a mentor, a guide, and a beacon of hope during my most challenging times. Her impact on my life extends far beyond academia, and her memory will continue to inspire me throughout my career and beyond.
