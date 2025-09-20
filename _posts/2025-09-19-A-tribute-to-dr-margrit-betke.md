@@ -11,6 +11,8 @@ tags:
 
 > *"I walked among the titans, and she was the biggest of them"*
 
+<img src="/files/MargritBetke2022.jpg" alt="Dr. Margrit Betke" style="float: right; margin-left: 20px; margin-bottom: 10px; width: 300px; border-radius: 8px;">
+
 ## A Remarkable Mentor
 
 Margrit was one of the kindest, most caring, and smartest people I have ever had the privilege to know. She was there during the lowest points of my life as a struggling student, and one of the few people who truly understood me and genuinely cared about my well-being. I had the honor of knowing her for the better part of two years, and I am so thankful that she was the person under whom I got to work. I would not trade that time for anything else.
