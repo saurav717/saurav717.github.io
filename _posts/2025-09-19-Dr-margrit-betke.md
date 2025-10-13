@@ -29,7 +29,7 @@ The world lost a precious soul, and I lost a mentor and a motherly figure in my 
 
 ## Our Journey Together
 
-I studied under Margrit as a master's student from 2021 to 2023. I initially started as a project volunteer in 2021, working on one of her research projects with Dr. Michael Hasselmo. By early 2022, I had begun working as a research assistant with her on groundbreaking research using machine learning to predict the severity of aphasia.
+I studied under Margrit as a master's student from 2021 to 2023. I initially started as a project volunteer in 2021, working on one of her research projects with Dr. Michael Hasselmo. By early 2022, I had begun working as a research assistant with her on important research using machine learning to predict the severity of aphasia.
 
 During our collaboration, I was able to make two publications under her guidance: one abstract at the Conference of Medical Imaging and Understanding Analysis, and another at a CVPR workshop called "CVAMD." We experienced many ups and downs in our work together, but she remained nothing but kind and understanding toward me throughout.
 
