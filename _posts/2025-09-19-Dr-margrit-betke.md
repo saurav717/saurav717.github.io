@@ -9,7 +9,6 @@ tags:
   - Life
 ---
 
-> *"I walked among the titans, and she was the biggest of them"*
 
 <div style="float: right; margin-left: 20px; margin-bottom: 10px; text-align: center;">
   <img src="/files/MargritBetke2022.jpg" alt="Dr. Margrit Betke" style="width: 300px; border-radius: 8px;">
