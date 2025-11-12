@@ -5,14 +5,19 @@
 #main {
   @include container;
   @include clearfix;
-  margin-top: 2em;
-  padding-left: 1em;
-  padding-right: 1em;
+  margin-top: 2.5em;
+  padding-left: 1.5em;
+  padding-right: 1.5em;
   animation: intro 0.3s both;
   animation-delay: 0.35s;
 
   @include breakpoint($x-large) {
     max-width: $x-large;
+  }
+
+  @include breakpoint($medium) {
+    padding-left: 2em;
+    padding-right: 2em;
   }
 }
 
@@ -73,13 +78,16 @@
   }
 
   a {
-    text-decoration: underline;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
-      text-decoration: underline;
+      border-bottom-color: $primary-color;
+      color: $primary-color;
 
       img {
-        box-shadow: 0 0 10px rgba(#000, 0.25);
+        box-shadow: $box-shadow-lg;
       }
     }
   }
