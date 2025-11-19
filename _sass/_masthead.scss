@@ -5,16 +5,20 @@
 .masthead {
   position: relative;
   border-bottom: 1px solid $border-color;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   -webkit-animation: intro 0.3s both;
           animation: intro 0.3s both;
   -webkit-animation-delay: 0.15s;
           animation-delay: 0.15s;
   z-index: 20;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &__inner-wrap {
     @include container;
     @include clearfix;
-    padding: 1em 1em 1em;
+    padding: 1.25em 1.5em;
     font-family: $sans-serif-narrow;
 
     @include breakpoint($x-large) {
@@ -27,6 +31,7 @@
 
     a {
       text-decoration: none;
+      font-weight: 500;
     }
   }
 }
