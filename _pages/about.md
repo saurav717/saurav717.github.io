@@ -11,8 +11,6 @@ redirect_from:
 <!-- About Me
 ====== -->
 
-***[A tribute to Dr.Margrit Betke](https://www.cs.bu.edu/fac/betke/). - The best advisor a prospective researcher could ever hope for.***
-
 
 
 # About me
