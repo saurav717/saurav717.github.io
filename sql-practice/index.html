@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL Practice — analytics-grade drills</title>
+<meta name="description" content="Browser-based SQL practice on a toy warehouse: window frames, rolling aggregation, timestamp patterns, and cross-engine portability.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗃️</text></svg>">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+
+<div id="boot" class="boot">
+  <div class="boot-card">
+    <h1>SQL Practice</h1>
+    <p class="boot-sub">Starting an analytics database in your browser.</p>
+    <div class="boot-bar"><div id="boot-bar-fill"></div></div>
+    <p id="boot-status" class="boot-status">Loading DuckDB engine</p>
+    <p class="boot-note">First load fetches a ~36&nbsp;MB engine (about 8&nbsp;MB compressed). Your browser caches it, so later visits are instant. Everything runs locally — no server, no data leaves this machine.</p>
+  </div>
+</div>
+
+<header class="topbar" hidden id="topbar">
+  <div class="brand">
+    <span class="brand-mark">▦</span>
+    <span class="brand-name">SQL Practice</span>
+  </div>
+
+  <div class="progress-block" title="Exercises solved">
+    <div class="progress-track"><div id="progress-fill"></div></div>
+    <span id="progress-label" class="progress-label">0 / 0</span>
+  </div>
+
+  <div class="topbar-right">
+    <label class="engine-picker" title="Warn me about SQL that will not run on this engine">
+      <span class="engine-label">Target</span>
+      <select id="engine-select"></select>
+    </label>
+    <button id="btn-sandbox" class="btn btn-ghost" title="Free-form query editor">Sandbox</button>
+    <button id="btn-reset-db" class="btn btn-ghost" title="Reload the dataset from scratch">Reset data</button>
+    <button id="btn-theme" class="btn btn-icon" title="Toggle light / dark">◐</button>
+  </div>
+</header>
+
+<main class="layout" hidden id="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <input id="search" type="search" placeholder="Filter exercises…" autocomplete="off">
+      <div class="filter-row" id="status-filter">
+        <button class="chip chip-on" data-filter="all">All</button>
+        <button class="chip" data-filter="todo">Unsolved</button>
+        <button class="chip" data-filter="done">Solved</button>
+      </div>
+    </div>
+    <nav id="exercise-list" class="exercise-list"></nav>
+    <div class="sidebar-foot">
+      <span id="engine-version" class="muted"></span>
+    </div>
+  </aside>
+
+  <section class="workspace" id="workspace">
+
+    <article class="pane prompt-pane">
+      <div class="prompt-head">
+        <div class="prompt-titles">
+          <div class="crumb"><span id="ex-track"></span> <span id="ex-ref" class="crumb-ref"></span></div>
+          <h2 id="ex-title"></h2>
+        </div>
+        <div class="prompt-badges">
+          <span id="ex-diff" class="badge"></span>
+          <span id="ex-status" class="badge"></span>
+        </div>
+      </div>
+      <div id="ex-prompt" class="prose"></div>
+    </article>
+
+    <article class="pane editor-pane">
+      <div class="toolbar">
+        <button id="btn-run"   class="btn btn-primary">Run <kbd>⌘↵</kbd></button>
+        <button id="btn-check" class="btn btn-accent">Check answer <kbd>⌘⇧↵</kbd></button>
+        <span class="toolbar-gap"></span>
+        <button id="btn-hint"     class="btn btn-ghost">Hint</button>
+        <button id="btn-solution" class="btn btn-ghost">Show solution</button>
+        <button id="btn-clear"    class="btn btn-ghost" title="Clear the editor">Clear</button>
+      </div>
+
+      <div class="editor-wrap">
+        <pre id="editor-highlight" class="editor-layer" aria-hidden="true"></pre>
+        <textarea id="editor" class="editor-layer editor-input" spellcheck="false"
+                  autocomplete="off" autocapitalize="off" autocorrect="off"
+                  placeholder="Write your query here. ⌘↵ to run, ⌘⇧↵ to check."></textarea>
+      </div>
+
+      <div id="hints" class="hints" hidden></div>
+    </article>
+
+    <article class="pane output-pane">
+      <div class="tabs" id="tabs">
+        <button class="tab tab-on" data-tab="results">Results</button>
+        <button class="tab" data-tab="feedback">Feedback <span id="feedback-dot" class="dot" hidden></span></button>
+        <button class="tab" data-tab="portability">Portability <span id="lint-count" class="pill" hidden>0</span></button>
+        <button class="tab" data-tab="dialect">Dialect notes</button>
+        <button class="tab" data-tab="schema">Schema</button>
+      </div>
+
+      <div class="tab-body">
+        <div id="tab-results"     class="tab-panel tab-panel-on"></div>
+        <div id="tab-feedback"    class="tab-panel"></div>
+        <div id="tab-portability" class="tab-panel"></div>
+        <div id="tab-dialect"     class="tab-panel"></div>
+        <div id="tab-schema"      class="tab-panel"></div>
+      </div>
+
+      <div class="statusbar">
+        <span id="status-left"  class="muted"></span>
+        <span id="status-right" class="muted"></span>
+      </div>
+    </article>
+
+  </section>
+</main>
+
+<script type="module" data-engine-source="cdn" src="assets/js/app.js"></script>
+</body>
+</html>
