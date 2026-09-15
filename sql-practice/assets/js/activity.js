@@ -21,10 +21,14 @@
 //     not a machine, and the user can reset it. Anything claiming to be a
 //     MAC address from inside a web page is guessing.
 //
-//  2. IT DOES NOT SEND ANYTHING ANYWHERE. This site is static -- there is no
-//     server to receive a log. Entries live in this browser's localStorage
-//     and leave only when the user exports them. `drain()` at the bottom is
-//     the seam to add a POST against if a collector ever exists.
+//  2. IT DOES NOT SEND THE QUERY LOG ANYWHERE. Entries live in this browser's
+//     localStorage and leave only when the user exports them. `drain()` at the
+//     bottom is the seam to POST them from, and nothing calls it.
+//
+//     Separately, and not through this module: beacon.js reports each page
+//     load to the collector in collector/, which logs the visit's IP address
+//     server-side. That carries the DEVICE_ID below so repeat visits can be
+//     grouped -- but no entry, no SQL, and no location.
 //
 //  Location is opt-in and stays off until the user turns it on, at which
 //  point the browser runs its own permission prompt on top.
