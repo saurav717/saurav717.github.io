@@ -137,6 +137,14 @@ async function fetchSql(name) {
   return res.text();
 }
 
+/**
+ * The raw DDL text, for the documentation layer: assets/data/schema.sql carries
+ * a comment on most columns, and those comments are the hover-card notes.
+ */
+export function schemaSource() {
+  return fetchSql('schema');
+}
+
 export async function loadDataset(onProgress = () => {}) {
   onProgress('Creating tables');
   await conn.query(await fetchSql('schema'));
