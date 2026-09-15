@@ -185,6 +185,69 @@ function renderRunTargetLabel(t) {
   el.textContent = t && t.label ? `⌘↵ runs ${t.label}` : '';
 }
 
+const INDENT = '  ';
+
+/**
+ * Replace [start, end) with `text`, leaving the edit on the browser's own undo
+ * stack. Assigning to editor.value wipes that stack -- which is what made a
+ * mistaken Tab unrecoverable -- and setRangeText does not record an entry
+ * either, so insertText is the only route that survives ⌘Z. execCommand is
+ * deprecated but has no replacement for this; the fallback keeps the edit
+ * working (undo aside) if a browser ever drops it.
+ */
+function writeRange(start, end, text, selStart, selEnd) {
+  editor.focus();
+  editor.setSelectionRange(start, end);
+  let wrote = false;
+  try { wrote = document.execCommand('insertText', false, text); } catch { wrote = false; }
+  if (!wrote) {
+    editor.setRangeText(text, start, end, 'end');
+    editor.dispatchEvent(new Event('input'));   // insertText fires this itself
+  }
+  editor.setSelectionRange(selStart, selEnd);
+}
+
+/**
+ * Tab / ⇧Tab over the lines the selection touches, the way every editor
+ * does it. Tab used to replace the selection with two spaces, so tabbing a
+ * selected block deleted it.
+ */
+function indentSelection(dedent) {
+  const { selectionStart: a, selectionEnd: b, value } = editor;
+
+  // Nothing selected: Tab is just a soft tab at the caret.
+  if (a === b && !dedent) {
+    writeRange(a, a, INDENT, a + INDENT.length, a + INDENT.length);
+    return;
+  }
+
+  const from = value.lastIndexOf('\n', a - 1) + 1;
+  // A selection ending exactly on a line break stops at the line above it.
+  const tail = b > a && value[b - 1] === '\n' ? b - 1 : b;
+  let to = value.indexOf('\n', tail);
+  if (to === -1) to = value.length;
+
+  let shiftFirst = 0, shiftAll = 0;
+  const out = value.slice(from, to).split('\n').map((line, i) => {
+    let shift = 0;
+    if (dedent) {
+      const lead = /^(\t| {1,2})/.exec(line);
+      if (lead) { line = line.slice(lead[0].length); shift = -lead[0].length; }
+    } else if (line !== '') {
+      // Blank lines are left alone rather than padded into trailing spaces.
+      line = INDENT + line;
+      shift = INDENT.length;
+    }
+    if (i === 0) shiftFirst = shift;
+    shiftAll += shift;
+    return line;
+  });
+  if (shiftAll === 0) return;          // nothing to dedent: leave the text be
+
+  const selStart = Math.max(from, a + shiftFirst);
+  writeRange(from, to, out.join('\n'), selStart, Math.max(selStart, b + shiftAll));
+}
+
 /**
  * Toggle `--` line comments over the selected lines, the way ⌘/ does in every
  * other editor: comment the block unless every line in it is already
@@ -219,12 +282,9 @@ function toggleLineComment() {
   const replaced = out.join('\n');
   const shiftFirst = out[0].length - lines[0].length;
   const shiftAll   = replaced.length - (to - from);
-  editor.value = value.slice(0, from) + replaced + value.slice(to);
-  editor.selectionStart = Math.max(from, a + shiftFirst);
-  editor.selectionEnd   = a === b
-    ? editor.selectionStart
-    : Math.max(editor.selectionStart, b + shiftAll);
-  editor.dispatchEvent(new Event('input'));
+  const selStart = Math.max(from, a + shiftFirst);
+  writeRange(from, to, replaced, selStart,
+             a === b ? selStart : Math.max(selStart, b + shiftAll));
 }
 
 editor.addEventListener('input', () => {
@@ -244,10 +304,7 @@ document.addEventListener('selectionchange', () => {
 editor.addEventListener('keydown', (e) => {
   if (e.key === 'Tab') {
     e.preventDefault();
-    const { selectionStart: a, selectionEnd: b, value } = editor;
-    editor.value = value.slice(0, a) + '  ' + value.slice(b);
-    editor.selectionStart = editor.selectionEnd = a + 2;
-    editor.dispatchEvent(new Event('input'));
+    indentSelection(e.shiftKey);
     return;
   }
   // ⌘/ (Ctrl+/ elsewhere). e.code, because on some layouts the modifier
@@ -678,10 +735,7 @@ async function renderSchema() {
     el.addEventListener('click', () => {
       const t = el.dataset.insert;
       const { selectionStart: a, selectionEnd: b } = editor;
-      editor.value = editor.value.slice(0, a) + t + editor.value.slice(b);
-      editor.selectionStart = editor.selectionEnd = a + t.length;
-      editor.focus();
-      editor.dispatchEvent(new Event('input'));
+      writeRange(a, b, t, a + t.length, a + t.length);
     });
   });
 }
