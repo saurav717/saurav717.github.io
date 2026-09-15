@@ -537,7 +537,10 @@ async function doCheck() {
     const next = nextUnsolved();
     $('#tab-feedback').innerHTML =
       `<div class="verdict verdict-good"><h3>Correct</h3><div>${esc(verdict.detail)}</div></div>` +
-      (next ? `<p class="placeholder">Next unsolved: <strong>${esc(next.title)}</strong> — press <code>Alt+→</code>.</p>` : '<p class="placeholder">That was the last one. All exercises solved.</p>');
+      (next
+        ? `<p class="placeholder">Next unsolved: <button type="button" id="btn-next-unsolved" class="btn btn-ghost">${esc(next.title)}</button></p>`
+        : '<p class="placeholder">That was the last one. All exercises solved.</p>');
+    if (next) $('#btn-next-unsolved').addEventListener('click', () => selectExercise(next.id));
     if (verdict.got) { renderGrid(verdict.got); }
     setStatus('Correct', `${verdict.got.rowCount.toLocaleString()} rows`);
   } else {
@@ -562,6 +565,17 @@ function renderExerciseBadge() {
   const statusEl = $('#ex-status');
   statusEl.className = 'badge' + (st === 'done' ? ' badge-done' : st === 'seen' ? ' badge-seen' : '');
   statusEl.textContent = { done: 'solved', try: 'attempted', seen: 'solution seen', todo: 'not started' }[st];
+}
+
+/**
+ * The exercise one step before or after the current one in list order, or null
+ * at either end. From the sandbox it lands back on the exercise you left.
+ */
+function neighborExercise(dir) {
+  const i = EXERCISES.findIndex(e => e.id === state.current);
+  if (i < 0) return EXERCISES[0] || null;
+  if (sandbox) return EXERCISES[i];
+  return EXERCISES[i + dir] || null;
 }
 
 function nextUnsolved() {
@@ -925,9 +939,13 @@ function wire() {
       else if (e.altKey) doRunAll();
       else doRun();
     }
-    if (e.altKey && e.key === 'ArrowRight') {
+    // Walk the exercise list. Deliberately not ⌥←/⌥→: on macOS those are
+    // word-wise caret movement, and claiming them here broke typing in the
+    // editor. ⌘⌥↑/↓ is free (⌘⌥←/→ switches browser tabs) and matches the
+    // sidebar, which runs vertically.
+    if (mod && e.altKey && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
       e.preventDefault();
-      const n = nextUnsolved();
+      const n = neighborExercise(e.key === 'ArrowDown' ? 1 : -1);
       if (n) selectExercise(n.id);
     }
   });
