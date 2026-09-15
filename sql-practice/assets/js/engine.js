@@ -220,6 +220,93 @@ export function isReadOnlyQuery(sql) {
   return /^(SELECT|WITH|DESCRIBE|EXPLAIN|SHOW|PIVOT|UNPIVOT|FROM|VALUES|TABLE)\b/.test(head);
 }
 
+// --- statement boundaries ---------------------------------------------------
+//  A worksheet holds a script, not a query: scratch work above, the real
+//  query below, each ended by a ';'. Finding those boundaries is lexing, not
+//  splitting on ';' -- the character is ordinary text inside a string, a
+//  quoted identifier, a comment or a dollar-quoted body.
+
+/** Walk past the quoted run starting at `i`. A doubled quote is an escape. */
+function skipQuoted(text, i) {
+  const q = text[i];
+  for (let k = i + 1; k < text.length; k++) {
+    if (text[k] !== q) continue;
+    if (text[k + 1] === q) { k++; continue; }   // '' / "" -- a literal quote
+    return k + 1;
+  }
+  return text.length;                          // unterminated: rest is quoted
+}
+
+/** True when a chunk of text holds nothing executable -- blanks and comments. */
+const isAllCommentary = (sql) =>
+  !sql.replace(/--[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '').trim();
+
+/**
+ * Split a script into the statements it actually runs, in text order:
+ *
+ *   [{ sql, start, end }, ...]
+ *
+ * `start`/`end` are offsets into the original text, trimmed to the first and
+ * last non-blank character, with the terminating ';' left out -- so a caller
+ * can both execute the slice and mark it in an editor. Segments holding only
+ * whitespace and comments are dropped; they are not statements.
+ */
+export function splitStatements(script) {
+  const text = String(script ?? '');
+  const out = [];
+  let from = 0, i = 0;
+
+  const push = (a, b) => {
+    while (a < b && /\s/.test(text[a]))     a++;
+    while (b > a && /\s/.test(text[b - 1])) b--;
+    if (a >= b) return;
+    const sql = text.slice(a, b);
+    if (isAllCommentary(sql)) return;
+    out.push({ sql, start: a, end: b });
+  };
+
+  while (i < text.length) {
+    const c = text[i];
+    if (c === '-' && text[i + 1] === '-') {
+      const nl = text.indexOf('\n', i);
+      i = nl === -1 ? text.length : nl + 1;
+    } else if (c === '/' && text[i + 1] === '*') {
+      const close = text.indexOf('*/', i + 2);
+      i = close === -1 ? text.length : close + 2;
+    } else if (c === "'" || c === '"') {
+      i = skipQuoted(text, i);
+    } else if (c === '$') {
+      // DuckDB/Postgres dollar quoting: $$ ... $$ or $tag$ ... $tag$
+      const tag = /^\$(?:[A-Za-z_][A-Za-z0-9_]*)?\$/.exec(text.slice(i));
+      if (!tag) { i++; continue; }
+      const close = text.indexOf(tag[0], i + tag[0].length);
+      i = close === -1 ? text.length : close + tag[0].length;
+    } else if (c === ';') {
+      push(from, i);
+      from = i + 1;
+      i++;
+    } else i++;
+  }
+  push(from, text.length);
+  return out;
+}
+
+/**
+ * The statement a cursor sits in -- what a Snowflake worksheet runs on
+ * Cmd+Enter. A cursor in the blank space after a ';' belongs to the statement
+ * before it, so pressing Run at the end of a script runs the last statement
+ * rather than nothing.
+ *
+ * Returns { sql, start, end, index, total }, or null for an empty script.
+ */
+export function statementAt(script, cursor = 0) {
+  const stmts = splitStatements(script);
+  if (!stmts.length) return null;
+  let pick = 0;
+  for (let i = 0; i < stmts.length && stmts[i].start <= cursor; i++) pick = i;
+  return { ...stmts[pick], index: pick, total: stmts.length };
+}
+
 // --- grading ----------------------------------------------------------------
 const rowKey = (r) => JSON.stringify(r);
 

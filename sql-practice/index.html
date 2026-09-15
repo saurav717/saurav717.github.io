@@ -59,6 +59,11 @@
     </div>
   </aside>
 
+  <div class="splitter split-col" id="split-sidebar" role="separator"
+       aria-orientation="vertical" tabindex="0"
+       aria-label="Resize the exercise list"
+       title="Drag to resize · double-click to reset"></div>
+
   <section class="workspace" id="workspace">
 
     <article class="pane prompt-pane">
@@ -75,10 +80,19 @@
       <div id="ex-prompt" class="prose"></div>
     </article>
 
+    <div class="splitter split-row" id="split-prompt" role="separator"
+         aria-orientation="horizontal" tabindex="0"
+         aria-label="Resize the exercise prompt"
+         title="Drag to resize · double-click to reset"></div>
+
     <article class="pane editor-pane">
       <div class="toolbar">
-        <button id="btn-run"   class="btn btn-primary">Run <kbd>⌘↵</kbd></button>
+        <button id="btn-run" class="btn btn-primary"
+                title="Run the statement the cursor is in, or the selection">Run <kbd>⌘↵</kbd></button>
+        <button id="btn-run-all" class="btn btn-ghost"
+                title="Run every statement in the editor, in order">Run all <kbd>⌘⌥↵</kbd></button>
         <button id="btn-check" class="btn btn-accent">Check answer <kbd>⌘⇧↵</kbd></button>
+        <span id="stmt-indicator" class="stmt-indicator" hidden></span>
         <span class="toolbar-gap"></span>
         <button id="btn-hint"     class="btn btn-ghost">Hint</button>
         <button id="btn-solution" class="btn btn-ghost">Show solution</button>
@@ -89,11 +103,16 @@
         <pre id="editor-highlight" class="editor-layer" aria-hidden="true"></pre>
         <textarea id="editor" class="editor-layer editor-input" spellcheck="false"
                   autocomplete="off" autocapitalize="off" autocorrect="off"
-                  placeholder="Write your query here. ⌘↵ to run, ⌘⇧↵ to check."></textarea>
+                  placeholder="Write your query here. ⌘↵ runs the statement at the cursor, ⌘⇧↵ checks it, ⌘/ comments a line."></textarea>
       </div>
 
       <div id="hints" class="hints" hidden></div>
     </article>
+
+    <div class="splitter split-row" id="split-editor" role="separator"
+         aria-orientation="horizontal" tabindex="0"
+         aria-label="Resize the results panel"
+         title="Drag to resize · double-click to reset"></div>
 
     <article class="pane output-pane">
       <div class="tabs" id="tabs">

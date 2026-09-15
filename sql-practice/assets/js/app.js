@@ -6,6 +6,7 @@
 import * as engine from './engine.js';
 import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js';
 import * as activity from './activity.js';
+import * as layout from './layout.js';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -21,7 +22,7 @@ function loadState() {
   const base = {
     solved: {}, attempted: {}, revealed: {}, drafts: {},
     hintsShown: {}, engine: 'redshift', theme: 'dark',
-    current: EXERCISES[0].id,
+    current: EXERCISES[0].id, layout: {},
   };
   try {
     return { ...base, ...JSON.parse(localStorage.getItem(STORE_KEY) || '{}') };
@@ -125,11 +126,101 @@ function highlightSQL(code) {
 const editor = $('#editor');
 const highlightLayer = $('#editor-highlight');
 
-function paintEditor() {
-  // trailing newline keeps the last line's height in the <pre>
-  highlightLayer.innerHTML = highlightSQL(editor.value + '\n');
+/**
+ * What Run acts on, Snowflake-worksheet style: the selection if there is one,
+ * otherwise the single statement the cursor sits in. Returns null for an
+ * editor with nothing runnable in it.
+ *   { sql, start, end, label, total }
+ */
+function runTarget() {
+  const { selectionStart: a, selectionEnd: b, value } = editor;
+  if (b > a && value.slice(a, b).trim()) {
+    return { sql: value.slice(a, b), start: a, end: b, label: 'the selection', total: 0 };
+  }
+  const st = engine.statementAt(value, a);
+  if (!st) return null;
+  return {
+    ...st,
+    label: st.total > 1 ? `statement ${st.index + 1} of ${st.total}` : '',
+  };
+}
+
+function syncScroll() {
   highlightLayer.scrollTop = editor.scrollTop;
   highlightLayer.scrollLeft = editor.scrollLeft;
+}
+
+/** Signature of the marked range, so we only repaint when it actually moves. */
+let paintedTarget = null;
+
+function paintEditor() {
+  const text = editor.value + '\n';   // keeps the last line's height in the <pre>
+  const t = runTarget();
+  // One statement needs no marking -- banding the whole editor says nothing.
+  const mark = t && t.total > 1;
+  highlightLayer.innerHTML = mark
+    ? highlightSQL(text.slice(0, t.start))
+      + `<span class="stmt-active">${highlightSQL(text.slice(t.start, t.end))}</span>`
+      + highlightSQL(text.slice(t.end))
+    : highlightSQL(text);
+  paintedTarget = t ? `${t.start}:${t.end}:${t.total}` : '';
+  syncScroll();
+  renderRunTargetLabel(t);
+}
+
+/** Repaint only if moving the caret changed which statement Run would take. */
+function repaintIfTargetMoved() {
+  const t = runTarget();
+  if ((t ? `${t.start}:${t.end}:${t.total}` : '') === paintedTarget) return;
+  paintEditor();
+}
+
+function renderRunTargetLabel(t) {
+  const el = $('#stmt-indicator');
+  el.hidden = !(t && t.label);
+  el.textContent = t && t.label ? `⌘↵ runs ${t.label}` : '';
+}
+
+/**
+ * Toggle `--` line comments over the selected lines, the way ⌘/ does in every
+ * other editor: comment the block unless every line in it is already
+ * commented, in which case uncomment. The comment marker goes at the shallowest
+ * indent in the block, so the code keeps its shape.
+ */
+function toggleLineComment() {
+  const { value } = editor;
+  const a = editor.selectionStart, b = editor.selectionEnd;
+  const from = value.lastIndexOf('\n', a - 1) + 1;
+  // A selection ending exactly at a line break must not drag in the next line.
+  const tail = b > a && value[b - 1] === '\n' ? b - 1 : b;
+  let to = value.indexOf('\n', tail);
+  if (to === -1) to = value.length;
+
+  const lines = value.slice(from, to).split('\n');
+  const code = lines.filter(l => l.trim());
+  const commented = code.length > 0 && code.every(l => /^\s*--/.test(l));
+
+  let out;
+  if (commented) {
+    out = lines.map(l => l.replace(/^(\s*)--[ \t]?/, '$1'));
+  } else {
+    const indent = code.length ? Math.min(...code.map(l => /^\s*/.exec(l)[0].length)) : 0;
+    // With nothing but blank lines selected, comment them anyway: the user
+    // asked for a comment marker and that is where the cursor is.
+    out = lines.map(l => (l.trim() || !code.length)
+      ? l.slice(0, indent) + '-- ' + l.slice(indent)
+      : l);
+  }
+
+  const replaced = out.join('\n');
+  const shiftFirst = out[0].length - lines[0].length;
+  const shiftAll   = replaced.length - (to - from);
+  editor.value = value.slice(0, from) + replaced + value.slice(to);
+  editor.selectionStart = Math.max(from, a + shiftFirst);
+  editor.selectionEnd   = a === b
+    ? editor.selectionStart
+    : Math.max(editor.selectionStart, b + shiftAll);
+  editor.dispatchEvent(new Event('input'));
 }
 
 editor.addEventListener('input', () => {
@@ -137,10 +228,15 @@ editor.addEventListener('input', () => {
   if (!sandbox) { state.drafts[state.current] = editor.value; saveState(); }
   scheduleLint();
 });
-editor.addEventListener('scroll', () => {
-  highlightLayer.scrollTop = editor.scrollTop;
-  highlightLayer.scrollLeft = editor.scrollLeft;
+editor.addEventListener('scroll', syncScroll);
+
+// Moving the caret changes what ⌘↵ would run, so the marked band follows it.
+['keyup', 'mouseup', 'focus', 'select'].forEach(ev =>
+  editor.addEventListener(ev, repaintIfTargetMoved));
+document.addEventListener('selectionchange', () => {
+  if (document.activeElement === editor) repaintIfTargetMoved();
 });
+
 editor.addEventListener('keydown', (e) => {
   if (e.key === 'Tab') {
     e.preventDefault();
@@ -148,6 +244,13 @@ editor.addEventListener('keydown', (e) => {
     editor.value = value.slice(0, a) + '  ' + value.slice(b);
     editor.selectionStart = editor.selectionEnd = a + 2;
     editor.dispatchEvent(new Event('input'));
+    return;
+  }
+  // ⌘/ (Ctrl+/ elsewhere). e.code, because on some layouts the modifier
+  // changes what e.key reports for this physical key.
+  if ((e.metaKey || e.ctrlKey) && (e.key === '/' || e.code === 'Slash')) {
+    e.preventDefault();
+    toggleLineComment();
   }
 });
 
@@ -237,6 +340,7 @@ function renderExercise() {
   $('#ex-ref').textContent = ex.ref || '';
   $('#ex-title').textContent = ex.title;
   $('#ex-prompt').innerHTML = markdown(ex.prompt);
+  layout.fitPrompt();          // a short prompt should not reserve a tall pane
   $('#ex-diff').textContent = `L${ex.diff} ${DIFF_LABEL[ex.diff]}`;
 
   const st = exerciseStatus(ex.id);
@@ -318,35 +422,69 @@ function setStatus(left, right, isError = false) {
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------
-async function doRun() {
-  const sql = editor.value.trim();
-  if (!sql) return;
+/** Execute one piece of SQL and show it on the Results tab. */
+async function runSql(sql, note = '') {
   showTab('results');
-  setStatus('Running…', '');
+  setStatus(note ? `Running ${note}…` : 'Running…', '');
+  const right = (extra) => [extra, note].filter(Boolean).join(' · ');
   try {
     if (sandbox && !engine.isReadOnlyQuery(sql)) {
       const { ms } = await engine.exec(sql);
       $('#tab-results').innerHTML = '<p class="placeholder">Statement executed. It returned no result set.</p>';
       schemaCache = null;
-      setStatus(`Executed in ${ms.toFixed(0)} ms`, 'sandbox');
+      setStatus(`Executed in ${ms.toFixed(0)} ms`, right('sandbox'));
       logActivity({ sql, action: 'run', rowCount: null, ms });
-      return;
+      return { ok: true, ms };
     }
     const res = await engine.run(sql);
     renderGrid(res);
     setStatus(`${res.rowCount.toLocaleString()} rows in ${res.ms.toFixed(0)} ms`,
-              `${res.columns.length} columns`);
+              right(`${res.columns.length} columns`));
     logActivity({ sql, action: 'run', rowCount: res.rowCount, ms: res.ms });
+    return { ok: true, ms: res.ms };
   } catch (e) {
     $('#tab-results').innerHTML =
-      `<div class="verdict verdict-bad"><h3>Query error</h3><pre>${esc(e.message ?? e)}</pre></div>`;
-    setStatus('Query failed', '', true);
+      `<div class="verdict verdict-bad"><h3>Query error${note ? ` in ${esc(note)}` : ''}</h3>`
+      + `<pre>${esc(e.message ?? e)}</pre></div>`;
+    setStatus('Query failed', note, true);
+    return { ok: false, ms: 0 };
+  }
+}
+
+/** ⌘↵ -- the selection, or the statement the cursor is in. */
+async function doRun() {
+  const t = runTarget();
+  if (!t || !t.sql.trim()) return;
+  await runSql(t.sql, t.label);
+}
+
+/** ⌘⌥↵ -- every statement in the editor, in order, stopping at the first error. */
+async function doRunAll() {
+  const stmts = engine.splitStatements(editor.value);
+  if (!stmts.length) return;
+  if (stmts.length === 1) { await runSql(stmts[0].sql); return; }
+
+  let ms = 0, done = 0;
+  for (const [i, st] of stmts.entries()) {
+    const res = await runSql(st.sql, `statement ${i + 1} of ${stmts.length}`);
+    if (!res.ok) break;
+    ms += res.ms;
+    done++;
+  }
+  if (done === stmts.length) {
+    // The grid is showing the last statement's result, which is what a
+    // worksheet does; the status line accounts for the whole script.
+    setStatus(`Ran ${stmts.length} statements in ${ms.toFixed(0)} ms`,
+              `result of statement ${stmts.length}`);
   }
 }
 
 async function doCheck() {
   const ex = currentExercise();
-  const sql = editor.value.trim();
+  // Grade what Run would run, so scratch work parked above the answer does not
+  // get submitted along with it.
+  const t = runTarget();
+  const sql = t ? t.sql.trim() : '';
   if (!sql) return;
 
   state.attempted[ex.id] = true;
@@ -641,6 +779,7 @@ function showTab(name) {
 // ---------------------------------------------------------------------------
 function wire() {
   $('#btn-run').addEventListener('click', doRun);
+  $('#btn-run-all').addEventListener('click', doRunAll);
   $('#btn-check').addEventListener('click', doCheck);
 
   $('#btn-hint').addEventListener('click', () => {
@@ -677,6 +816,7 @@ function wire() {
     } else {
       renderExercise();
     }
+    layout.refresh();
     renderSidebar();
   });
 
@@ -719,7 +859,9 @@ function wire() {
     const mod = e.metaKey || e.ctrlKey;
     if (mod && e.key === 'Enter') {
       e.preventDefault();
-      if (e.shiftKey && !sandbox) doCheck(); else doRun();
+      if (e.shiftKey && !sandbox) doCheck();
+      else if (e.altKey) doRunAll();
+      else doRun();
     }
     if (e.altKey && e.key === 'ArrowRight') {
       e.preventDefault();
@@ -767,6 +909,11 @@ function wire() {
   $('#engine-version').title = engine.hasTimezoneSupport
     ? 'ICU extension loaded: CONVERT_TIMEZONE and AT TIME ZONE work with IANA zone names.'
     : 'ICU extension unavailable, so this session knows UTC only. Every exercise still works; exercises ts-4 and ts-8 use fixed offsets deliberately.';
+
+  layout.init({
+    saved: state.layout,
+    onResize: (sizes) => { state.layout = sizes; saveState(); },
+  });
 
   wire();
   renderExercise();
