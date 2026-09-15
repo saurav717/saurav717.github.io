@@ -356,6 +356,42 @@ table.grid td.is-num { text-align: right; }
 .muted { color: var(--text-mute); }
 .err { color: var(--bad); }
 
+/* activity log */
+.act-head {
+  display: flex; flex-wrap: wrap; gap: 8px 20px;
+  padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--border-soft);
+}
+.act-toggle { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 13px; }
+.act-toggle input { accent-color: var(--accent); cursor: pointer; margin: 0; }
+.act-toggle input:disabled, .act-toggle input:disabled + span { cursor: not-allowed; opacity: .5; }
+
+.act-ident { display: grid; gap: 6px; margin-bottom: 12px; }
+.act-field { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; }
+.act-key {
+  flex: none; width: 96px; color: var(--text-mute);
+  font: 11px var(--mono); text-transform: uppercase; letter-spacing: .04em; padding-top: 2px;
+}
+.act-val { flex: 1; min-width: 200px; color: var(--text-dim); }
+.act-val code { font: 12px var(--mono); color: var(--text); }
+.act-off { color: var(--text-mute); }
+.act-sub { color: var(--text-mute); }
+.act-link {
+  background: none; border: 0; padding: 0 0 0 6px; cursor: pointer;
+  color: var(--accent); font: inherit; text-decoration: underline;
+}
+
+.act-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+.act-actions .toolbar-gap { flex: 1; }
+
+.act-table td { vertical-align: top; }
+.act-when { white-space: nowrap; color: var(--text-dim); }
+.act-pass { color: var(--good); }
+.act-fail { color: var(--bad); }
+.act-sql {
+  margin: 0; max-width: 460px; max-height: 96px; overflow: auto;
+  white-space: pre-wrap; font: 11.5px/1.45 var(--mono); color: var(--text-dim);
+}
+
 /* ---------- sandbox ---------- */
 body.sandbox .prompt-pane,
 body.sandbox #btn-check,
@@ -384,6 +420,7 @@ body.sandbox .workspace { grid-template-rows: auto minmax(180px, 1fr); }
   .tab-panel { position: static; display: none; }
   .tab-panel-on { display: block; }
   .progress-block { display: none; }
+  .act-sql { max-width: 200px; }
 }
 @media (max-width: 620px) {
   .brand-name, .engine-label { display: none; }
