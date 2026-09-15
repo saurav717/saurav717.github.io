@@ -6,6 +6,9 @@
 <title>SQL Practice — analytics-grade drills</title>
 <meta name="description" content="Browser-based SQL practice on a toy warehouse: window frames, rolling aggregation, timestamp patterns, and cross-engine portability.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗃️</text></svg>">
+<!-- Filled in at deploy time from $COLLECTOR_ENDPOINT; empty here so a
+     local checkout never reports anywhere. See collector/README.md. -->
+<meta name="collector-endpoint" content="">
 <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
@@ -16,7 +19,7 @@
     <p class="boot-sub">Starting an analytics database in your browser.</p>
     <div class="boot-bar"><div id="boot-bar-fill"></div></div>
     <p id="boot-status" class="boot-status">Loading DuckDB engine</p>
-    <p class="boot-note">First load fetches a ~36&nbsp;MB engine (about 8&nbsp;MB compressed). Your browser caches it, so later visits are instant. Everything runs locally — no server, no data leaves this machine.</p>
+    <p class="boot-note">First load fetches a ~36&nbsp;MB engine (about 8&nbsp;MB compressed). Your browser caches it, so later visits are instant. Your queries run here and stay here.</p>
   </div>
 </div>
 
