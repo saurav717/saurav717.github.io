@@ -226,6 +226,69 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 .badge-done { border-color: var(--good); color: var(--good); background: var(--good-dim); }
 .badge-seen { border-color: var(--text-mute); }
 
+/* ---------- tables used, and the hover card ---------- */
+.tables-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 5px;
+  margin: 0 0 10px;
+}
+.tables-label {
+  font: 11px var(--mono); color: var(--text-mute);
+  text-transform: uppercase; letter-spacing: .06em; margin-right: 2px;
+}
+.tbl-ref {
+  font: 12px var(--mono); cursor: help;
+  border-bottom: 1px dotted var(--text-mute);
+}
+.tbl-ref:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tbl-chip {
+  padding: 2px 7px; border-radius: 99px; border: 1px solid var(--border);
+  border-bottom-style: solid; background: var(--bg-raise); color: var(--text-dim);
+}
+.tbl-chip:hover, .tbl-chip[aria-describedby] {
+  border-color: var(--accent); color: var(--text);
+}
+/* a table name inside the prompt text keeps its <code> look, gains the hint */
+.prose code.tbl-ref, .hint code.tbl-ref { border-bottom: 1px dotted var(--accent); }
+.prose code.tbl-ref:hover, .hint code.tbl-ref:hover { border-color: var(--accent); color: var(--accent); }
+
+.tbl-card {
+  position: fixed; z-index: 60; width: max-content;
+  max-width: min(460px, calc(100vw - 16px));
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  padding: 10px 12px; color: var(--text-dim);
+}
+[data-theme="light"] .tbl-card { box-shadow: 0 10px 28px rgba(20,30,50,.18); }
+.tbl-card[hidden] { display: none; }
+.tip-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  font: 600 13px var(--mono); color: var(--text);
+}
+.tip-rows { font: 11px var(--mono); color: var(--text-mute); font-weight: 400; }
+.tip-purpose {
+  margin: 5px 0 8px; font: 12px/1.5 var(--sans); color: var(--text-dim);
+  max-width: 44em;
+}
+.tip-scroll { max-height: min(46vh, 360px); overflow-y: auto; }
+.tip-cols { border-collapse: collapse; font: 11.5px var(--mono); width: 100%; }
+.tip-cols th, .tip-cols td {
+  text-align: left; font-weight: 400; padding: 2px 10px 2px 0; vertical-align: baseline;
+}
+.tip-cols th { color: var(--text); white-space: nowrap; }
+.tip-cols tr + tr th, .tip-cols tr + tr td { border-top: 1px solid var(--border-soft); }
+.tip-type { color: var(--fn); white-space: nowrap; }
+/* Notes like 'completed','shipped',... have no spaces to break on, and a card
+   that clips its own text is worse than one that wraps. */
+.tip-meta { color: var(--text-mute); overflow-wrap: anywhere; }
+.tip-flag {
+  display: inline-block; margin-right: 5px; padding: 0 5px; border-radius: 99px;
+  font-size: 10px; border: 1px solid var(--border);
+}
+.tip-pk { color: var(--accent); border-color: var(--accent-dim); background: var(--accent-dim); }
+.tip-null { color: var(--warn); border-color: var(--warn-dim); background: var(--warn-dim); }
+.tip-link { color: var(--text-dim); margin-right: 6px; }
+.tip-note { color: var(--text-mute); }
+
 /* ---------- prose ---------- */
 .prose { color: var(--text-dim); }
 .prose > *:first-child { margin-top: 0; }

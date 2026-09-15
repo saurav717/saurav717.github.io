@@ -7,6 +7,8 @@ import * as engine from './engine.js';
 import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js';
 import * as activity from './activity.js';
 import * as layout from './layout.js';
+import * as tabletip from './tabletip.js';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -16,6 +18,8 @@ const DIFF_LABEL = { 1: 'warm-up', 2: 'core', 3: 'hard', 4: 'interview-grade' };
 
 const state = loadState();
 let schemaCache = null;
+let tableDocs = new Map();     // table name -> what the hover card shows
+let ddlNotes = null;           // parsed assets/data/schema.sql, fetched once
 let sandbox = false;
 
 function loadState() {
@@ -340,6 +344,7 @@ function renderExercise() {
   $('#ex-ref').textContent = ex.ref || '';
   $('#ex-title').textContent = ex.title;
   $('#ex-prompt').innerHTML = markdown(ex.prompt);
+  renderTables();              // must run before fitPrompt: it adds a row
   layout.fitPrompt();          // a short prompt should not reserve a tall pane
   $('#ex-diff').textContent = `L${ex.diff} ${DIFF_LABEL[ex.diff]}`;
 
@@ -358,6 +363,19 @@ function renderExercise() {
   showTab('results');
 }
 
+/**
+ * The "Tables" strip under the exercise title, plus the hover triggers on the
+ * table names inside the prompt itself. Which tables an exercise uses is
+ * derived from its text and its reference solution -- see schema-doc.js.
+ */
+function renderTables() {
+  const row = $('#ex-tables');
+  const names = tablesFor(currentExercise(), new Set(tableDocs.keys()));
+  row.innerHTML = tabletip.chips(names);
+  row.hidden = names.length === 0;
+  tabletip.annotate($('#ex-prompt'), (n) => tableDocs.has(n));
+}
+
 function renderHints() {
   const ex = currentExercise();
   const shown = state.hintsShown[ex.id] || 0;
@@ -367,6 +385,7 @@ function renderHints() {
   box.innerHTML = ex.hints.slice(0, shown)
     .map((h, i) => `<div class="hint"><span class="hint-n">${i + 1}</span><span>${markdown(h).replace(/^<p>|<\/p>$/g, '')}</span></div>`)
     .join('');
+  tabletip.annotate(box, (n) => tableDocs.has(n));
   $('#btn-hint').textContent = shown >= ex.hints.length ? 'No more hints' : `Hint (${shown}/${ex.hints.length})`;
   $('#btn-hint').disabled = shown >= ex.hints.length;
 }
@@ -580,26 +599,66 @@ function renderLint() {
     </div>`).join('');
 }
 
-// --- schema browser ---------------------------------------------------------
+// --- schema, and the documentation built on top of it -----------------------
+//
+// Column names and types come from the live engine; the prose comes from
+// schema.sql and schema-doc.js. See assets/js/schema-doc.js for why they are
+// kept in three places rather than one.
+async function ensureSchema() {
+  if (schemaCache) return schemaCache;
+  schemaCache = await engine.getSchema();
+  if (!ddlNotes) {
+    try { ddlNotes = parseSchemaSql(await engine.schemaSource()); }
+    catch { ddlNotes = {}; }       // no notes is a worse card, not a broken one
+  }
+  tableDocs = new Map(schemaCache.map(t => {
+    const notes = ddlNotes[t.name] ?? {};
+    const links = LINKS[t.name] ?? {};
+    return [t.name, {
+      name: t.name,
+      rowCount: t.rowCount,
+      purpose: PURPOSE[t.name] ?? '',
+      columns: t.columns.map(c => ({
+        name: c.name,
+        type: c.type,
+        note: notes[c.name]?.note ?? '',
+        notNull: notes[c.name]?.notNull ?? false,
+        pk: notes[c.name]?.pk ?? false,
+        link: links[c.name] ?? '',
+      })),
+    }];
+  }));
+  return schemaCache;
+}
+
+/** What the hover card knows about a table, or null for one it has never seen. */
+const tableDoc = (name) => tableDocs.get(String(name).toLowerCase()) ?? null;
+
 async function renderSchema() {
   const panel = $('#tab-schema');
   if (!schemaCache) {
     panel.innerHTML = '<p class="placeholder">Reading schema…</p>';
-    try { schemaCache = await engine.getSchema(); }
+    try { await ensureSchema(); }
     catch (e) { panel.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
   }
   panel.innerHTML =
-    '<p class="placeholder">Click a table or column name to insert it into the editor.</p>' +
-    schemaCache.map(t => `
+    '<p class="placeholder">Click a table or column name to insert it into the editor. Hover either one for what it means.</p>' +
+    schemaCache.map(t => {
+      const doc = tableDoc(t.name);
+      const noteOf = (col) => doc?.columns.find(c => c.name === col)?.note ?? '';
+      return `
       <div class="schema-table">
-        <div class="schema-name" data-insert="${esc(t.name)}">
+        <div class="schema-name" data-insert="${esc(t.name)}"${doc?.purpose ? ` title="${esc(doc.purpose)}"` : ''}>
           <span>${esc(t.name)}</span>
           <span class="schema-rows">${t.rowCount === null ? '' : t.rowCount.toLocaleString() + ' rows'}</span>
         </div>
         <div class="schema-cols">
-          ${t.columns.map(c => `<span class="schema-col" data-insert="${esc(c.name)}">${esc(c.name)}<span class="ct"> ${esc(c.type)}</span></span>`).join('')}
+          ${t.columns.map(c => `<span class="schema-col" data-insert="${esc(c.name)}"${
+            noteOf(c.name) ? ` title="${esc(noteOf(c.name))}"` : ''
+          }>${esc(c.name)}<span class="ct"> ${esc(c.type)}</span></span>`).join('')}
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
   panel.querySelectorAll('[data-insert]').forEach(el => {
     el.addEventListener('click', () => {
@@ -778,6 +837,8 @@ function showTab(name) {
 // Wiring
 // ---------------------------------------------------------------------------
 function wire() {
+  tabletip.init(tableDoc);
+
   $('#btn-run').addEventListener('click', doRun);
   $('#btn-run-all').addEventListener('click', doRunAll);
   $('#btn-check').addEventListener('click', doCheck);
@@ -825,6 +886,7 @@ function wire() {
     setStatus('Reloading dataset…', '');
     await engine.resetDatabase(msg => setStatus(msg, ''));
     schemaCache = null;
+    await ensureSchema().catch(() => {});   // row counts on the cards again
     setStatus('Dataset reloaded', '');
   });
 
@@ -900,6 +962,11 @@ function wire() {
     $('.boot-card').append(box);
     return;
   }
+
+  // The hover cards need the live column list, so read it before the first
+  // exercise renders. A failure here costs the cards, not the app.
+  $('#boot-status').textContent = 'Reading the schema';
+  try { await ensureSchema(); } catch { /* cards degrade to nothing */ }
 
   $('#boot').remove();
   $('#topbar').hidden = false;

@@ -50,7 +50,7 @@ DROP TABLE IF EXISTS employees;
 -- Range: 2024-01-01 .. 2026-12-31
 -- ---------------------------------------------------------------------------
 CREATE TABLE dim_date (
-    day             DATE PRIMARY KEY,
+    day             DATE PRIMARY KEY,   -- one row per calendar day, no gaps
     year            INTEGER NOT NULL,
     quarter         INTEGER NOT NULL,
     month           INTEGER NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE dim_date (
     dow_sun0        INTEGER NOT NULL,   -- 0=Sunday .. 6=Saturday (Postgres DOW)
     day_name        TEXT    NOT NULL,
     is_weekday      INTEGER NOT NULL,   -- 1 if Mon-Fri
-    is_holiday      INTEGER NOT NULL,
+    is_holiday      INTEGER NOT NULL,   -- 1/0, not a BOOLEAN (warehouse habit)
     holiday_name    TEXT,               -- NULL unless is_holiday = 1
     month_start     DATE    NOT NULL,
     month_end       DATE    NOT NULL,
@@ -79,14 +79,14 @@ CREATE TABLE dim_date (
 CREATE TABLE customers (
     customer_id        INTEGER PRIMARY KEY,
     full_name          TEXT NOT NULL,
-    email              TEXT,
+    email              TEXT,            -- NULLable: some signups never confirmed one
     country            TEXT NOT NULL,
-    city               TEXT,
+    city               TEXT,            -- NULLable
     segment            TEXT,            -- NULLable: 'Consumer','SMB','Enterprise'
     signup_ts          TIMESTAMP NOT NULL,   -- naive UTC (like Redshift TIMESTAMP)
     tz_name            TEXT NOT NULL,   -- IANA name, e.g. 'America/New_York'
     utc_offset_minutes INTEGER NOT NULL,-- fixed offset, DST ignored (that is the lesson)
-    is_active          INTEGER NOT NULL
+    is_active          INTEGER NOT NULL -- 1/0
 );
 
 -- ---------------------------------------------------------------------------
@@ -105,7 +105,7 @@ CREATE TABLE merchants (
     merchant_id   INTEGER PRIMARY KEY,
     merchant_name TEXT NOT NULL,
     category      TEXT NOT NULL,        -- the MCC-ish grouping
-    country       TEXT NOT NULL
+    country       TEXT NOT NULL         -- may differ from the customer's country
 );
 
 -- ---------------------------------------------------------------------------
@@ -120,7 +120,7 @@ CREATE TABLE transactions (
     card_id     INTEGER NOT NULL,
     merchant_id INTEGER NOT NULL,
     txn_ts      TIMESTAMP NOT NULL,     -- naive UTC
-    amount      DECIMAL(12,2) NOT NULL,
+    amount      DECIMAL(12,2) NOT NULL, -- positive; a refund arrives as status='reversed'
     status      TEXT NOT NULL           -- 'settled','pending','reversed'
 );
 
@@ -132,8 +132,8 @@ CREATE TABLE transactions (
 CREATE TABLE balance_snapshots (
     snapshot_id  INTEGER PRIMARY KEY,
     customer_id  INTEGER NOT NULL,
-    snapshot_ts  TIMESTAMP NOT NULL,
-    balance      DECIMAL(14,2) NOT NULL
+    snapshot_ts  TIMESTAMP NOT NULL,    -- naive UTC; irregular, never aligned to txn_ts
+    balance      DECIMAL(14,2) NOT NULL  -- the balance AS OF snapshot_ts, not a delta
 );
 
 -- ---------------------------------------------------------------------------
@@ -144,9 +144,9 @@ CREATE TABLE balance_snapshots (
 CREATE TABLE logins (
     login_id    INTEGER PRIMARY KEY,
     customer_id INTEGER NOT NULL,
-    login_ts    TIMESTAMP NOT NULL,
+    login_ts    TIMESTAMP NOT NULL,     -- naive UTC; several per customer per day
     device      TEXT NOT NULL,          -- 'ios','android','web'
-    success     INTEGER NOT NULL
+    success     INTEGER NOT NULL        -- 1/0: failed attempts are in here too
 );
 
 -- ---------------------------------------------------------------------------
@@ -156,7 +156,7 @@ CREATE TABLE logins (
 CREATE TABLE clickstream (
     event_id    INTEGER PRIMARY KEY,
     customer_id INTEGER NOT NULL,
-    event_ts    TIMESTAMP NOT NULL,
+    event_ts    TIMESTAMP NOT NULL,     -- naive UTC; gaps straddle the 30-min timeout
     event_type  TEXT NOT NULL,          -- view_home|view_product|add_to_cart|begin_checkout|purchase
     product_id  INTEGER                 -- NULL for non-product events
 );
@@ -174,10 +174,10 @@ CREATE TABLE products (
     product_id   INTEGER PRIMARY KEY,
     product_name TEXT NOT NULL,
     category_id  INTEGER NOT NULL,
-    unit_price   DECIMAL(10,2) NOT NULL,
-    unit_cost    DECIMAL(10,2) NOT NULL,
+    unit_price   DECIMAL(10,2) NOT NULL,  -- list price, before any line discount
+    unit_cost    DECIMAL(10,2) NOT NULL, -- margin = unit_price - unit_cost
     launched_on  DATE NOT NULL,
-    discontinued INTEGER NOT NULL
+    discontinued INTEGER NOT NULL         -- 1/0
 );
 
 -- ---------------------------------------------------------------------------
@@ -189,7 +189,7 @@ CREATE TABLE products (
 CREATE TABLE orders (
     order_id      INTEGER PRIMARY KEY,
     customer_id   INTEGER NOT NULL,
-    order_ts      TIMESTAMP NOT NULL,
+    order_ts      TIMESTAMP NOT NULL,   -- naive UTC
     status        TEXT NOT NULL,        -- 'completed','shipped','pending','cancelled','returned'
     channel       TEXT NOT NULL,        -- 'web','mobile','phone','partner'
     shipping_fee  DECIMAL(8,2) NOT NULL,        -- order-level: the fan-out landmine
@@ -198,10 +198,10 @@ CREATE TABLE orders (
 
 CREATE TABLE order_items (
     order_id   INTEGER NOT NULL,
-    item_no    INTEGER NOT NULL,
+    item_no    INTEGER NOT NULL,                  -- 1..n within the order
     product_id INTEGER NOT NULL,
     quantity   INTEGER NOT NULL,
-    unit_price DECIMAL(10,2) NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,            -- line net = quantity * unit_price * (1 - discount)
     discount   DECIMAL(4,3) NOT NULL,           -- 0.00 .. 0.25
     PRIMARY KEY (order_id, item_no)
 );
@@ -209,8 +209,8 @@ CREATE TABLE order_items (
 CREATE TABLE payments (
     payment_id INTEGER PRIMARY KEY,
     order_id   INTEGER NOT NULL,
-    paid_ts    TIMESTAMP NOT NULL,
-    amount     DECIMAL(12,2) NOT NULL,
+    paid_ts    TIMESTAMP NOT NULL,      -- naive UTC; can be days after order_ts
+    amount     DECIMAL(12,2) NOT NULL,   -- one order can be settled in several payments
     method     TEXT NOT NULL            -- 'card','paypal','bank_transfer','gift_card'
 );
 
@@ -225,9 +225,9 @@ CREATE TABLE subscriptions (
     subscription_id INTEGER PRIMARY KEY,
     customer_id     INTEGER NOT NULL,
     plan            TEXT NOT NULL,      -- 'basic','plus','pro'
-    start_date      DATE NOT NULL,
-    end_date        DATE,               -- NULL = active
-    mrr             DECIMAL(10,2) NOT NULL
+    start_date      DATE NOT NULL,      -- inclusive
+    end_date        DATE,               -- NULL = active; EXCLUSIVE when set
+    mrr             DECIMAL(10,2) NOT NULL -- monthly recurring revenue while active
 );
 
 -- ---------------------------------------------------------------------------
@@ -239,8 +239,8 @@ CREATE TABLE subscriptions (
 CREATE TABLE dim_customer_scd (
     scd_id       INTEGER PRIMARY KEY,
     customer_id  INTEGER NOT NULL,
-    segment_name TEXT NOT NULL,
-    valid_from   TIMESTAMP NOT NULL,
+    segment_name TEXT NOT NULL,         -- the segment AS OF this version
+    valid_from   TIMESTAMP NOT NULL,    -- inclusive
     valid_to     TIMESTAMP              -- NULL = current version
 );
 
@@ -250,10 +250,10 @@ CREATE TABLE dim_customer_scd (
 -- ---------------------------------------------------------------------------
 CREATE TABLE bookings (
     booking_id  INTEGER PRIMARY KEY,
-    resource_id INTEGER NOT NULL,
+    resource_id INTEGER NOT NULL,       -- bookings overlap WITHIN a resource_id
     customer_id INTEGER NOT NULL,
-    start_ts    TIMESTAMP NOT NULL,
-    end_ts      TIMESTAMP NOT NULL
+    start_ts    TIMESTAMP NOT NULL,     -- inclusive
+    end_ts      TIMESTAMP NOT NULL      -- exclusive
 );
 
 -- ---------------------------------------------------------------------------
@@ -263,8 +263,8 @@ CREATE TABLE bookings (
 --   * zero days  -> NULLIF on the denominator is not optional (ref §2.4)
 -- ---------------------------------------------------------------------------
 CREATE TABLE daily_revenue (
-    day     DATE PRIMARY KEY,
-    revenue DECIMAL(12,2) NOT NULL
+    day     DATE PRIMARY KEY,           -- NOT every day is present -- that is the lesson
+    revenue DECIMAL(12,2) NOT NULL       -- some days are 0.00
 );
 
 -- ---------------------------------------------------------------------------
@@ -273,11 +273,11 @@ CREATE TABLE daily_revenue (
 -- ---------------------------------------------------------------------------
 CREATE TABLE staging_customers (
     row_id             INTEGER PRIMARY KEY,
-    source_customer_id INTEGER NOT NULL,
+    source_customer_id INTEGER NOT NULL, -- repeats: several CDC rows per customer
     email              TEXT,
     full_name          TEXT NOT NULL,
     country            TEXT,
-    updated_at         TIMESTAMP NOT NULL
+    updated_at         TIMESTAMP NOT NULL -- newest row per source_customer_id wins
 );
 
 -- ---------------------------------------------------------------------------
@@ -298,7 +298,7 @@ CREATE TABLE employees (
     department_id INTEGER,  -- NULLable
     manager_id    INTEGER,      -- NULL for CEO
     title         TEXT NOT NULL,
-    salary        DECIMAL(12,2) NOT NULL,
+    salary        DECIMAL(12,2) NOT NULL, -- annual
     hire_date     DATE NOT NULL
 );
 
