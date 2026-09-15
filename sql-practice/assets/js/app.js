@@ -5,6 +5,7 @@
 // ===========================================================================
 import * as engine from './engine.js';
 import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js';
+import * as activity from './activity.js';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -328,12 +329,14 @@ async function doRun() {
       $('#tab-results').innerHTML = '<p class="placeholder">Statement executed. It returned no result set.</p>';
       schemaCache = null;
       setStatus(`Executed in ${ms.toFixed(0)} ms`, 'sandbox');
+      logActivity({ sql, action: 'run', rowCount: null, ms });
       return;
     }
     const res = await engine.run(sql);
     renderGrid(res);
     setStatus(`${res.rowCount.toLocaleString()} rows in ${res.ms.toFixed(0)} ms`,
               `${res.columns.length} columns`);
+    logActivity({ sql, action: 'run', rowCount: res.rowCount, ms: res.ms });
   } catch (e) {
     $('#tab-results').innerHTML =
       `<div class="verdict verdict-bad"><h3>Query error</h3><pre>${esc(e.message ?? e)}</pre></div>`;
@@ -356,6 +359,15 @@ async function doCheck() {
     verdict = await engine.grade(sql, ex);
   } catch (e) {
     verdict = { pass: false, reason: 'error', detail: String(e.message ?? e) };
+  }
+
+  // verdict.got is only set when the user's query executed. A query that
+  // errored never ran successfully, so it is not a submission worth logging.
+  if (verdict.got) {
+    logActivity({
+      sql, action: 'check', rowCount: verdict.got.rowCount,
+      ms: verdict.got.ms, passed: verdict.pass,
+    });
   }
 
   const dot = $('#feedback-dot');
@@ -463,12 +475,165 @@ async function renderSchema() {
   });
 }
 
+// --- activity log -----------------------------------------------------------
+// Everything recorded here stays in this browser. See assets/js/activity.js
+// for why the device id is a UUID and not a MAC address.
+
+/** Record one successful submission, then keep the tab badge in step. */
+function logActivity({ sql, action, rowCount, ms, passed = null }) {
+  const ex = sandbox ? null : currentExercise();
+  activity.record({
+    sql, action, rowCount, ms, passed,
+    exerciseId: sandbox ? null : ex.id,
+    exerciseTitle: sandbox ? 'Sandbox' : ex.title,
+    target: state.engine,
+  });
+  updateActivityCount();
+  if ($('#tab-activity').classList.contains('tab-panel-on')) renderActivity();
+}
+
+function updateActivityCount() {
+  const pill = $('#activity-count');
+  const n = activity.entryCount();
+  pill.hidden = n === 0;
+  pill.textContent = String(n);
+}
+
+const fmtWhen = (iso) => {
+  const d = new Date(iso);
+  return Number.isNaN(+d) ? iso : d.toLocaleString();
+};
+
+function locationLine() {
+  if (!activity.locationSupported()) {
+    return '<span class="act-off">This browser has no Geolocation API.</span>';
+  }
+  if (!activity.locationConsent()) {
+    return '<span class="act-off">Off — entries are recorded without a position.</span>';
+  }
+  const loc = activity.lastLocation();
+  if (!loc) return '<span class="act-off">On, but no fix yet.</span>';
+  return `<code>${loc.lat}, ${loc.lon}</code> ±${loc.accuracyM ?? '?'} m` +
+         `<span class="act-sub"> · ${esc(fmtWhen(loc.capturedAt))}</span>`;
+}
+
+function renderActivity() {
+  const on = activity.isLogging();
+  const rows = [...activity.entries()].reverse();
+
+  const head = `
+    <div class="act-head">
+      <label class="act-toggle">
+        <input type="checkbox" id="act-logging"${on ? ' checked' : ''}>
+        <span>Record queries that run successfully</span>
+      </label>
+      <label class="act-toggle">
+        <input type="checkbox" id="act-location"${activity.locationConsent() ? ' checked' : ''}
+               ${activity.locationSupported() ? '' : 'disabled'}>
+        <span>Attach my location</span>
+      </label>
+    </div>
+
+    <div class="act-ident">
+      <div class="act-field">
+        <span class="act-key">Device ID</span>
+        <span class="act-val"><code>${esc(activity.deviceId())}</code>
+          <button class="act-link" id="act-reset-id">reset</button></span>
+      </div>
+      <div class="act-field">
+        <span class="act-key">Location</span>
+        <span class="act-val">${locationLine()}</span>
+      </div>
+      <div class="act-field">
+        <span class="act-key">MAC address</span>
+        <span class="act-val act-off">Unavailable. No browser exposes the network
+          adapter's hardware address to a web page, so the device ID above — a random
+          UUID kept in this browser's storage — stands in for it.</span>
+      </div>
+    </div>
+
+    <div class="act-actions">
+      <button class="btn btn-ghost" id="act-export-json" ${rows.length ? '' : 'disabled'}>Export JSON</button>
+      <button class="btn btn-ghost" id="act-export-csv"  ${rows.length ? '' : 'disabled'}>Export CSV</button>
+      <span class="toolbar-gap"></span>
+      <button class="btn btn-ghost" id="act-clear" ${rows.length ? '' : 'disabled'}>Clear log</button>
+    </div>`;
+
+  const note = activity.storageFailed()
+    ? '<p class="err">This browser refused to save the log (private mode, or storage is full). Entries will be lost on reload.</p>'
+    : '';
+
+  const body = !rows.length
+    ? `<p class="placeholder">${on
+        ? 'No queries recorded yet. Run or check a query and it lands here.'
+        : 'Recording is off.'} Nothing is sent anywhere — the log lives in this browser until you export or clear it.</p>`
+    : `<div class="grid-wrap"><table class="grid act-table">
+        <thead><tr>
+          <th>When</th><th>What</th><th>Exercise</th><th>Result</th><th>Location</th><th>Query</th>
+        </tr></thead>
+        <tbody>${rows.map(e => `
+          <tr>
+            <td class="act-when">${esc(fmtWhen(e.at))}</td>
+            <td>${esc(e.action)}${e.passed === null ? ''
+                 : e.passed ? ' <span class="act-pass">pass</span>' : ' <span class="act-fail">fail</span>'}</td>
+            <td>${esc(e.exerciseTitle ?? e.exerciseId ?? '—')}</td>
+            <td class="is-num">${e.rowCount === null ? '—' : e.rowCount.toLocaleString() + ' rows'}${
+                 e.ms === null ? '' : ` / ${e.ms} ms`}</td>
+            <td>${e.location ? `${e.location.lat}, ${e.location.lon}` : '—'}</td>
+            <td><pre class="act-sql">${esc(e.sql)}${e.sqlTruncated ? '\n…truncated' : ''}</pre></td>
+          </tr>`).join('')}
+        </tbody></table></div>
+       <p class="placeholder">Newest first. The log keeps the most recent 500 entries.</p>`;
+
+  $('#tab-activity').innerHTML = head + note + body;
+  wireActivityPanel();
+}
+
+function wireActivityPanel() {
+  const panel = $('#tab-activity');
+
+  panel.querySelector('#act-logging').addEventListener('change', (e) => {
+    activity.setLogging(e.target.checked);
+    renderActivity();
+  });
+
+  panel.querySelector('#act-location').addEventListener('change', async (e) => {
+    const box = e.target;
+    box.disabled = true;
+    const res = await activity.setLocationConsent(box.checked);
+    box.disabled = false;
+    renderActivity();
+    if (!res.ok) {
+      setStatus(`Location not enabled: ${res.error}`, '', true);
+    }
+  });
+
+  panel.querySelector('#act-reset-id').addEventListener('click', () => {
+    if (!confirm('Generate a new device ID?\n\nEntries already recorded keep the ID they were written with.')) return;
+    activity.resetDeviceId();
+    renderActivity();
+  });
+
+  const json = panel.querySelector('#act-export-json');
+  const csv  = panel.querySelector('#act-export-csv');
+  const clr  = panel.querySelector('#act-clear');
+  if (!json.disabled) json.addEventListener('click', () => activity.download('json'));
+  if (!csv.disabled)  csv.addEventListener('click',  () => activity.download('csv'));
+  if (!clr.disabled)  clr.addEventListener('click', () => {
+    if (!confirm(`Delete all ${activity.entryCount()} recorded entries? This cannot be undone.`)) return;
+    activity.clearEntries();
+    updateActivityCount();
+    renderActivity();
+  });
+}
+
 // --- tabs -------------------------------------------------------------------
 function showTab(name) {
   $$('.tab').forEach(t => t.classList.toggle('tab-on', t.dataset.tab === name));
   $$('.tab-panel').forEach(p => p.classList.toggle('tab-panel-on', p.id === `tab-${name}`));
   if (name === 'schema') renderSchema();
   if (name === 'portability') renderLint();
+  if (name === 'activity') renderActivity();
 }
 
 // ---------------------------------------------------------------------------
@@ -607,5 +772,6 @@ function wire() {
   renderExercise();
   renderSidebar();
   renderLint();
+  updateActivityCount();
   editor.focus();
 })();
