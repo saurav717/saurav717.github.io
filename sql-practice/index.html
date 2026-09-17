@@ -9,8 +9,8 @@
 <!-- Filled in at deploy time from $COLLECTOR_ENDPOINT; empty here so a
      local checkout never reports anywhere. See collector/README.md. -->
 <meta name="collector-endpoint" content="">
-<meta name="build" content="20260917-solution">
-<link rel="stylesheet" href="assets/css/app.css?v=20260917-solution">
+<meta name="build" content="20260917-layout">
+<link rel="stylesheet" href="assets/css/app.css?v=20260917-layout">
 </head>
 <body>
 
@@ -42,13 +42,37 @@
     </label>
     <button id="btn-sandbox" class="btn btn-ghost" title="Free-form query editor">Sandbox</button>
     <button id="btn-reset-db" class="btn btn-ghost" title="Reload the dataset from scratch">Reset data</button>
+    <button id="btn-reset-layout" class="btn btn-icon"
+            title="Put the panels and tabs back where they started">⊞</button>
     <button id="btn-theme" class="btn btn-icon" title="Toggle light / dark">◐</button>
   </div>
 </header>
 
+<!-- The four tiles below are the whole layout. assets/js/layout.js lifts them
+     out of this source order, arranges them into the tree it has stored, and
+     puts a draggable seam between every pair -- so the arrangement here is
+     only the one a first visit starts from. -->
 <main class="layout" hidden id="layout">
 
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar tile" id="sidebar" data-tile="sidebar">
+    <div class="tile-bar" title="Drag to move this panel; drop it against any edge">
+      <span class="tile-grip" aria-hidden="true">⠿</span>
+      <span class="tile-name">Exercises</span>
+      <span class="tile-moves">
+        <button type="button" class="tile-move" data-move="left"
+                title="Move the exercise list to the left edge"
+                aria-label="Move the exercise list to the left edge">←</button>
+        <button type="button" class="tile-move" data-move="top"
+                title="Move the exercise list to the top edge"
+                aria-label="Move the exercise list to the top edge">↑</button>
+        <button type="button" class="tile-move" data-move="bottom"
+                title="Move the exercise list to the bottom edge"
+                aria-label="Move the exercise list to the bottom edge">↓</button>
+        <button type="button" class="tile-move" data-move="right"
+                title="Move the exercise list to the right edge"
+                aria-label="Move the exercise list to the right edge">→</button>
+      </span>
+    </div>
     <div class="sidebar-head">
       <input id="search" type="search" placeholder="Filter exercises…" autocomplete="off">
       <div class="filter-row" id="status-filter">
@@ -63,14 +87,26 @@
     </div>
   </aside>
 
-  <div class="splitter split-col" id="split-sidebar" role="separator"
-       aria-orientation="vertical" tabindex="0"
-       aria-label="Resize the exercise list"
-       title="Drag to resize · double-click to reset"></div>
-
-  <section class="workspace" id="workspace">
-
-    <article class="pane prompt-pane">
+  <article class="pane tile prompt-pane" data-tile="prompt">
+    <div class="tile-bar" title="Drag to move this panel; drop it against any edge">
+      <span class="tile-grip" aria-hidden="true">⠿</span>
+      <span class="tile-name">Exercise</span>
+      <span class="tile-moves">
+        <button type="button" class="tile-move" data-move="left"
+                title="Move the exercise prompt to the left edge"
+                aria-label="Move the exercise prompt to the left edge">←</button>
+        <button type="button" class="tile-move" data-move="top"
+                title="Move the exercise prompt to the top edge"
+                aria-label="Move the exercise prompt to the top edge">↑</button>
+        <button type="button" class="tile-move" data-move="bottom"
+                title="Move the exercise prompt to the bottom edge"
+                aria-label="Move the exercise prompt to the bottom edge">↓</button>
+        <button type="button" class="tile-move" data-move="right"
+                title="Move the exercise prompt to the right edge"
+                aria-label="Move the exercise prompt to the right edge">→</button>
+      </span>
+    </div>
+    <div class="prompt-body">
       <div class="prompt-head">
         <div class="prompt-titles">
           <div class="crumb"><span id="ex-track"></span> <span id="ex-ref" class="crumb-ref"></span></div>
@@ -83,74 +119,100 @@
       </div>
       <div id="ex-tables" class="tables-row" hidden></div>
       <div id="ex-prompt" class="prose"></div>
-    </article>
+    </div>
+  </article>
 
-    <div class="splitter split-row" id="split-prompt" role="separator"
-         aria-orientation="horizontal" tabindex="0"
-         aria-label="Resize the exercise prompt"
-         title="Drag to resize · double-click to reset"></div>
+  <article class="pane tile editor-pane" data-tile="editor">
+    <div class="tile-bar" title="Drag to move this panel; drop it against any edge">
+      <span class="tile-grip" aria-hidden="true">⠿</span>
+      <span class="tile-name">Editor</span>
+      <span class="tile-moves">
+        <button type="button" class="tile-move" data-move="left"
+                title="Move the editor to the left edge"
+                aria-label="Move the editor to the left edge">←</button>
+        <button type="button" class="tile-move" data-move="top"
+                title="Move the editor to the top edge"
+                aria-label="Move the editor to the top edge">↑</button>
+        <button type="button" class="tile-move" data-move="bottom"
+                title="Move the editor to the bottom edge"
+                aria-label="Move the editor to the bottom edge">↓</button>
+        <button type="button" class="tile-move" data-move="right"
+                title="Move the editor to the right edge"
+                aria-label="Move the editor to the right edge">→</button>
+      </span>
+    </div>
+    <div class="toolbar">
+      <button id="btn-run" class="btn btn-primary"
+              title="Run the statement the cursor is in, or the selection">Run <kbd>⌘↵</kbd></button>
+      <button id="btn-run-all" class="btn btn-ghost"
+              title="Run every statement in the editor, in order">Run all <kbd>⌘⌥↵</kbd></button>
+      <button id="btn-check" class="btn btn-accent">Check answer <kbd>⌘⇧↵</kbd></button>
+      <span id="stmt-indicator" class="stmt-indicator" hidden></span>
+      <span class="toolbar-gap"></span>
+      <button id="btn-hint"     class="btn btn-ghost">Hint</button>
+      <button id="btn-solution" class="btn btn-ghost">Show solution</button>
+      <button id="btn-clear"    class="btn btn-ghost" title="Clear the editor">Clear</button>
+      <button id="btn-lines"    class="btn btn-ghost btn-icon" aria-pressed="false"
+              title="Show or hide line numbers">#</button>
+    </div>
 
-    <article class="pane editor-pane">
-      <div class="toolbar">
-        <button id="btn-run" class="btn btn-primary"
-                title="Run the statement the cursor is in, or the selection">Run <kbd>⌘↵</kbd></button>
-        <button id="btn-run-all" class="btn btn-ghost"
-                title="Run every statement in the editor, in order">Run all <kbd>⌘⌥↵</kbd></button>
-        <button id="btn-check" class="btn btn-accent">Check answer <kbd>⌘⇧↵</kbd></button>
-        <span id="stmt-indicator" class="stmt-indicator" hidden></span>
-        <span class="toolbar-gap"></span>
-        <button id="btn-hint"     class="btn btn-ghost">Hint</button>
-        <button id="btn-solution" class="btn btn-ghost">Show solution</button>
-        <button id="btn-clear"    class="btn btn-ghost" title="Clear the editor">Clear</button>
-        <button id="btn-lines"    class="btn btn-ghost btn-icon" aria-pressed="false"
-                title="Show or hide line numbers">#</button>
-      </div>
+    <div class="editor-wrap">
+      <div id="editor-gutter" class="editor-gutter" aria-hidden="true" hidden><div id="editor-gutter-lines"></div></div>
+      <pre id="editor-highlight" class="editor-layer" aria-hidden="true"></pre>
+      <textarea id="editor" class="editor-layer editor-input" spellcheck="false"
+                autocomplete="off" autocapitalize="off" autocorrect="off"
+                placeholder="Write your query here. ⌘↵ runs the statement at the cursor, ⌘⇧↵ checks it, ⌘/ comments a line, Tab / ⇧Tab indents."></textarea>
+    </div>
 
-      <div class="editor-wrap">
-        <div id="editor-gutter" class="editor-gutter" aria-hidden="true" hidden><div id="editor-gutter-lines"></div></div>
-        <pre id="editor-highlight" class="editor-layer" aria-hidden="true"></pre>
-        <textarea id="editor" class="editor-layer editor-input" spellcheck="false"
-                  autocomplete="off" autocapitalize="off" autocorrect="off"
-                  placeholder="Write your query here. ⌘↵ runs the statement at the cursor, ⌘⇧↵ checks it, ⌘/ comments a line, Tab / ⇧Tab indents."></textarea>
-      </div>
+    <div id="hints" class="hints" hidden></div>
+    <div id="solution" class="solution" hidden></div>
+  </article>
 
-      <div id="hints" class="hints" hidden></div>
-      <div id="solution" class="solution" hidden></div>
-    </article>
+  <article class="pane tile output-pane" data-tile="output">
+    <div class="tile-bar" title="Drag to move this panel; drop it against any edge">
+      <span class="tile-grip" aria-hidden="true">⠿</span>
+      <span class="tile-name">Results</span>
+      <span class="tile-moves">
+        <button type="button" class="tile-move" data-move="left"
+                title="Move the results panel to the left edge"
+                aria-label="Move the results panel to the left edge">←</button>
+        <button type="button" class="tile-move" data-move="top"
+                title="Move the results panel to the top edge"
+                aria-label="Move the results panel to the top edge">↑</button>
+        <button type="button" class="tile-move" data-move="bottom"
+                title="Move the results panel to the bottom edge"
+                aria-label="Move the results panel to the bottom edge">↓</button>
+        <button type="button" class="tile-move" data-move="right"
+                title="Move the results panel to the right edge"
+                aria-label="Move the results panel to the right edge">→</button>
+      </span>
+    </div>
+    <div class="tabs" id="tabs" title="Drag a tab sideways to reorder it">
+      <button class="tab tab-on" data-tab="results">Results</button>
+      <button class="tab" data-tab="feedback">Feedback <span id="feedback-dot" class="dot" hidden></span></button>
+      <button class="tab" data-tab="portability">Portability <span id="lint-count" class="pill" hidden>0</span></button>
+      <button class="tab" data-tab="dialect">Dialect notes</button>
+      <button class="tab" data-tab="schema">Schema</button>
+      <button class="tab" data-tab="activity">Activity <span id="activity-count" class="pill" hidden>0</span></button>
+    </div>
 
-    <div class="splitter split-row" id="split-editor" role="separator"
-         aria-orientation="horizontal" tabindex="0"
-         aria-label="Resize the results panel"
-         title="Drag to resize · double-click to reset"></div>
+    <div class="tab-body">
+      <div id="tab-results"     class="tab-panel tab-panel-on"></div>
+      <div id="tab-feedback"    class="tab-panel"></div>
+      <div id="tab-portability" class="tab-panel"></div>
+      <div id="tab-dialect"     class="tab-panel"></div>
+      <div id="tab-schema"      class="tab-panel"></div>
+      <div id="tab-activity"    class="tab-panel"></div>
+    </div>
 
-    <article class="pane output-pane">
-      <div class="tabs" id="tabs">
-        <button class="tab tab-on" data-tab="results">Results</button>
-        <button class="tab" data-tab="feedback">Feedback <span id="feedback-dot" class="dot" hidden></span></button>
-        <button class="tab" data-tab="portability">Portability <span id="lint-count" class="pill" hidden>0</span></button>
-        <button class="tab" data-tab="dialect">Dialect notes</button>
-        <button class="tab" data-tab="schema">Schema</button>
-        <button class="tab" data-tab="activity">Activity <span id="activity-count" class="pill" hidden>0</span></button>
-      </div>
+    <div class="statusbar">
+      <span id="status-left"  class="muted"></span>
+      <span id="status-right" class="muted"></span>
+    </div>
+  </article>
 
-      <div class="tab-body">
-        <div id="tab-results"     class="tab-panel tab-panel-on"></div>
-        <div id="tab-feedback"    class="tab-panel"></div>
-        <div id="tab-portability" class="tab-panel"></div>
-        <div id="tab-dialect"     class="tab-panel"></div>
-        <div id="tab-schema"      class="tab-panel"></div>
-        <div id="tab-activity"    class="tab-panel"></div>
-      </div>
-
-      <div class="statusbar">
-        <span id="status-left"  class="muted"></span>
-        <span id="status-right" class="muted"></span>
-      </div>
-    </article>
-
-  </section>
 </main>
 
-<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260917-solution"></script>
+<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260917-layout"></script>
 </body>
 </html>

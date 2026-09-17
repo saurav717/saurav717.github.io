@@ -139,12 +139,78 @@ body {
 }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 
-/* ---------- layout ---------- */
-.layout { display: flex; height: calc(100vh - 52px); }
+/* ---------- layout ----------
+   The window is a tree of splits whose leaves are the four tiles. The tree
+   background is the border colour, so every seam between two tiles reads as a
+   hairline without anyone having to own a border. layout.js writes the flex
+   sizes; nothing here assumes which tile sits where. */
+.layout {
+  display: flex; height: calc(100vh - 52px);
+  background: var(--border); overflow: hidden;
+}
+.dock-split { display: flex; min-width: 0; min-height: 0; overflow: hidden; }
+.dock-row { flex-direction: row; }
+.dock-col { flex-direction: column; }
+.tile { min-width: 0; min-height: 0; position: relative; }
+
+/* ---------- tile bars ----------
+   Every tile carries the same thin bar: a grip that drags the whole tile to
+   wherever you drop it, its name, and four buttons that send it to an edge of
+   the window (the keyboard path to the same thing). */
+.tile-bar {
+  flex: none; display: flex; align-items: center; gap: 7px;
+  height: 24px; padding: 0 6px 0 8px;
+  background: var(--bg-raise); border-bottom: 1px solid var(--border-soft);
+  cursor: grab; user-select: none; touch-action: none;
+}
+.tile-bar:active { cursor: grabbing; }
+.tile-grip { color: var(--text-mute); font-size: 11px; letter-spacing: -1px; }
+.tile-name {
+  font: 600 10.5px var(--sans); letter-spacing: .09em; text-transform: uppercase;
+  color: var(--text-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tile-moves { margin-left: auto; display: flex; gap: 1px; opacity: 0; transition: opacity .12s; }
+.tile-bar:hover .tile-moves, .tile-moves:focus-within { opacity: 1; }
+.tile-move {
+  border: 0; background: transparent; color: var(--text-mute);
+  font: 12px var(--sans); line-height: 1; cursor: pointer;
+  padding: 3px 4px; border-radius: 4px;
+}
+.tile-move:hover { background: var(--accent-dim); color: var(--accent); }
+.tile-move:focus-visible { outline: 1px solid var(--accent); outline-offset: 0; opacity: 1; }
+/* A touch screen has no hover, so the buttons stay put there. */
+@media (hover: none) { .tile-moves { opacity: 1; } }
+
+/* ---------- moving a tile ---------- */
+body.dock-dragging, body.dock-dragging * { cursor: grabbing !important; user-select: none; }
+.tile-dragging { opacity: .5; }
+#dock-drop {
+  position: fixed; z-index: 70; pointer-events: none;
+  border: 2px solid var(--accent); background: rgba(77, 163, 255, .16);
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+}
+[data-theme="light"] #dock-drop { background: rgba(22, 103, 204, .12); }
+#dock-drop[hidden], #dock-ghost[hidden] { display: none; }
+.dock-drop-label {
+  font: 600 11px var(--sans); letter-spacing: .06em; text-transform: uppercase;
+  color: #fff; background: var(--accent); padding: 3px 9px; border-radius: 99px;
+}
+#dock-ghost {
+  position: fixed; z-index: 71; pointer-events: none;
+  font: 600 11px var(--sans); letter-spacing: .07em; text-transform: uppercase;
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--accent); border-radius: 5px; padding: 4px 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.4);
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
 
 .sidebar {
-  width: var(--sidebar-w, 284px); flex: none; display: flex; flex-direction: column;
-  background: var(--panel); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  background: var(--panel);
 }
 .sidebar-head { padding: 10px; border-bottom: 1px solid var(--border-soft); }
 #search {
@@ -208,15 +274,15 @@ body.resizing-col, body.resizing-row { user-select: none; }
 body.resizing-col, body.resizing-col * { cursor: col-resize !important; }
 body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 
-/* ---------- workspace ---------- */
-.workspace {
-  flex: 1; min-width: 0; display: flex; flex-direction: column;
-  background: var(--border); overflow: hidden;
-}
-.pane { background: var(--bg); min-height: 0; display: flex; flex-direction: column; }
+/* ---------- panes ---------- */
+.pane { background: var(--bg); min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 
-/* Two panes are sized by the splitters; the output pane takes what is left. */
-.prompt-pane { flex: none; height: var(--prompt-h, 196px); overflow-y: auto; padding: 14px 18px 16px; }
+/* The prompt is the one tile that scrolls as a whole, so its bar sticks to the
+   top of it rather than sitting outside the scroll. layout.js measures this
+   pane to size it to the exercise text. */
+.prompt-pane { display: block; overflow-y: auto; padding: 0; }
+.prompt-pane .tile-bar { position: sticky; top: 0; z-index: 2; }
+.prompt-body { padding: 14px 18px 16px; }
 .prompt-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; }
 .crumb { font-size: 11px; color: var(--text-mute); text-transform: uppercase; letter-spacing: .06em; }
 .crumb-ref { text-transform: none; letter-spacing: 0; opacity: .85; }
@@ -317,7 +383,7 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 .prose blockquote p { margin: 0; }
 
 /* ---------- editor ---------- */
-.editor-pane { padding: 0; flex: none; height: var(--editor-h, 300px); }
+.editor-pane { padding: 0; }
 .toolbar {
   display: flex; align-items: center; gap: 7px; padding: 8px 12px;
   border-bottom: 1px solid var(--border-soft); flex-wrap: wrap; flex: none;
@@ -410,7 +476,7 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 }
 
 /* ---------- output ---------- */
-.output-pane { flex: 1 1 0; min-height: 0; }
+.output-pane { min-height: 0; }
 .tabs { display: flex; gap: 2px; padding: 6px 10px 0; border-bottom: 1px solid var(--border-soft); overflow-x: auto; }
 .tab {
   border: 0; background: transparent; color: var(--text-mute); cursor: pointer;
@@ -419,6 +485,8 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 }
 .tab:hover { color: var(--text); }
 .tab-on { color: var(--text); background: var(--bg-raise); }
+/* A tab being dragged into a new position in the strip. */
+.tab-dragging { opacity: .55; background: var(--accent-dim); color: var(--accent); }
 .dot { width: 7px; height: 7px; border-radius: 99px; background: var(--bad); display: inline-block; }
 .dot-good { background: var(--good); }
 .pill {
@@ -539,8 +607,6 @@ table.grid td.is-num { text-align: right; }
 }
 
 /* ---------- sandbox ---------- */
-body.sandbox .prompt-pane,
-body.sandbox #split-prompt,
 body.sandbox #btn-check,
 body.sandbox #btn-hint,
 body.sandbox #btn-solution,
@@ -549,18 +615,23 @@ body.sandbox .hints { display: none; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 1000px) {
-  .layout { flex-direction: column; height: auto; min-height: calc(100vh - 52px); width: 100%; }
+  /* Stacked: every split runs top to bottom whatever the stored tree says, the
+     tiles size to their content, and the seams have nothing left to divide --
+     layout.js also refuses to drag or move a tile below this width. */
+  .layout { display: block; height: auto; min-height: calc(100vh - 52px); width: 100%; overflow: visible; }
   body { overflow: auto; }
-  .sidebar { width: 100%; max-height: 240px; border-right: 0; border-bottom: 1px solid var(--border); }
-  /* Stacked panes size to their content, so the splitters have nothing to
-     divide -- layout.js also refuses to drag below this width. */
+  /* A block container still overflows when an item's min-content width is
+     wider than the window, so the widths are pinned explicitly. */
+  .dock-split { display: block; }
+  .dock-split, .tile { width: 100%; max-width: 100%; min-width: 0; overflow-x: clip; }
   .splitter { display: none; }
-  /* In a column flex container the cross-axis size stretches, but an item whose
-     min-content width is larger still overflows. Pin the widths explicitly. */
-  .workspace {
-    width: 100%; max-width: 100%; min-width: 0; overflow-x: clip;
-  }
-  .pane { min-width: 0; max-width: 100%; }
+  /* Nothing to rearrange while the tiles are stacked, so the handles, the move
+     buttons and the layout-reset button all go away. */
+  .tile-moves, #btn-reset-layout { display: none; }
+  /* No dragging here, so the bar must not eat a scroll gesture. */
+  .tile-bar { cursor: default; touch-action: auto; }
+  .tile { border-bottom: 1px solid var(--border); }
+  .sidebar { max-height: 280px; }
   .prompt-pane, .editor-pane, .output-pane { flex: none; height: auto; }
   .editor-wrap { height: 216px; flex: none; }
   .hints, .solution { max-height: none; }

@@ -3,13 +3,13 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js?v=20260917-solution';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260917-solution';
-import * as activity from './activity.js?v=20260917-solution';
-import * as beacon from './beacon.js?v=20260917-solution';
-import * as layout from './layout.js?v=20260917-solution';
-import * as tabletip from './tabletip.js?v=20260917-solution';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260917-solution';
+import * as engine from './engine.js?v=20260917-layout';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260917-layout';
+import * as activity from './activity.js?v=20260917-layout';
+import * as beacon from './beacon.js?v=20260917-layout';
+import * as layout from './layout.js?v=20260917-layout';
+import * as tabletip from './tabletip.js?v=20260917-layout';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260917-layout';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -28,7 +28,7 @@ function loadState() {
     solved: {}, attempted: {}, revealed: {}, drafts: {},
     hintsShown: {}, hintsHidden: {}, solutionHidden: {},
     engine: 'redshift', theme: 'dark', lineNumbers: false,
-    current: EXERCISES[0].id, layout: {},
+    current: EXERCISES[0].id, layout: {}, tabOrder: [],
   };
   try {
     return { ...base, ...JSON.parse(localStorage.getItem(STORE_KEY) || '{}') };
@@ -1154,6 +1154,17 @@ function wire() {
 
   $$('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
 
+  // The tabs can be dragged into whatever order you read them in.
+  layout.initTabs({
+    saved: state.tabOrder,
+    onReorder: (order) => { state.tabOrder = order; saveState(); },
+  });
+
+  $('#btn-reset-layout').addEventListener('click', () => {
+    layout.reset();
+    layout.resetTabs();
+  });
+
   document.addEventListener('keydown', (e) => {
     const mod = e.metaKey || e.ctrlKey;
     if (mod && e.key === 'Enter') {
@@ -1226,7 +1237,7 @@ function wire() {
 
   layout.init({
     saved: state.layout,
-    onResize: (sizes) => { state.layout = sizes; saveState(); },
+    onLayout: (arrangement) => { state.layout = arrangement; saveState(); },
   });
 
   wire();
