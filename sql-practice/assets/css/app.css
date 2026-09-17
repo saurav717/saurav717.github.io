@@ -376,6 +376,15 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
   border-bottom: 1px dashed var(--border-soft); font-size: 13px;
 }
 .hint:last-child { border-bottom: 0; }
+.hints-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding-bottom: 2px;
+}
+.hints-title {
+  color: var(--text-mute); font: 11px var(--mono);
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.btn-mini { padding: 2px 8px; font-size: 12px; }
 .hint-n { color: var(--warn); font: 11px var(--mono); flex: none; padding-top: 2px; }
 
 /* ---------- output ---------- */
