@@ -26,7 +26,8 @@ let sandbox = false;
 function loadState() {
   const base = {
     solved: {}, attempted: {}, revealed: {}, drafts: {},
-    hintsShown: {}, hintsHidden: {}, engine: 'redshift', theme: 'dark', lineNumbers: false,
+    hintsShown: {}, hintsHidden: {}, solutionHidden: {},
+    engine: 'redshift', theme: 'dark', lineNumbers: false,
     current: EXERCISES[0].id, layout: {},
   };
   try {
@@ -468,6 +469,7 @@ function renderExercise() {
 
   setEditor(state.drafts[ex.id] ?? '');
   renderHints();
+  renderSolution();
   renderDialect();
   $('#tab-feedback').innerHTML = '<p class="placeholder">Run Check answer to compare your result against the reference.</p>';
   $('#feedback-dot').hidden = true;
@@ -523,6 +525,40 @@ function renderHints() {
   tabletip.annotate(box, (n) => tableDocs.has(n));
   btn.textContent = shown >= total ? 'No more hints' : `Hint (${shown}/${total})`;
   btn.disabled = shown >= total;
+}
+
+/**
+ * The reference solution is read-only text under the editor, not editor
+ * content: revealing it never overwrites what the user wrote, and the toolbar
+ * button toggles the box, so a solution can be put away again. Whether it has
+ * ever been revealed (state.revealed) is separate from whether the box is open
+ * right now (state.solutionHidden) -- the "solution seen" badge stays.
+ */
+function renderSolution() {
+  const ex = currentExercise();
+  const box = $('#solution');
+  const btn = $('#btn-solution');
+  const open = !!state.revealed[ex.id] && !state.solutionHidden[ex.id];
+
+  if (!open) {
+    box.hidden = true;
+    box.innerHTML = '';
+    btn.textContent = 'Show solution';
+    return;
+  }
+
+  box.hidden = false;
+  box.innerHTML =
+    `<div class="solution-head">` +
+      `<span class="solution-title">Reference solution</span>` +
+      `<span class="solution-actions">` +
+        `<button type="button" id="btn-solution-copy" class="btn btn-ghost btn-mini" ` +
+          `title="Put this solution in the editor, replacing what is there">Copy to editor</button>` +
+        `<button type="button" id="btn-solution-hide" class="btn btn-ghost btn-mini">Hide</button>` +
+      `</span>` +
+    `</div>` +
+    `<pre class="solution-code"><code>${highlightSQL(ex.solution)}</code></pre>`;
+  btn.textContent = 'Hide solution';
 }
 
 function renderDialect() {
@@ -1016,16 +1052,43 @@ function wire() {
 
   $('#btn-solution').addEventListener('click', () => {
     const ex = currentExercise();
-    if (!state.solved[ex.id] && !state.revealed[ex.id]) {
-      const ok = confirm('Show the reference solution?\n\nThis marks the exercise as "solution seen" so you know to come back to it.');
-      if (!ok) return;
+    const open = !!state.revealed[ex.id] && !state.solutionHidden[ex.id];
+    if (open) {
+      state.solutionHidden[ex.id] = true;
+    } else {
+      if (!state.solved[ex.id] && !state.revealed[ex.id]) {
+        const ok = confirm('Show the reference solution?\n\nThis marks the exercise as "solution seen" so you know to come back to it.');
+        if (!ok) return;
+      }
       state.revealed[ex.id] = true;
+      delete state.solutionHidden[ex.id];
     }
+    saveState();
+    renderSolution();
+    layout.refresh();
+    renderExerciseBadge();
+    renderSidebar();
+  });
+
+  // Both buttons live inside the box, which renderSolution rebuilds.
+  $('#solution').addEventListener('click', (e) => {
+    const ex = currentExercise();
+    if (e.target.closest('#btn-solution-hide')) {
+      state.solutionHidden[ex.id] = true;
+      saveState();
+      renderSolution();
+      layout.refresh();
+      return;
+    }
+    if (!e.target.closest('#btn-solution-copy')) return;
+    // Only this button touches the editor, and never silently over a draft.
+    const draft = editor.value;
+    if (draft.trim() && draft !== ex.solution &&
+        !confirm('Replace what is in the editor with the reference solution?\n\nYour own query will be lost.')) return;
     setEditor(ex.solution);
     state.drafts[ex.id] = ex.solution;
     saveState();
-    renderExerciseBadge();
-    renderSidebar();
+    editor.focus();
   });
 
   // Through replaceRange, not setEditor: emptying the editor by accident and
