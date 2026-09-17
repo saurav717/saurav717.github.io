@@ -129,6 +129,10 @@ body {
 .btn-ghost { background: transparent; color: var(--text-dim); }
 .btn-ghost:hover { color: var(--text); }
 .btn-icon { padding: 6px 9px; }
+/* A toggle button that is currently on -- reads like the filter chips. */
+.btn-on, .btn-ghost.btn-on {
+  background: var(--accent-dim); border-color: var(--accent); color: var(--accent);
+}
 .btn kbd {
   font: 11px var(--mono); opacity: .75; border: 1px solid currentColor;
   border-radius: 3px; padding: 0 3px; line-height: 1.4;
@@ -327,6 +331,23 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
   position: absolute; inset: 0; margin: 0; padding: 12px 14px;
   font: 13px/1.6 var(--mono); tab-size: 2;
   white-space: pre; overflow: auto; border: 0;
+}
+
+/* Line numbers. An opaque column pinned to the left edge: it follows the
+   editor's vertical scroll but never its horizontal one, so a long line
+   slides underneath the numbers instead of pushing them off. Width is in
+   `ch` of the same mono font, so 100 lines widen it by exactly one digit. */
+.editor-gutter {
+  position: absolute; top: 0; bottom: 0; left: 0; z-index: 3;
+  width: calc(var(--gutter-digits, 2) * 1ch + 20px);
+  padding: 12px 8px 12px 0; overflow: hidden;
+  font: 13px/1.6 var(--mono); text-align: right; white-space: pre;
+  color: var(--text-mute); background: var(--bg-sunk);
+  border-right: 1px solid var(--border-soft);
+  pointer-events: none; user-select: none; -webkit-user-select: none;
+}
+.editor-wrap.with-gutter .editor-layer {
+  padding-left: calc(var(--gutter-digits, 2) * 1ch + 32px);
 }
 #editor-highlight { pointer-events: none; color: var(--text); background: var(--bg); z-index: 1; }
 .editor-input {

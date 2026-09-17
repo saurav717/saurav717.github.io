@@ -26,7 +26,7 @@ let sandbox = false;
 function loadState() {
   const base = {
     solved: {}, attempted: {}, revealed: {}, drafts: {},
-    hintsShown: {}, engine: 'redshift', theme: 'dark',
+    hintsShown: {}, engine: 'redshift', theme: 'dark', lineNumbers: false,
     current: EXERCISES[0].id, layout: {},
   };
   try {
@@ -130,6 +130,100 @@ function highlightSQL(code) {
 // ---------------------------------------------------------------------------
 const editor = $('#editor');
 const highlightLayer = $('#editor-highlight');
+const editorWrap = $('.editor-wrap');
+const gutter = $('#editor-gutter');
+const gutterLines = $('#editor-gutter-lines');
+
+/** One indent level. The stylesheet's tab-size matches it. */
+const INDENT = '  ';
+/** One level of leading whitespace: a tab, or up to INDENT.length spaces. */
+const ONE_LEVEL = new RegExp(`^(?:\\t| {1,${INDENT.length}})`);
+
+/**
+ * Replace [from, to) with `text`, then leave the selection at [selA, selB).
+ *
+ * Every edit this module makes to the editor goes through here, because it
+ * routes through execCommand('insertText') -- the only way to change a
+ * textarea that leaves the browser's own undo stack intact. Assigning to
+ * `editor.value` wipes that stack, which is how pressing Tab over a selected
+ * query used to eat it with no way back.
+ */
+function replaceRange(from, to, text, selA, selB) {
+  editor.focus();
+  editor.setSelectionRange(from, to);
+  let ok = false;
+  try {
+    ok = text === ''
+      ? document.execCommand('delete')
+      : document.execCommand('insertText', false, text);
+  } catch { ok = false; }
+  if (!ok) {
+    // Very old or locked-down browsers only: the edit still lands, but this
+    // one will not be undoable.
+    const v = editor.value;
+    editor.value = v.slice(0, from) + text + v.slice(to);
+    editor.dispatchEvent(new Event('input'));
+  }
+  editor.setSelectionRange(selA, selB);
+  paintEditor();
+}
+
+/** Offset of the start of the line `pos` sits on. */
+const lineStart = (value, pos) => value.lastIndexOf('\n', pos - 1) + 1;
+
+/**
+ * The whole lines the current selection touches. A selection that ends exactly
+ * on a line break stops at the end of the previous line, so selecting three
+ * lines by dragging down does not quietly drag in a fourth.
+ */
+function selectedLines() {
+  const { value, selectionStart: a, selectionEnd: b } = editor;
+  const from = lineStart(value, a);
+  const tail = b > a && value[b - 1] === '\n' ? b - 1 : b;
+  let to = value.indexOf('\n', tail);
+  if (to === -1) to = value.length;
+  return { from, to };
+}
+
+/**
+ * Tab and Shift+Tab. A selection spanning more than one line is indented or
+ * dedented as a block -- never replaced, which is what used to delete the
+ * whole query after ⌘A. Inside a single line, Tab pads to the next tab stop
+ * and Shift+Tab takes one indent level off that line.
+ */
+function indentSelection(dedent) {
+  const { value, selectionStart: a, selectionEnd: b } = editor;
+  const { from, to } = selectedLines();
+  const multiLine = value.slice(a, b).includes('\n');
+
+  if (!multiLine && !dedent) {
+    // Pad to the tab stop rather than always two, so Tab lines columns up.
+    const pad = INDENT.length - ((a - from) % INDENT.length);
+    replaceRange(a, b, ' '.repeat(pad), a + pad, a + pad);
+    return;
+  }
+
+  const lines = value.slice(from, to).split('\n');
+  let firstShift = 0, shiftAll = 0;
+  const out = lines.map((line, i) => {
+    let next = line;
+    if (dedent) {
+      const lead = ONE_LEVEL.exec(line);
+      if (lead) next = line.slice(lead[0].length);
+    } else if (line !== '') {
+      next = INDENT + line;               // no trailing space on blank lines
+    }
+    const d = next.length - line.length;
+    if (i === 0) firstShift = d;
+    shiftAll += d;
+    return next;
+  });
+  if (shiftAll === 0) return;             // nothing left to dedent
+
+  const selA = multiLine ? from : Math.max(from, a + firstShift);
+  const selB = multiLine ? to + shiftAll : Math.max(selA, b + firstShift);
+  replaceRange(from, to, out.join('\n'), selA, selB);
+}
 
 /**
  * What Run acts on, Snowflake-worksheet style: the selection if there is one,
@@ -153,6 +247,33 @@ function runTarget() {
 function syncScroll() {
   highlightLayer.scrollTop = editor.scrollTop;
   highlightLayer.scrollLeft = editor.scrollLeft;
+  // The gutter scrolls vertically with the text but never horizontally, so
+  // the numbers stay put while a long line slides underneath them.
+  gutterLines.style.transform = `translateY(${-editor.scrollTop}px)`;
+}
+
+/**
+ * Redraw the line-number gutter. Widths are in `ch`, so the column grows by
+ * exactly one digit when the query passes 100 lines instead of jumping.
+ */
+function paintGutter() {
+  if (!state.lineNumbers) return;
+  const n = editor.value.split('\n').length;
+  let out = '';
+  for (let i = 1; i <= n; i++) out += `${i}\n`;
+  gutterLines.textContent = out;
+  // On the wrap, because the text layers pad themselves clear of it too.
+  editorWrap.style.setProperty('--gutter-digits', String(n).length);
+}
+
+/** Show or hide the gutter, and put the toolbar toggle in the matching state. */
+function applyLineNumbers() {
+  editorWrap.classList.toggle('with-gutter', state.lineNumbers);
+  gutter.hidden = !state.lineNumbers;
+  const btn = $('#btn-lines');
+  btn.classList.toggle('btn-on', state.lineNumbers);
+  btn.setAttribute('aria-pressed', String(state.lineNumbers));
+  if (state.lineNumbers) { paintGutter(); syncScroll(); }
 }
 
 /** Signature of the marked range, so we only repaint when it actually moves. */
@@ -169,6 +290,7 @@ function paintEditor() {
       + highlightSQL(text.slice(t.end))
     : highlightSQL(text);
   paintedTarget = t ? `${t.start}:${t.end}:${t.total}` : '';
+  paintGutter();
   syncScroll();
   renderRunTargetLabel(t);
 }
@@ -195,11 +317,7 @@ function renderRunTargetLabel(t) {
 function toggleLineComment() {
   const { value } = editor;
   const a = editor.selectionStart, b = editor.selectionEnd;
-  const from = value.lastIndexOf('\n', a - 1) + 1;
-  // A selection ending exactly at a line break must not drag in the next line.
-  const tail = b > a && value[b - 1] === '\n' ? b - 1 : b;
-  let to = value.indexOf('\n', tail);
-  if (to === -1) to = value.length;
+  const { from, to } = selectedLines();
 
   const lines = value.slice(from, to).split('\n');
   const code = lines.filter(l => l.trim());
@@ -220,12 +338,9 @@ function toggleLineComment() {
   const replaced = out.join('\n');
   const shiftFirst = out[0].length - lines[0].length;
   const shiftAll   = replaced.length - (to - from);
-  editor.value = value.slice(0, from) + replaced + value.slice(to);
-  editor.selectionStart = Math.max(from, a + shiftFirst);
-  editor.selectionEnd   = a === b
-    ? editor.selectionStart
-    : Math.max(editor.selectionStart, b + shiftAll);
-  editor.dispatchEvent(new Event('input'));
+  const selA = Math.max(from, a + shiftFirst);
+  const selB = a === b ? selA : Math.max(selA, b + shiftAll);
+  replaceRange(from, to, replaced, selA, selB);
 }
 
 editor.addEventListener('input', () => {
@@ -245,10 +360,7 @@ document.addEventListener('selectionchange', () => {
 editor.addEventListener('keydown', (e) => {
   if (e.key === 'Tab') {
     e.preventDefault();
-    const { selectionStart: a, selectionEnd: b, value } = editor;
-    editor.value = value.slice(0, a) + '  ' + value.slice(b);
-    editor.selectionStart = editor.selectionEnd = a + 2;
-    editor.dispatchEvent(new Event('input'));
+    indentSelection(e.shiftKey);
     return;
   }
   // ⌘/ (Ctrl+/ elsewhere). e.code, because on some layouts the modifier
@@ -881,7 +993,19 @@ function wire() {
     renderSidebar();
   });
 
-  $('#btn-clear').addEventListener('click', () => { setEditor(''); editor.focus(); });
+  // Through replaceRange, not setEditor: emptying the editor by accident and
+  // having ⌘Z do nothing is the same trap Tab used to be.
+  $('#btn-clear').addEventListener('click', () => {
+    if (editor.value) replaceRange(0, editor.value.length, '', 0, 0);
+    editor.focus();
+  });
+
+  $('#btn-lines').addEventListener('click', () => {
+    state.lineNumbers = !state.lineNumbers;
+    saveState();
+    applyLineNumbers();
+  });
+  applyLineNumbers();
 
   $('#btn-sandbox').addEventListener('click', () => {
     sandbox = !sandbox;
