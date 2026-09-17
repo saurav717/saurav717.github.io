@@ -26,7 +26,7 @@ let sandbox = false;
 function loadState() {
   const base = {
     solved: {}, attempted: {}, revealed: {}, drafts: {},
-    hintsShown: {}, engine: 'redshift', theme: 'dark', lineNumbers: false,
+    hintsShown: {}, hintsHidden: {}, engine: 'redshift', theme: 'dark', lineNumbers: false,
     current: EXERCISES[0].id, layout: {},
   };
   try {
@@ -489,18 +489,40 @@ function renderTables() {
   tabletip.annotate($('#ex-prompt'), (n) => tableDocs.has(n));
 }
 
+/**
+ * Hints have three states: none revealed yet, revealed and on screen, and
+ * revealed but collapsed. Collapsing keeps the count, so hiding and showing
+ * again never costs another hint -- the toolbar button re-opens the box
+ * instead of revealing the next one.
+ */
 function renderHints() {
   const ex = currentExercise();
   const shown = state.hintsShown[ex.id] || 0;
+  const total = ex.hints.length;
+  const collapsed = !!state.hintsHidden[ex.id];
   const box = $('#hints');
-  if (!shown) { box.hidden = true; box.innerHTML = ''; return; }
+  const btn = $('#btn-hint');
+
+  if (!shown || collapsed) {
+    box.hidden = true;
+    box.innerHTML = '';
+    btn.textContent = shown ? `Show hints (${shown}/${total})` : 'Hint';
+    btn.disabled = !shown && total === 0;
+    return;
+  }
+
   box.hidden = false;
-  box.innerHTML = ex.hints.slice(0, shown)
-    .map((h, i) => `<div class="hint"><span class="hint-n">${i + 1}</span><span>${markdown(h).replace(/^<p>|<\/p>$/g, '')}</span></div>`)
-    .join('');
+  box.innerHTML =
+    `<div class="hints-head">` +
+      `<span class="hints-title">Hints ${shown}/${total}</span>` +
+      `<button type="button" id="btn-hint-hide" class="btn btn-ghost btn-mini">Hide</button>` +
+    `</div>` +
+    ex.hints.slice(0, shown)
+      .map((h, i) => `<div class="hint"><span class="hint-n">${i + 1}</span><span>${markdown(h).replace(/^<p>|<\/p>$/g, '')}</span></div>`)
+      .join('');
   tabletip.annotate(box, (n) => tableDocs.has(n));
-  $('#btn-hint').textContent = shown >= ex.hints.length ? 'No more hints' : `Hint (${shown}/${ex.hints.length})`;
-  $('#btn-hint').disabled = shown >= ex.hints.length;
+  btn.textContent = shown >= total ? 'No more hints' : `Hint (${shown}/${total})`;
+  btn.disabled = shown >= total;
 }
 
 function renderDialect() {
@@ -973,8 +995,21 @@ function wire() {
   $('#btn-hint').addEventListener('click', () => {
     const ex = currentExercise();
     const shown = state.hintsShown[ex.id] || 0;
-    if (shown >= ex.hints.length) return;
-    state.hintsShown[ex.id] = shown + 1;
+    // Hidden hints come back first; only an open box reveals the next one.
+    if (shown && state.hintsHidden[ex.id]) {
+      delete state.hintsHidden[ex.id];
+    } else {
+      if (shown >= ex.hints.length) return;
+      state.hintsShown[ex.id] = shown + 1;
+    }
+    saveState();
+    renderHints();
+  });
+
+  // The Hide button lives inside the box, which renderHints rebuilds.
+  $('#hints').addEventListener('click', (e) => {
+    if (!e.target.closest('#btn-hint-hide')) return;
+    state.hintsHidden[currentExercise().id] = true;
     saveState();
     renderHints();
   });
