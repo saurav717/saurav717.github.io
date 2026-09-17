@@ -15,7 +15,7 @@
 //  -- so `npm run serve` and a plain checkout never phone anywhere.
 // ===========================================================================
 
-import { deviceId } from './activity.js';
+import { deviceId } from './activity.js?v=20260917-solution';
 
 /** Endpoint from <meta name="collector-endpoint">, or '' when unconfigured. */
 function endpoint() {

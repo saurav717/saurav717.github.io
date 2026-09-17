@@ -3,13 +3,13 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js';
-import * as activity from './activity.js';
-import * as beacon from './beacon.js';
-import * as layout from './layout.js';
-import * as tabletip from './tabletip.js';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js';
+import * as engine from './engine.js?v=20260917-solution';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260917-solution';
+import * as activity from './activity.js?v=20260917-solution';
+import * as beacon from './beacon.js?v=20260917-solution';
+import * as layout from './layout.js?v=20260917-solution';
+import * as tabletip from './tabletip.js?v=20260917-solution';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260917-solution';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
