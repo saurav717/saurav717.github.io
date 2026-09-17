@@ -101,13 +101,16 @@
         <button id="btn-hint"     class="btn btn-ghost">Hint</button>
         <button id="btn-solution" class="btn btn-ghost">Show solution</button>
         <button id="btn-clear"    class="btn btn-ghost" title="Clear the editor">Clear</button>
+        <button id="btn-lines"    class="btn btn-ghost btn-icon" aria-pressed="false"
+                title="Show or hide line numbers">#</button>
       </div>
 
       <div class="editor-wrap">
+        <div id="editor-gutter" class="editor-gutter" aria-hidden="true" hidden><div id="editor-gutter-lines"></div></div>
         <pre id="editor-highlight" class="editor-layer" aria-hidden="true"></pre>
         <textarea id="editor" class="editor-layer editor-input" spellcheck="false"
                   autocomplete="off" autocapitalize="off" autocorrect="off"
-                  placeholder="Write your query here. ⌘↵ runs the statement at the cursor, ⌘⇧↵ checks it, ⌘/ comments a line."></textarea>
+                  placeholder="Write your query here. ⌘↵ runs the statement at the cursor, ⌘⇧↵ checks it, ⌘/ comments a line, Tab / ⇧Tab indents."></textarea>
       </div>
 
       <div id="hints" class="hints" hidden></div>
