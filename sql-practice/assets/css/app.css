@@ -387,6 +387,28 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 .btn-mini { padding: 2px 8px; font-size: 12px; }
 .hint-n { color: var(--warn); font: 11px var(--mono); flex: none; padding-top: 2px; }
 
+/* The reference solution sits beside the editor, never inside it, so opening
+   it leaves whatever the user wrote untouched. */
+.solution {
+  padding: 10px 14px 14px; border-top: 1px solid var(--border-soft);
+  /* 40%, not the hint box's 45%: with both open the editor keeps its room. */
+  flex: none; max-height: 40%; overflow-y: auto;
+}
+.solution-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding-bottom: 6px;
+}
+.solution-title {
+  color: var(--text-mute); font: 11px var(--mono);
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.solution-actions { display: flex; gap: 6px; }
+.solution-code {
+  margin: 0; padding: 10px 12px; border: 1px solid var(--border-soft);
+  border-radius: var(--radius); background: var(--bg-raise);
+  overflow-x: auto; white-space: pre; font: 12.5px/1.5 var(--mono);
+}
+
 /* ---------- output ---------- */
 .output-pane { flex: 1 1 0; min-height: 0; }
 .tabs { display: flex; gap: 2px; padding: 6px 10px 0; border-bottom: 1px solid var(--border-soft); overflow-x: auto; }
@@ -522,6 +544,7 @@ body.sandbox #split-prompt,
 body.sandbox #btn-check,
 body.sandbox #btn-hint,
 body.sandbox #btn-solution,
+body.sandbox .solution,
 body.sandbox .hints { display: none; }
 
 /* ---------- responsive ---------- */
@@ -540,7 +563,7 @@ body.sandbox .hints { display: none; }
   .pane { min-width: 0; max-width: 100%; }
   .prompt-pane, .editor-pane, .output-pane { flex: none; height: auto; }
   .editor-wrap { height: 216px; flex: none; }
-  .hints { max-height: none; }
+  .hints, .solution { max-height: none; }
   .toolbar { overflow-x: auto; }
   .prose pre, .prose blockquote { max-width: 100%; }
   .prompt-head { flex-wrap: wrap; }
