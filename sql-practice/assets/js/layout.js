@@ -22,7 +22,7 @@
 const STACK_WIDTH = 1000;
 
 /** Splitter thickness. Must match `.split-col` / `.split-row` in the CSS. */
-const BAR = 5;
+const BAR = 10;
 
 /** Keyboard resize step for a focused splitter. */
 const STEP = 16;
@@ -81,8 +81,26 @@ const stacked = () => window.innerWidth <= STACK_WIDTH;
  * exactly the layout this site has always had.
  */
 const hidden = new Set(['assistant']);
+
+/**
+ * Tiles that have been lifted out of the tree into a window of their own.
+ * float.js positions those; all this module has to do is stop reserving room
+ * for them -- a floating tile is `position: fixed`, so it is out of flow and
+ * the split it came from should close over the gap as if it were hidden. The
+ * one difference from `hidden` is that it must stay *displayed*.
+ */
+const floatingSet = new Set();
+
+const tileFloating = (pane) => floatingSet.has(pane);
 const tileHidden = (pane) =>
-  hidden.has(pane) || (pane === 'prompt' && document.body.classList.contains('sandbox'));
+  hidden.has(pane) || floatingSet.has(pane) ||
+  (pane === 'prompt' && document.body.classList.contains('sandbox'));
+
+/**
+ * A leaf whose tile is floating: out of flow, but still on screen. A tile
+ * that is also `hidden` is closed, and a closed window shows nothing.
+ */
+const floats = (n) => isLeaf(n) && tileFloating(n.pane) && !hidden.has(n.pane);
 
 /** Show or hide a tile without disturbing where it sits in the tree. */
 export function setHidden(pane, off) {
@@ -91,6 +109,16 @@ export function setHidden(pane, off) {
   apply();
 }
 export const isHidden = (pane) => hidden.has(pane);
+
+/**
+ * Lift a tile out of the tree, or put it back. The tree keeps the slot it
+ * came from, so docking it again drops it exactly where it was.
+ */
+export function setFloating(pane, lift) {
+  if (!PANES.includes(pane)) return;
+  if (lift) floatingSet.add(pane); else floatingSet.delete(pane);
+  apply();
+}
 const visible = (n) => (isLeaf(n) ? !tileHidden(n.pane) : n.children.some(visible));
 const holds = (n, pane) => (isLeaf(n) ? n.pane === pane : n.children.some((c) => holds(c, pane)));
 const leadPane = (n) => (isLeaf(n) ? n.pane : leadPane(n.children[0]));
@@ -386,7 +414,7 @@ function render() {
 function clearInline(node) {
   if (node._el) {
     node._el.style.flex = '';
-    node._el.style.display = isLeaf(node) && tileHidden(node.pane) ? 'none' : '';
+    node._el.style.display = isLeaf(node) && tileHidden(node.pane) && !floats(node) ? 'none' : '';
   }
   if (node._bar) node._bar.style.display = '';
   if (!isLeaf(node)) node.children.forEach(clearInline);
@@ -397,12 +425,12 @@ function sizeNode(node) {
   const axis = axisOf(node.dir);
   const box = axis === 'x' ? node._el.clientWidth : node._el.clientHeight;
 
-  // A seam only earns its 5px when there is a visible tile on both sides.
+  // A seam only earns its width when there is a visible tile on both sides.
   let seen = 0;
   for (const c of node.children) {
     const show = visible(c);
     if (c._bar) c._bar.style.display = show && seen ? '' : 'none';
-    if (c._el) c._el.style.display = show ? '' : 'none';
+    if (c._el) c._el.style.display = show || floats(c) ? '' : 'none';
     if (show) seen++;
   }
 
@@ -664,7 +692,7 @@ function onTileDown(e) {
   if (!bar || e.button !== 0 || stacked()) return;
   if (e.target.closest('button, a, input, select, textarea')) return;
   const pane = bar.closest('[data-tile]')?.dataset.tile;
-  if (!pane) return;
+  if (!pane || tileFloating(pane)) return;   // float.js owns that bar
   drag = { pane, id: e.pointerId, x0: e.clientX, y0: e.clientY, bar, on: false, drop: null };
   bar.setPointerCapture(e.pointerId);
 }

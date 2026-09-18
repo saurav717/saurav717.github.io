@@ -3,61 +3,149 @@
    Dark by default (you will stare at this for weeks), light available.
    ========================================================================== */
 
+/* Every surface here is glass: a translucent tint over a blurred backdrop,
+   with a hairline edge and a specular highlight along its top. So the colours
+   below come in two kinds -- the few opaque ones (text, syntax, the accent)
+   and the many translucent ones, which are deliberately alpha values rather
+   than hex so whatever the tile is floating over shows through. --wall-* is
+   the ambient light source all of that refracts: the drifting colour field
+   painted behind the whole page (see body::before). */
 :root {
-  --bg:        #0e1117;
-  --bg-raise:  #151b24;
-  --bg-sunk:   #0a0d12;
-  --panel:     #131923;
-  --border:    #232c3a;
-  --border-soft:#1b2330;
-  --text:      #dbe3ee;
-  --text-dim:  #8d9bb0;
-  --text-mute: #64718a;
-  --accent:    #4da3ff;
-  --accent-dim:#1e3a5c;
-  --good:      #3fbf7f;
-  --good-dim:  #14372a;
-  --bad:       #ff6b6b;
-  --bad-dim:   #3d1d20;
-  --warn:      #e9b949;
-  --warn-dim:  #3a2f13;
-  --kw:        #7aa2f7;
-  --fn:        #7dcfff;
-  --str:       #9ece6a;
-  --num:       #ff9e64;
-  --cmt:       #5b667d;
-  --stmt:      rgba(77,163,255,.14);
-  --radius:    8px;
+  color-scheme: dark;
+  --bg:        #05070e;
+  --bg-raise:  rgba(255,255,255,.075);
+  --bg-sunk:   rgba(3,6,13,.42);
+  --panel:     rgba(18,25,42,.55);
+  --border:    rgba(255,255,255,.14);
+  --border-soft:rgba(255,255,255,.075);
+  --text:      #e9eef8;
+  --text-dim:  #a4b1c6;
+  --text-mute: #75839b;
+  --accent:    #63b3ff;
+  --accent-hi: #a8d6ff;
+  --accent-dim:rgba(99,179,255,.20);
+  --good:      #4ede9b;
+  --good-hi:   #9df0c6;
+  --good-dim:  rgba(78,222,155,.16);
+  --bad:       #ff7b7b;
+  --bad-dim:   rgba(255,123,123,.16);
+  --warn:      #ffd166;
+  --warn-dim:  rgba(255,209,102,.16);
+  --kw:        #8fb4ff;
+  --fn:        #7fe0ff;
+  --str:       #a8e878;
+  --num:       #ffb27a;
+  --cmt:       #6b7791;
+  --stmt:      rgba(99,179,255,.16);
+
+  /* glass */
+  --glass:     rgba(18,25,42,.55);
+  --glass-2:   rgba(30,39,60,.62);
+  --chrome:    rgba(11,16,29,.58);
+  --glass-edge:rgba(255,255,255,.13);
+  --glass-hi:  rgba(255,255,255,.22);
+  --glass-shadow: 0 18px 44px rgba(0,0,0,.46), 0 2px 8px rgba(0,0,0,.30);
+  --sheen: linear-gradient(177deg, rgba(255,255,255,.085), rgba(255,255,255,.018) 130px, rgba(255,255,255,0) 300px);
+  --blur: blur(30px) saturate(180%);
+  --blur-sm: blur(14px) saturate(160%);
+  --btn:       rgba(255,255,255,.085);
+  --btn-hi:    rgba(255,255,255,.16);
+  --scroll:    rgba(255,255,255,.22);
+  --ring:      rgba(99,179,255,.55);
+
+  /* the ambient colour field the glass refracts */
+  --wall-1: rgba(72,142,255,.50);
+  --wall-2: rgba(168,104,255,.42);
+  --wall-3: rgba(0,209,196,.34);
+  --wall-4: rgba(255,106,163,.28);
+  --grain: .05;
+
+  --radius:    14px;
+  --radius-sm: 9px;
+  --radius-lg: 22px;
+  --pill:      999px;
+  --ease: cubic-bezier(.22,.8,.24,1);
+
+  /* the floating window. Its colour is a raw triple that an alpha gets
+     multiplied into -- float.js writes --win-tint on the element, and the
+     slider in the title bar moves it. */
+  --win-rgb:   18 25 42;
+  --win-edge:  255 255 255;
+  --win-edge-a: .13;
+  --win-shadow: 0 26px 70px -18px rgba(0,0,0,.80), 0 2px 10px rgba(0,0,0,.45);
+  --accent-rgb: 99 179 255;
   --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
 }
 [data-theme="light"] {
-  --bg:        #f6f7f9;
-  --bg-raise:  #ffffff;
-  --bg-sunk:   #eceef2;
-  --panel:     #ffffff;
-  --border:    #d8dde5;
-  --border-soft:#e6e9ee;
-  --text:      #1a2230;
-  --text-dim:  #55607a;
-  --text-mute: #7a8598;
-  --accent:    #1667cc;
-  --accent-dim:#d6e6ff;
-  --good:      #197f4f;
-  --good-dim:  #d8f2e4;
-  --bad:       #c0392b;
-  --bad-dim:   #fbe0dd;
-  --warn:      #9a6b00;
-  --warn-dim:  #fbeec9;
+  color-scheme: light;
+  --bg:        #e7ecf7;
+  --bg-raise:  rgba(255,255,255,.60);
+  --bg-sunk:   rgba(14,30,66,.055);
+  --panel:     rgba(255,255,255,.55);
+  --border:    rgba(18,34,70,.14);
+  --border-soft:rgba(18,34,70,.075);
+  --text:      #10192b;
+  --text-dim:  #44536e;
+  --text-mute: #6c7a92;
+  --accent:    #0a6fe8;
+  --accent-hi: #61a8ff;
+  --accent-dim:rgba(10,111,232,.13);
+  --good:      #0e7a4d;
+  --good-hi:   #35b47c;
+  --good-dim:  rgba(14,122,77,.13);
+  --bad:       #c2321f;
+  --bad-dim:   rgba(194,50,31,.11);
+  --warn:      #96680a;
+  --warn-dim:  rgba(200,140,0,.16);
   --kw:        #2f5fd0;
   --fn:        #0b7285;
   --str:       #2f7d32;
   --num:       #b34700;
   --cmt:       #7a8598;
-  --stmt:      rgba(22,103,204,.11);
+  --stmt:      rgba(10,111,232,.10);
+
+  --glass:     rgba(255,255,255,.55);
+  --glass-2:   rgba(255,255,255,.68);
+  --chrome:    rgba(255,255,255,.60);
+  --glass-edge:rgba(255,255,255,.75);
+  --glass-hi:  rgba(255,255,255,.95);
+  --glass-shadow: 0 0 0 1px rgba(24,40,82,.07), 0 16px 38px rgba(24,40,82,.14), 0 2px 8px rgba(24,40,82,.08);
+  --sheen: linear-gradient(177deg, rgba(255,255,255,.55), rgba(255,255,255,.14) 130px, rgba(255,255,255,0) 300px);
+  --btn:       rgba(255,255,255,.58);
+  --btn-hi:    rgba(255,255,255,.90);
+  --scroll:    rgba(28,44,82,.22);
+  --ring:      rgba(10,111,232,.45);
+
+  --wall-1: rgba(118,168,255,.55);
+  --wall-2: rgba(190,150,255,.45);
+  --wall-3: rgba(112,235,214,.40);
+  --wall-4: rgba(255,168,200,.40);
+  --grain: .035;
+
+  --win-rgb:   255 255 255;
+  --win-edge:  18 34 70;
+  --win-edge-a: .16;
+  --win-shadow: 0 24px 60px -20px rgba(24,40,82,.40), 0 2px 8px rgba(24,40,82,.14);
+  --accent-rgb: 10 111 232;
 }
 
 * { box-sizing: border-box; }
+
+/* Thin, translucent scrollbars: a solid gutter would cut every glass panel
+   with an opaque stripe. */
+* { scrollbar-width: thin; scrollbar-color: var(--scroll) transparent; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--scroll); border-radius: var(--pill);
+  border: 3px solid transparent; background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-mute); background-clip: content-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* One focus ring for everything, so a keyboard user can follow the glass. */
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
 
 /* The `hidden` attribute means hidden. The browser's own rule for it is a
    user-agent rule, so any author rule that sets `display` -- and half the
@@ -67,79 +155,175 @@
    already assumes. */
 [hidden] { display: none !important; }
 html, body { height: 100%; }
+/* The base colour lives on <html>, not <body>: body's background would
+   propagate to the canvas and paint over the backdrop layers below, which sit
+   at a negative z-index precisely so every backdrop-filter in the page has
+   something to refract. */
+html { background: var(--bg); }
 body {
   margin: 0;
-  background: var(--bg);
+  background: transparent;
   color: var(--text);
   font: 14px/1.5 var(--sans);
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
 
+/* ---------- the backdrop ----------
+   Four soft colour blooms, drifting slowly. Nothing reads them directly; they
+   exist to be blurred by the glass on top, which is what gives a translucent
+   panel its colour and makes moving one feel like moving a lens. The drift is
+   a transform so it stays on the compositor -- animating the gradients
+   themselves would repaint the whole viewport every frame. */
+body::before {
+  content: ''; position: fixed; inset: -14%; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(46% 54% at 17% 20%, var(--wall-1), transparent 74%),
+    radial-gradient(42% 48% at 84% 14%, var(--wall-2), transparent 74%),
+    radial-gradient(52% 58% at 74% 86%, var(--wall-3), transparent 74%),
+    radial-gradient(46% 52% at 24% 88%, var(--wall-4), transparent 74%);
+  animation: drift 48s var(--ease) infinite alternate;
+}
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(-3.5%, 2.5%, 0) scale(1.14); }
+}
+/* A film of grain over the blooms. Flat gradients behind frosted glass band
+   into visible steps; noise at a few percent hides the banding and is the
+   difference between "translucent div" and "pane of glass". */
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  opacity: var(--grain); mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 /* ---------- boot ---------- */
 .boot {
   position: fixed; inset: 0; z-index: 50;
-  display: grid; place-items: center;
-  background: var(--bg);
+  display: grid; place-items: center; padding: 20px;
+  background: transparent;
 }
-.boot-card { width: min(520px, 90vw); text-align: center; padding: 24px; }
+/* The first thing anyone sees is a slab of glass over the colour field, so the
+   material is established before a single control exists. */
+.boot-card {
+  width: min(520px, 100%); text-align: center; padding: 34px 30px 30px;
+  background: var(--sheen), var(--glass-2);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow),
+              inset 0 0 0 1px var(--glass-edge),
+              inset 0 1px 0 0 var(--glass-hi);
+  animation: rise .6s var(--ease) both;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
 .boot-card h1 { margin: 0 0 4px; font-size: 26px; letter-spacing: -0.02em; }
 .boot-sub { margin: 0 0 22px; color: var(--text-dim); }
 .boot-bar {
-  height: 4px; background: var(--bg-sunk); border-radius: 99px; overflow: hidden;
+  height: 5px; background: var(--bg-sunk); border-radius: var(--pill); overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--border-soft);
 }
 #boot-bar-fill {
-  height: 100%; width: 12%; background: var(--accent);
-  transition: width .5s ease; border-radius: 99px;
+  height: 100%; width: 12%; border-radius: var(--pill);
+  background: linear-gradient(90deg, var(--accent), var(--accent-hi));
+  box-shadow: 0 0 14px var(--ring);
+  transition: width .5s var(--ease);
 }
 .boot-status { margin: 12px 0 0; font: 12px/1.4 var(--mono); color: var(--accent); }
 .boot-note { margin: 22px 0 0; font-size: 12px; color: var(--text-mute); line-height: 1.6; }
 .boot-error { color: var(--bad); font-family: var(--mono); font-size: 12px; text-align: left;
-  background: var(--bad-dim); padding: 12px; border-radius: var(--radius); margin-top: 16px; }
+  background: var(--bad-dim); padding: 12px; border-radius: var(--radius-sm); margin-top: 16px;
+  box-shadow: inset 0 0 0 1px var(--bad-dim); }
 
 /* ---------- topbar ---------- */
+/* The chrome is a sheet of glass in its own right, and it has to sit above
+   the layout so the tiles scroll under it rather than through it. */
 .topbar {
   display: flex; align-items: center; gap: 16px;
+  position: relative; z-index: 4;
   height: 52px; padding: 0 14px;
-  background: var(--panel); border-bottom: 1px solid var(--border);
+  background: var(--chrome);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  border-bottom: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 8px 24px rgba(0,0,0,.18);
 }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: -0.01em; }
-.brand-mark { color: var(--accent); font-size: 16px; }
+.brand-mark { color: var(--accent); font-size: 16px; text-shadow: 0 0 14px var(--ring); }
 .brand-name { white-space: nowrap; }
 
 .progress-block { display: flex; align-items: center; gap: 10px; flex: 1; max-width: 340px; }
-.progress-track { flex: 1; height: 6px; background: var(--bg-sunk); border-radius: 99px; overflow: hidden; }
-#progress-fill { height: 100%; width: 0; background: var(--good); transition: width .35s ease; }
+.progress-track {
+  flex: 1; height: 6px; background: var(--bg-sunk); border-radius: var(--pill); overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+}
+#progress-fill {
+  height: 100%; width: 0; border-radius: var(--pill);
+  background: linear-gradient(90deg, var(--good), var(--good-hi));
+  box-shadow: 0 0 12px var(--good-dim);
+  transition: width .45s var(--ease);
+}
 .progress-label { font: 12px var(--mono); color: var(--text-dim); white-space: nowrap; }
 
 .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .engine-picker { display: flex; align-items: center; gap: 6px; }
 .engine-label { font-size: 12px; color: var(--text-mute); }
 #engine-select {
-  background: var(--bg-raise); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px;
-  padding: 5px 8px; font: 12px var(--sans);
+  background: var(--btn); color: var(--text);
+  border: 1px solid var(--glass-edge); border-radius: var(--pill);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+  padding: 5px 10px; font: 12px var(--sans);
 }
+#engine-select:hover { background: var(--btn-hi); }
 
 /* ---------- buttons ---------- */
+/* Every control is a glass pill: a translucent fill, a hairline, and a
+   highlight along the top edge that stands in for the light catching it. They
+   lift a little under the pointer and press back in on click -- the whole
+   affordance is that one millimetre of travel. */
 .btn {
-  border: 1px solid var(--border); background: var(--bg-raise); color: var(--text);
-  padding: 6px 11px; border-radius: 6px; font: 500 13px var(--sans);
+  border: 1px solid var(--glass-edge); background: var(--btn); color: var(--text);
+  padding: 6px 13px; border-radius: var(--pill); font: 500 13px var(--sans);
   cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
-  white-space: nowrap; transition: background .12s, border-color .12s;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 1px 2px rgba(0,0,0,.18);
+  transition: background .18s var(--ease), transform .18s var(--ease),
+              box-shadow .18s var(--ease), color .18s var(--ease);
 }
-.btn:hover  { border-color: var(--text-mute); }
-.btn:active { transform: translateY(1px); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn-primary:hover { filter: brightness(1.08); }
-.btn-accent { background: var(--good); border-color: var(--good); color: #fff; }
-.btn-accent:hover { filter: brightness(1.08); }
-.btn-ghost { background: transparent; color: var(--text-dim); }
-.btn-ghost:hover { color: var(--text); }
-.btn-icon { padding: 6px 9px; }
+.btn:hover  {
+  background: var(--btn-hi); transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 6px 16px rgba(0,0,0,.24);
+}
+.btn:active { transform: translateY(0) scale(.97); box-shadow: inset 0 1px 3px rgba(0,0,0,.28); }
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent-hi), var(--accent));
+  border-color: transparent; color: #04101f;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 4px 14px var(--accent-dim);
+}
+.btn-primary:hover {
+  background: linear-gradient(180deg, var(--accent-hi), var(--accent-hi));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 8px 22px var(--ring);
+}
+.btn-accent {
+  background: linear-gradient(180deg, var(--good-hi), var(--good));
+  border-color: transparent; color: #03180e;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 4px 14px var(--good-dim);
+}
+.btn-accent:hover {
+  background: linear-gradient(180deg, var(--good-hi), var(--good-hi));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 8px 22px var(--good-dim);
+}
+.btn-ghost {
+  background: transparent; color: var(--text-dim);
+  border-color: transparent; box-shadow: none;
+}
+.btn-ghost:hover { color: var(--text); background: var(--btn); border-color: var(--glass-edge); }
+.btn-icon { padding: 6px 10px; }
 /* A toggle button that is currently on -- reads like the filter chips. */
 .btn-on, .btn-ghost.btn-on {
   background: var(--accent-dim); border-color: var(--accent); color: var(--accent);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 2px 10px var(--accent-dim);
 }
 .btn kbd {
   font: 11px var(--mono); opacity: .75; border: 1px solid currentColor;
@@ -148,18 +332,32 @@ body {
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 
 /* ---------- layout ----------
-   The window is a tree of splits whose leaves are the four tiles. The tree
-   background is the border colour, so every seam between two tiles reads as a
-   hairline without anyone having to own a border. layout.js writes the flex
-   sizes; nothing here assumes which tile sits where. */
+   The window is a tree of splits whose leaves are the four tiles. Each tile is
+   its own floating slab of glass, so the tree itself is transparent and the
+   seams between tiles are gaps the backdrop shows through -- the splitters
+   below are those gaps. layout.js writes the flex sizes; nothing here assumes
+   which tile sits where. */
 .layout {
   display: flex; height: calc(100vh - 52px);
-  background: var(--border); overflow: hidden;
+  padding: 10px; background: transparent; overflow: hidden;
 }
 .dock-split { display: flex; min-width: 0; min-height: 0; overflow: hidden; }
 .dock-row { flex-direction: row; }
 .dock-col { flex-direction: column; }
-.tile { min-width: 0; min-height: 0; position: relative; }
+
+/* The one rule that makes the whole interface: tint, blur what is behind,
+   hairline the edge, and run a highlight along the top. --sheen is layered in
+   front of the tint rather than over the content, so it lights the panel
+   without washing out a word of text. */
+.tile {
+  min-width: 0; min-height: 0; position: relative;
+  border-radius: var(--radius); overflow: hidden;
+  background: var(--sheen), var(--glass);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  box-shadow: var(--glass-shadow),
+              inset 0 0 0 1px var(--glass-edge),
+              inset 0 1px 0 0 var(--glass-hi);
+}
 
 /* ---------- tile bars ----------
    Every tile carries the same thin bar: a grip that drags the whole tile to
@@ -167,8 +365,11 @@ body {
    the window (the keyboard path to the same thing). */
 .tile-bar {
   flex: none; display: flex; align-items: center; gap: 7px;
-  height: 24px; padding: 0 6px 0 8px;
+  height: 26px; padding: 0 6px 0 10px;
   background: var(--bg-raise); border-bottom: 1px solid var(--border-soft);
+  /* The prompt tile sticks this bar to the top of its own scroll, so it needs
+     to frost what slides under it rather than let the text through. */
+  -webkit-backdrop-filter: var(--blur-sm); backdrop-filter: var(--blur-sm);
   cursor: grab; user-select: none; touch-action: none;
 }
 .tile-bar:active { cursor: grabbing; }
@@ -185,54 +386,70 @@ body {
   padding: 3px 4px; border-radius: 4px;
 }
 .tile-move:hover { background: var(--accent-dim); color: var(--accent); }
-.tile-move:focus-visible { outline: 1px solid var(--accent); outline-offset: 0; opacity: 1; }
+.tile-move:focus-visible { opacity: 1; }
 /* A touch screen has no hover, so the buttons stay put there. */
 @media (hover: none) { .tile-moves { opacity: 1; } }
 
 /* ---------- moving a tile ---------- */
 body.dock-dragging, body.dock-dragging * { cursor: grabbing !important; user-select: none; }
 .tile-dragging { opacity: .5; }
+/* Where the tile would land: a lit pane of the same material, so the preview
+   looks like the thing it is previewing. */
 #dock-drop {
   position: fixed; z-index: 70; pointer-events: none;
-  border: 2px solid var(--accent); background: rgba(77, 163, 255, .16);
+  background: var(--accent-dim);
+  -webkit-backdrop-filter: var(--blur-sm); backdrop-filter: var(--blur-sm);
   border-radius: var(--radius);
+  box-shadow: inset 0 0 0 2px var(--accent), 0 0 40px var(--ring);
   display: flex; align-items: center; justify-content: center;
 }
-[data-theme="light"] #dock-drop { background: rgba(22, 103, 204, .12); }
 .dock-drop-label {
   font: 600 11px var(--sans); letter-spacing: .06em; text-transform: uppercase;
-  color: #fff; background: var(--accent); padding: 3px 9px; border-radius: 99px;
+  color: #04101f; background: linear-gradient(180deg, var(--accent-hi), var(--accent));
+  padding: 4px 11px; border-radius: var(--pill);
+  box-shadow: 0 4px 14px var(--ring);
 }
 #dock-ghost {
   position: fixed; z-index: 71; pointer-events: none;
   font: 600 11px var(--sans); letter-spacing: .07em; text-transform: uppercase;
-  background: var(--panel); color: var(--text);
-  border: 1px solid var(--accent); border-radius: 5px; padding: 4px 8px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.4);
+  background: var(--glass-2); color: var(--text);
+  -webkit-backdrop-filter: var(--blur-sm); backdrop-filter: var(--blur-sm);
+  border-radius: var(--pill); padding: 5px 11px;
+  box-shadow: inset 0 0 0 1px var(--accent), inset 0 1px 0 var(--glass-hi),
+              0 10px 26px rgba(0,0,0,.4);
 }
 .sr-only {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
 }
 
-.sidebar {
-  display: flex; flex-direction: column;
-  background: var(--panel);
-}
+.sidebar { display: flex; flex-direction: column; }
 .sidebar-head { padding: 10px; border-bottom: 1px solid var(--border-soft); }
+/* Fields are the inverse of the buttons: recessed into the glass, so the
+   highlight runs along the inside of the top edge instead of the outside. */
 #search {
-  width: 100%; padding: 7px 9px; border-radius: 6px;
-  border: 1px solid var(--border); background: var(--bg-sunk); color: var(--text);
+  width: 100%; padding: 8px 12px; border-radius: var(--pill);
+  border: 1px solid var(--border-soft); background: var(--bg-sunk); color: var(--text);
   font: 13px var(--sans);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.14);
+  transition: border-color .18s var(--ease), box-shadow .18s var(--ease);
 }
-#search:focus { outline: none; border-color: var(--accent); }
+#search:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.14), 0 0 0 3px var(--accent-dim);
+}
 .filter-row { display: flex; gap: 5px; margin-top: 8px; }
 .chip {
-  flex: 1; padding: 4px 6px; border-radius: 5px; cursor: pointer;
-  border: 1px solid var(--border); background: transparent; color: var(--text-mute);
-  font: 12px var(--sans);
+  flex: 1; padding: 5px 8px; border-radius: var(--pill); cursor: pointer;
+  border: 1px solid var(--glass-edge); background: var(--btn); color: var(--text-mute);
+  font: 12px var(--sans); box-shadow: inset 0 1px 0 var(--glass-hi);
+  transition: background .18s var(--ease), color .18s var(--ease);
 }
-.chip-on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+.chip:hover { background: var(--btn-hi); color: var(--text); }
+.chip-on {
+  background: var(--accent-dim); border-color: var(--accent); color: var(--accent);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 2px 10px var(--accent-dim);
+}
 
 .exercise-list { flex: 1; overflow-y: auto; padding: 6px 0 20px; }
 .track-head {
@@ -244,12 +461,23 @@ body.dock-dragging, body.dock-dragging * { cursor: grabbing !important; user-sel
 .track-source { padding: 0 12px 6px; font-size: 11px; color: var(--text-mute); opacity: .8; }
 
 .ex-item {
-  display: flex; align-items: center; gap: 8px; width: 100%;
-  padding: 6px 12px; border: 0; background: transparent; color: var(--text-dim);
-  font: 13px var(--sans); text-align: left; cursor: pointer; border-left: 2px solid transparent;
+  display: flex; align-items: center; gap: 8px; width: calc(100% - 12px);
+  margin: 1px 6px; padding: 6px 10px; border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-dim);
+  font: 13px var(--sans); text-align: left; cursor: pointer; position: relative;
+  transition: background .16s var(--ease), color .16s var(--ease);
 }
-.ex-item:hover { background: var(--bg-raise); color: var(--text); }
-.ex-item-on { background: var(--bg-raise); color: var(--text); border-left-color: var(--accent); }
+.ex-item:hover { background: var(--btn); color: var(--text); }
+.ex-item-on {
+  background: var(--accent-dim); color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), inset 0 1px 0 var(--glass-hi);
+}
+/* The selected row keeps its accent marker, now a rounded cap rather than a
+   border, because the row itself has corners. */
+.ex-item-on::before {
+  content: ''; position: absolute; left: 3px; top: 7px; bottom: 7px; width: 3px;
+  border-radius: var(--pill); background: var(--accent); box-shadow: 0 0 10px var(--ring);
+}
 .ex-state { width: 14px; flex: none; text-align: center; font-size: 11px; }
 .ex-state-done { color: var(--good); }
 .ex-state-try  { color: var(--warn); }
@@ -260,19 +488,28 @@ body.dock-dragging, body.dock-dragging * { cursor: grabbing !important; user-sel
 .sidebar-foot { padding: 8px 12px; border-top: 1px solid var(--border-soft); font-size: 11px; }
 
 /* ---------- splitters ----------
-   The hairline between two panes IS the drag handle. It is 5px of border
-   colour with a wider invisible hit area, so it reads as a seam and grabs
-   like a control. layout.js does the arithmetic. */
+   The gap between two tiles IS the drag handle: 10px of backdrop, empty until
+   you point at it, when a capsule fades in where your hand already is. Its
+   thickness must stay in step with BAR in layout.js, which does the
+   arithmetic. */
 .splitter {
-  flex: none; position: relative; background: var(--border);
+  flex: none; position: relative; background: transparent;
   border: 0; padding: 0; z-index: 3; touch-action: none;
 }
-.splitter::before {          /* a forgiving grab area around the thin line */
-  content: ''; position: absolute; inset: -3px;
+.splitter::before {          /* a forgiving grab area around the gap */
+  content: ''; position: absolute; inset: -2px;
 }
-.split-col { width: 5px; cursor: col-resize; }
-.split-row { height: 5px; cursor: row-resize; }
-.splitter:hover, .splitter:focus-visible, .splitter-on { background: var(--accent); }
+.splitter::after {           /* the capsule that appears under the pointer */
+  content: ''; position: absolute; border-radius: var(--pill);
+  background: transparent; transition: background .18s var(--ease);
+}
+.split-col { width: 10px; cursor: col-resize; }
+.split-row { height: 10px; cursor: row-resize; }
+.split-col::after { inset: 30% 3.5px; }
+.split-row::after { inset: 3.5px 30%; }
+.splitter:hover::after, .splitter:focus-visible::after, .splitter-on::after {
+  background: var(--accent); box-shadow: 0 0 12px var(--ring);
+}
 .splitter:focus-visible { outline: none; }
 
 /* While dragging, the cursor must not flicker as it crosses other elements,
@@ -281,8 +518,10 @@ body.resizing-col, body.resizing-row { user-select: none; }
 body.resizing-col, body.resizing-col * { cursor: col-resize !important; }
 body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 
-/* ---------- panes ---------- */
-.pane { background: var(--bg); min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+/* ---------- panes ----------
+   A pane is a tile, and .tile already painted the glass; anything opaque here
+   would seal it up again. */
+.pane { background: none; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 
 /* The prompt is the one tile that scrolls as a whole, so its bar sticks to the
    top of it rather than sitting outside the scroll. layout.js measures this
@@ -297,8 +536,10 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 #ex-title { margin: 3px 0 10px; font-size: 18px; letter-spacing: -0.01em; }
 .prompt-badges { display: flex; gap: 6px; flex: none; }
 .badge {
-  font: 11px var(--mono); padding: 2px 7px; border-radius: 99px;
-  border: 1px solid var(--border); color: var(--text-mute); white-space: nowrap;
+  font: 11px var(--mono); padding: 3px 9px; border-radius: var(--pill);
+  border: 1px solid var(--glass-edge); background: var(--btn);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+  color: var(--text-mute); white-space: nowrap;
 }
 .badge-done { border-color: var(--good); color: var(--good); background: var(--good-dim); }
 .badge-seen { border-color: var(--text-mute); }
@@ -318,8 +559,10 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 }
 .tbl-ref:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .tbl-chip {
-  padding: 2px 7px; border-radius: 99px; border: 1px solid var(--border);
-  border-bottom-style: solid; background: var(--bg-raise); color: var(--text-dim);
+  padding: 3px 9px; border-radius: var(--pill); border: 1px solid var(--glass-edge);
+  border-bottom-style: solid; background: var(--btn); color: var(--text-dim);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+  transition: background .18s var(--ease), border-color .18s var(--ease);
 }
 .tbl-chip:hover, .tbl-chip[aria-describedby] {
   border-color: var(--accent); color: var(--text);
@@ -328,14 +571,24 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 .prose code.tbl-ref, .hint code.tbl-ref { border-bottom: 1px dotted var(--accent); }
 .prose code.tbl-ref:hover, .hint code.tbl-ref:hover { border-color: var(--accent); color: var(--accent); }
 
+/* A hover card is glass held above the page: same material, more of it, and a
+   shadow deep enough to read as a second layer. */
 .tbl-card {
   position: fixed; z-index: 60; width: max-content;
   max-width: min(460px, calc(100vw - 16px));
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,.45);
-  padding: 10px 12px; color: var(--text-dim);
+  background: var(--sheen), var(--glass-2); border: 0;
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  border-radius: var(--radius);
+  box-shadow: var(--glass-shadow),
+              inset 0 0 0 1px var(--glass-edge),
+              inset 0 1px 0 0 var(--glass-hi);
+  padding: 12px 14px; color: var(--text-dim);
+  animation: pop .16s var(--ease) both;
 }
-[data-theme="light"] .tbl-card { box-shadow: 0 10px 28px rgba(20,30,50,.18); }
+@keyframes pop {
+  from { opacity: 0; transform: translateY(4px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
 .tip-head {
   display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
   font: 600 13px var(--mono); color: var(--text);
@@ -357,7 +610,7 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
    that clips its own text is worse than one that wraps. */
 .tip-meta { color: var(--text-mute); overflow-wrap: anywhere; }
 .tip-flag {
-  display: inline-block; margin-right: 5px; padding: 0 5px; border-radius: 99px;
+  display: inline-block; margin-right: 5px; padding: 0 6px; border-radius: var(--pill);
   font-size: 10px; border: 1px solid var(--border);
 }
 .tip-pk { color: var(--accent); border-color: var(--accent-dim); background: var(--accent-dim); }
@@ -375,16 +628,18 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 .prose li { margin-bottom: 4px; }
 .prose code {
   font: 12.5px var(--mono); background: var(--bg-sunk);
-  border: 1px solid var(--border-soft); border-radius: 4px; padding: 1px 4px; color: var(--text);
+  border: 1px solid var(--border-soft); border-radius: 5px; padding: 1px 5px; color: var(--text);
 }
 .prose pre {
-  margin: 0 0 10px; padding: 10px 12px; overflow-x: auto;
-  background: var(--bg-sunk); border: 1px solid var(--border-soft); border-radius: var(--radius);
+  margin: 0 0 10px; padding: 11px 13px; overflow-x: auto;
+  background: var(--bg-sunk); border: 1px solid var(--border-soft); border-radius: var(--radius-sm);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.12);
 }
 .prose pre code { background: none; border: 0; padding: 0; font-size: 12.5px; line-height: 1.55; }
 .prose blockquote {
-  margin: 0 0 10px; padding: 8px 12px; border-left: 3px solid var(--accent);
-  background: var(--bg-raise); border-radius: 0 var(--radius) var(--radius) 0; color: var(--text);
+  margin: 0 0 10px; padding: 9px 13px; border-left: 3px solid var(--accent);
+  background: var(--bg-raise); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
 }
 .prose blockquote p { margin: 0; }
 
@@ -405,28 +660,33 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
   white-space: pre; overflow: auto; border: 0;
 }
 
-/* Line numbers. An opaque column pinned to the left edge: it follows the
+/* Line numbers. A frosted column pinned to the left edge: it follows the
    editor's vertical scroll but never its horizontal one, so a long line
-   slides underneath the numbers instead of pushing them off. Width is in
-   `ch` of the same mono font, so 100 lines widen it by exactly one digit. */
+   slides underneath the numbers instead of pushing them off. It blurs what
+   passes beneath it rather than hiding it -- an opaque fill here would be the
+   one solid rectangle in a page made of glass. Width is in `ch` of the same
+   mono font, so 100 lines widen it by exactly one digit. */
 .editor-gutter {
   position: absolute; top: 0; bottom: 0; left: 0; z-index: 3;
   width: calc(var(--gutter-digits, 2) * 1ch + 20px);
   padding: 12px 8px 12px 0; overflow: hidden;
   font: 13px/1.6 var(--mono); text-align: right; white-space: pre;
   color: var(--text-mute); background: var(--bg-sunk);
+  -webkit-backdrop-filter: var(--blur-sm); backdrop-filter: var(--blur-sm);
   border-right: 1px solid var(--border-soft);
   pointer-events: none; user-select: none; -webkit-user-select: none;
 }
 .editor-wrap.with-gutter .editor-layer {
   padding-left: calc(var(--gutter-digits, 2) * 1ch + 32px);
 }
-#editor-highlight { pointer-events: none; color: var(--text); background: var(--bg); z-index: 1; }
+/* Transparent, not the page colour: this layer is the visible text, and an
+   opaque fill here would punch an opaque rectangle through the glass. */
+#editor-highlight { pointer-events: none; color: var(--text); background: transparent; z-index: 1; }
 .editor-input {
   z-index: 2; background: transparent; color: transparent;
   caret-color: var(--accent); resize: none;
 }
-.editor-input::selection { background: rgba(77,163,255,.28); }
+.editor-input::selection { background: var(--accent-dim); }
 .editor-input:focus { outline: none; }
 .editor-input::placeholder { color: var(--text-mute); }
 
@@ -476,28 +736,37 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 }
 .solution-actions { display: flex; gap: 6px; }
 .solution-code {
-  margin: 0; padding: 10px 12px; border: 1px solid var(--border-soft);
-  border-radius: var(--radius); background: var(--bg-raise);
+  margin: 0; padding: 11px 13px; border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm); background: var(--bg-raise);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
   overflow-x: auto; white-space: pre; font: 12.5px/1.5 var(--mono);
 }
 
 /* ---------- output ---------- */
 .output-pane { min-height: 0; }
-.tabs { display: flex; gap: 2px; padding: 6px 10px 0; border-bottom: 1px solid var(--border-soft); overflow-x: auto; }
+/* The tab strip reads as a segmented control: the selected tab is a lit pill
+   rather than a folder tab, which is the only shape that survives sitting on
+   glass. */
+.tabs { display: flex; gap: 4px; padding: 7px 10px; border-bottom: 1px solid var(--border-soft); overflow-x: auto; }
 .tab {
-  border: 0; background: transparent; color: var(--text-mute); cursor: pointer;
-  padding: 7px 11px; border-radius: 6px 6px 0 0; font: 13px var(--sans);
+  border: 1px solid transparent; background: transparent; color: var(--text-mute); cursor: pointer;
+  padding: 6px 12px; border-radius: var(--pill); font: 13px var(--sans);
   display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  transition: background .18s var(--ease), color .18s var(--ease);
 }
-.tab:hover { color: var(--text); }
-.tab-on { color: var(--text); background: var(--bg-raise); }
+.tab:hover { color: var(--text); background: var(--btn); }
+.tab-on {
+  color: var(--text); background: var(--btn-hi); border-color: var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 2px 8px rgba(0,0,0,.14);
+}
 /* A tab being dragged into a new position in the strip. */
 .tab-dragging { opacity: .55; background: var(--accent-dim); color: var(--accent); }
-.dot { width: 7px; height: 7px; border-radius: 99px; background: var(--bad); display: inline-block; }
-.dot-good { background: var(--good); }
+.dot { width: 7px; height: 7px; border-radius: var(--pill); background: var(--bad); display: inline-block;
+  box-shadow: 0 0 8px var(--bad-dim); }
+.dot-good { background: var(--good); box-shadow: 0 0 8px var(--good-dim); }
 .pill {
   font: 10px var(--mono); background: var(--warn-dim); color: var(--warn);
-  border-radius: 99px; padding: 1px 6px;
+  border-radius: var(--pill); padding: 2px 7px;
 }
 
 .tab-body { flex: 1; min-height: 0; position: relative; }
@@ -507,43 +776,54 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 .placeholder { color: var(--text-mute); font-size: 13px; padding: 6px 2px; }
 
 /* results grid */
-.grid-wrap { overflow: auto; border: 1px solid var(--border-soft); border-radius: var(--radius); }
-table.grid { border-collapse: collapse; width: 100%; font: 12.5px var(--mono); }
+.grid-wrap {
+  overflow: auto; border: 1px solid var(--border-soft); border-radius: var(--radius);
+  background: var(--bg-sunk); box-shadow: inset 0 1px 0 var(--glass-hi);
+}
+table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font: 12.5px var(--mono); }
 table.grid th, table.grid td {
-  padding: 5px 10px; text-align: left; white-space: nowrap;
+  padding: 6px 11px; text-align: left; white-space: nowrap;
   border-bottom: 1px solid var(--border-soft);
 }
+/* The header row scrolls over its own body, so it frosts what passes beneath
+   it; a translucent tint alone would let the rows read straight through. */
 table.grid th {
-  position: sticky; top: 0; background: var(--bg-raise); color: var(--text);
+  position: sticky; top: 0; background: var(--glass-2); color: var(--text);
+  -webkit-backdrop-filter: var(--blur-sm); backdrop-filter: var(--blur-sm);
   font-weight: 600; border-bottom: 1px solid var(--border); z-index: 1;
 }
 table.grid th .col-type { display: block; font: 10px var(--mono); color: var(--text-mute); font-weight: 400; }
-table.grid tbody tr:hover { background: var(--bg-raise); }
+table.grid tbody tr:hover { background: var(--btn); }
 table.grid td.is-null { color: var(--text-mute); font-style: italic; }
 table.grid td.is-num { text-align: right; }
 
 /* feedback */
-.verdict { padding: 11px 13px; border-radius: var(--radius); margin-bottom: 12px; border: 1px solid; }
+.verdict {
+  padding: 12px 14px; border-radius: var(--radius); margin-bottom: 12px; border: 1px solid;
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+  animation: pop .22s var(--ease) both;
+}
 .verdict-good { background: var(--good-dim); border-color: var(--good); color: var(--good); }
 .verdict-bad  { background: var(--bad-dim);  border-color: var(--bad);  color: var(--bad); }
 .verdict h3 { margin: 0 0 5px; font-size: 14px; }
 .verdict pre {
   margin: 6px 0 0; white-space: pre-wrap; font: 12px var(--mono);
-  color: var(--text); background: var(--bg-sunk); padding: 8px 10px; border-radius: 6px;
+  color: var(--text); background: var(--bg-sunk); padding: 9px 11px; border-radius: var(--radius-sm);
 }
 
 /* portability + dialect */
 .lint-item, .dialect-item {
   border: 1px solid var(--border-soft); border-radius: var(--radius);
-  padding: 10px 12px; margin-bottom: 9px; background: var(--bg-raise);
+  padding: 11px 13px; margin-bottom: 9px; background: var(--bg-raise);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
 }
 .lint-warn { border-left: 3px solid var(--warn); }
 .lint-info { border-left: 3px solid var(--accent); }
 .lint-head { font-weight: 600; color: var(--text); margin-bottom: 4px; }
 .lint-fix { color: var(--text-dim); font-size: 13px; }
 .lint-fix code, .dialect-body code {
-  font: 12px var(--mono); background: var(--bg-sunk); padding: 1px 4px;
-  border-radius: 4px; border: 1px solid var(--border-soft);
+  font: 12px var(--mono); background: var(--bg-sunk); padding: 1px 5px;
+  border-radius: 5px; border: 1px solid var(--border-soft);
 }
 .dialect-engine {
   font: 600 11px var(--sans); text-transform: uppercase; letter-spacing: .06em;
@@ -563,7 +843,9 @@ table.grid td.is-num { text-align: right; }
 .schema-cols { display: flex; flex-wrap: wrap; gap: 4px; }
 .schema-col {
   font: 11.5px var(--mono); background: var(--bg-raise); border: 1px solid var(--border-soft);
-  border-radius: 4px; padding: 2px 6px; color: var(--text-dim); cursor: pointer;
+  border-radius: var(--pill); padding: 3px 9px; color: var(--text-dim); cursor: pointer;
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+  transition: background .16s var(--ease), border-color .16s var(--ease), color .16s var(--ease);
 }
 .schema-col:hover { border-color: var(--accent); color: var(--text); }
 .schema-col .ct { color: var(--text-mute); opacity: .8; }
@@ -598,6 +880,7 @@ table.grid td.is-num { text-align: right; }
 .act-link {
   background: none; border: 0; padding: 0 0 0 6px; cursor: pointer;
   color: var(--accent); font: inherit; text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .act-actions { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -617,15 +900,19 @@ table.grid td.is-num { text-align: right; }
    becomes its glyph there. Both spellings ship; the media query picks one. */
 .btn-narrow { display: none; }
 
-.assistant-pane { border-left: 1px solid var(--border-soft); }
+/* The panel is a tile like any other now, so it carries no edge of its own --
+   the gap between slabs is the separation. */
+.assistant-pane { border-left: 0; }
 .chat-toolbar {
   display: flex; align-items: center; gap: 6px; flex: none;
   padding: 6px 10px; border-bottom: 1px solid var(--border-soft);
 }
 #chat-model {
-  background: var(--bg-raise); color: var(--text); border: 1px solid var(--border);
-  border-radius: 6px; padding: 4px 6px; font: 12px var(--sans); max-width: 190px;
+  background: var(--btn); color: var(--text); border: 1px solid var(--glass-edge);
+  border-radius: var(--pill); padding: 4px 10px; font: 12px var(--sans); max-width: 190px;
+  box-shadow: inset 0 1px 0 var(--glass-hi);
 }
+#chat-model:hover { background: var(--btn-hi); }
 
 .chat-settings {
   flex: none; max-height: 45%; overflow-y: auto;
@@ -654,8 +941,9 @@ p.chat-set-note { margin: 0 0 8px; }
 
 /* The card that stands in for a sign-in screen there is no way to offer. */
 .chat-card {
-  border: 1px solid var(--border); border-radius: var(--radius);
-  background: var(--bg-raise); padding: 14px 15px; font-size: 13px;
+  border: 1px solid var(--glass-edge); border-radius: var(--radius);
+  background: var(--bg-raise); padding: 15px 16px; font-size: 13px;
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 4px 16px rgba(0,0,0,.14);
 }
 .chat-card h3 { margin: 0 0 8px; font-size: 14px; }
 .chat-card p { margin: 0 0 10px; color: var(--text-dim); line-height: 1.55; }
@@ -666,15 +954,19 @@ p.chat-set-note { margin: 0 0 8px; }
 .chat-key-row { display: flex; gap: 6px; }
 #chat-key-input {
   flex: 1 1 auto; min-width: 0; background: var(--bg-sunk); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px; padding: 6px 9px;
-  font: 12px var(--mono);
+  border: 1px solid var(--border-soft); border-radius: var(--pill); padding: 7px 12px;
+  font: 12px var(--mono); box-shadow: inset 0 1px 2px rgba(0,0,0,.14);
 }
-#chat-key-input:focus { outline: none; border-color: var(--accent); }
+#chat-key-input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.14), 0 0 0 3px var(--accent-dim);
+}
 
 .chat-turn { margin: 0 0 14px; }
 .chat-user .chat-text {
-  background: var(--accent-dim); border: 1px solid var(--accent-dim);
-  border-radius: var(--radius); padding: 8px 11px; font-size: 13px;
+  background: var(--accent-dim); border: 1px solid var(--glass-edge);
+  border-radius: var(--radius); padding: 9px 12px; font-size: 13px;
+  box-shadow: inset 0 1px 0 var(--glass-hi);
   white-space: normal; overflow-wrap: anywhere;
 }
 .chat-claude .chat-text { font-size: 13.5px; line-height: 1.6; }
@@ -685,12 +977,13 @@ p.chat-set-note { margin: 0 0 8px; }
 .chat-claude li { margin: 3px 0; }
 .chat-claude code {
   font: 12px var(--mono); background: var(--bg-sunk);
-  padding: 1px 4px; border-radius: 4px;
+  padding: 1px 5px; border-radius: 5px;
 }
 .chat-claude pre {
-  position: relative; margin: 0 0 10px; padding: 9px 11px;
-  border: 1px solid var(--border-soft); border-radius: var(--radius);
-  background: var(--bg-raise); overflow-x: auto;
+  position: relative; margin: 0 0 10px; padding: 10px 12px;
+  border: 1px solid var(--border-soft); border-radius: var(--radius-sm);
+  background: var(--bg-sunk); overflow-x: auto;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.12);
   font: 12px/1.5 var(--mono);
 }
 .chat-claude pre code { background: none; padding: 0; font-size: inherit; }
@@ -698,10 +991,13 @@ p.chat-set-note { margin: 0 0 8px; }
   margin: 0 0 9px; padding: 2px 0 2px 11px;
   border-left: 2px solid var(--border); color: var(--text-dim);
 }
-/* The button only shows on hover, so it never hides the first line of SQL. */
+/* The button only shows on hover, so it never hides the first line of SQL. It
+   needs its own blur: it floats over code, not over the panel. */
 .chat-insert {
   position: absolute; top: 5px; right: 5px;
-  background: var(--bg-sunk); opacity: 0; transition: opacity .12s;
+  background: var(--glass-2); opacity: 0;
+  -webkit-backdrop-filter: var(--blur-sm); backdrop-filter: var(--blur-sm);
+  transition: opacity .16s var(--ease);
 }
 .chat-claude pre:hover .chat-insert, .chat-insert:focus-visible { opacity: 1; }
 @media (hover: none) { .chat-insert { opacity: 1; } }
@@ -726,12 +1022,197 @@ p.chat-set-note { margin: 0 0 8px; }
 #chat-input {
   flex: 1 1 auto; min-width: 0; resize: none; overflow-y: auto;
   background: var(--bg-sunk); color: var(--text);
-  border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 8px 10px; font: 13px/1.5 var(--sans);
+  border: 1px solid var(--border-soft); border-radius: var(--radius);
+  padding: 9px 12px; font: 13px/1.5 var(--sans);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.14);
+  transition: border-color .18s var(--ease), box-shadow .18s var(--ease);
 }
-#chat-input:focus { outline: none; border-color: var(--accent); }
+#chat-input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.14), 0 0 0 3px var(--accent-dim);
+}
 #chat-input::placeholder { color: var(--text-mute); }
 #chat-input:disabled { opacity: .5; }
+
+/* ---------- Ask Claude as a floating window ----------
+   The same tile, lifted out of the layout and given a frame: it sits over the
+   workspace rather than taking room from it, it is dragged by its bar and
+   resized from any edge, and it is tinted instead of painted so the query
+   underneath stays readable.
+
+   Two knobs, and they are independent. `--win-tint` is the alpha -- float.js
+   writes it, the slider in the title bar moves it. `data-win-style` is the
+   frame: blur, radius, rim, shadow and what the title bar looks like. Every
+   style leaves the tint alone, so picking a frame never costs you the
+   transparency you had settled on. */
+
+.tile-float {
+  position: fixed; z-index: 55;
+  --win-tint: .70;
+  --win-blur: 22px;
+  --win-sat: 165%;
+  background-color: rgb(var(--win-rgb) / var(--win-tint));
+  background-image: none;
+  -webkit-backdrop-filter: blur(var(--win-blur)) saturate(var(--win-sat));
+  backdrop-filter: blur(var(--win-blur)) saturate(var(--win-sat));
+  border: 1px solid rgb(var(--win-edge) / var(--win-edge-a));
+  border-radius: var(--radius);
+  box-shadow: var(--win-shadow), inset 0 1px 0 rgb(var(--win-edge) / .07);
+  overflow: hidden;
+  transition: box-shadow .16s var(--ease), background-color .16s var(--ease);
+}
+/* An unfocused window steps back, the way an unfocused terminal does: less
+   tint, a flatter shadow, so the thing you are typing into is obvious. Only
+   the alpha changes, so a style's own background-image survives. */
+.tile-float:not(:focus-within):not(:hover) {
+  background-color: rgb(var(--win-rgb) / calc(var(--win-tint) * .82));
+  box-shadow: 0 14px 34px -16px rgba(0,0,0,.7);
+}
+/* Every surface inside has to give up its own background, or the glass is
+   glass around an opaque brick. */
+.tile-float .chat-toolbar,
+.tile-float .chat-compose { background: transparent; }
+.tile-float .chat-settings { background: rgb(var(--win-rgb) / .35); }
+.tile-float #chat-input,
+.tile-float #chat-model,
+.tile-float #chat-key-input,
+.tile-float .chat-claude pre,
+.tile-float .chat-card { background: rgb(var(--win-rgb) / .45); }
+.tile-float .chat-claude code { background: rgb(var(--win-rgb) / .5); }
+.tile-float .chat-insert { background: rgb(var(--win-rgb) / .75); }
+
+/* The bar becomes a title bar: taller, no docking arrows -- a window is moved
+   by dragging it, not by sending it to an edge. */
+.tile-float .tile-bar {
+  height: 30px;
+  background: rgb(var(--win-edge) / .045);
+  border-bottom: 1px solid rgb(var(--win-edge) / calc(var(--win-edge-a) * .8));
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.tile-float .tile-name { margin-left: 4px; }
+.tile-float .tile-moves { display: none; }
+.tile-float .win-tint, .tile-float #chat-style { display: flex; }
+
+/* ---------- window styles ----------
+   Four frames for the same window. "frosted" is the base above. */
+
+/* Clear: the Cluely end of the range -- as little glass as stays readable,
+   a wide blur doing the work instead of opacity. */
+.tile-float[data-win-style="clear"] {
+  --win-blur: 34px; --win-sat: 185%;
+  border-radius: 16px;
+  border-color: rgb(var(--win-edge) / .16);
+  box-shadow: 0 30px 80px -24px rgba(0,0,0,.8), inset 0 1px 0 rgb(var(--win-edge) / .12);
+}
+.tile-float[data-win-style="clear"] .tile-bar { background: rgb(var(--win-edge) / .03); }
+
+/* Terminal: a macOS window with transparency turned up. Little blur, mostly
+   opacity, traffic lights where your hand already expects them. */
+.tile-float[data-win-style="terminal"] {
+  --win-blur: 9px; --win-sat: 120%;
+  border-radius: 9px;
+  border-color: rgb(var(--win-edge) / .18);
+  box-shadow: 0 20px 44px -14px rgba(0,0,0,.9), 0 0 0 .5px rgba(0,0,0,.55);
+}
+.tile-float[data-win-style="terminal"] .tile-bar {
+  height: 32px; background: rgb(var(--win-edge) / .07);
+}
+.tile-float[data-win-style="terminal"] .tile-grip { display: none; }
+.tile-float[data-win-style="terminal"] .tile-name {
+  font-family: var(--mono); font-size: 11px; text-transform: none; letter-spacing: 0;
+}
+/* Decoration, not controls: the close button is the ✕ on the right, which is
+   where this app's other close buttons are. These only say "window". */
+.tile-float[data-win-style="terminal"] .tile-bar::before {
+  content: ""; flex: none; width: 38px; height: 10px; margin-left: 2px;
+  background:
+    radial-gradient(circle 5px at 5px 5px, #ff5f57 98%, transparent) 0 0/14px 10px no-repeat,
+    radial-gradient(circle 5px at 5px 5px, #febc2e 98%, transparent) 14px 0/14px 10px no-repeat,
+    radial-gradient(circle 5px at 5px 5px, #28c840 98%, transparent) 28px 0/14px 10px no-repeat;
+}
+
+/* Aurora: the same glass with the accent bled into the top corner and the
+   rim, so the window reads as Claude's rather than as the OS's. */
+.tile-float[data-win-style="aurora"] {
+  --win-blur: 26px; --win-sat: 175%;
+  border-radius: var(--radius);
+  border-color: rgb(var(--accent-rgb) / .30);
+  background-image: linear-gradient(168deg, rgb(var(--accent-rgb) / .20),
+                                    rgb(var(--accent-rgb) / .03) 46%, transparent 74%);
+  box-shadow: 0 0 0 1px rgb(var(--accent-rgb) / .10), 0 30px 76px -22px rgba(0,0,0,.80),
+              0 0 70px -28px rgb(var(--accent-rgb) / .5);
+}
+.tile-float[data-win-style="aurora"] .tile-bar {
+  background: transparent; border-bottom-color: rgb(var(--accent-rgb) / .22);
+}
+
+/* ---------- window controls ---------- */
+.win-ctl { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.assistant-pane .tile-moves { margin-left: auto; }
+.assistant-pane .win-ctl { margin-left: 4px; }
+#chat-float[aria-pressed="true"] { background: var(--accent-dim); color: var(--accent); }
+/* Docked, there is nothing behind the panel to see through and no frame to
+   restyle, so neither control is offered. */
+#chat-style { display: none; font-size: 11px; }
+
+/* The transparency slider. */
+.win-tint { display: none; align-items: center; gap: 5px; padding: 0 5px 0 2px; }
+.win-tint-mark { color: var(--text-mute); font-size: 11px; line-height: 1; }
+.win-tint input {
+  -webkit-appearance: none; appearance: none; width: 54px; height: 3px;
+  background: var(--border); border-radius: 99px; outline: none; cursor: ew-resize;
+}
+.win-tint input::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--text-dim); cursor: ew-resize;
+}
+.win-tint input::-moz-range-thumb {
+  width: 10px; height: 10px; border: 0; border-radius: 50%; background: var(--text-dim);
+}
+.win-tint input:hover::-webkit-slider-thumb { background: var(--accent); }
+.win-tint input:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
+
+/* ---------- resize grips ----------
+   Eight invisible strips over the frame. They overhang the border a little,
+   because a 1px target is a target you miss. */
+.win-grip { position: absolute; z-index: 2; }
+.win-grip-n, .win-grip-s { left: 10px; right: 10px; height: 8px; cursor: ns-resize; }
+.win-grip-e, .win-grip-w { top: 10px; bottom: 10px; width: 8px; cursor: ew-resize; }
+.win-grip-n { top: -3px; }
+.win-grip-s { bottom: -3px; }
+.win-grip-w { left: -3px; }
+.win-grip-e { right: -3px; }
+.win-grip-ne, .win-grip-nw, .win-grip-se, .win-grip-sw { width: 15px; height: 15px; }
+.win-grip-nw { top: -3px; left: -3px; cursor: nwse-resize; }
+.win-grip-se { bottom: -3px; right: -3px; cursor: nwse-resize; }
+.win-grip-ne { top: -3px; right: -3px; cursor: nesw-resize; }
+.win-grip-sw { bottom: -3px; left: -3px; cursor: nesw-resize; }
+/* The one grip worth showing: the corner you reach for. */
+.win-grip-se::after {
+  content: ""; position: absolute; right: 4px; bottom: 4px; width: 7px; height: 7px;
+  border-right: 1.5px solid var(--text-mute); border-bottom: 1.5px solid var(--text-mute);
+  border-radius: 0 0 2px 0; opacity: 0; transition: opacity .12s;
+}
+.tile-float:hover .win-grip-se::after { opacity: .5; }
+
+body.win-moving, body.win-moving * { user-select: none; }
+body.win-moving .tile-float { transition: none; }
+
+/* Without backdrop-filter the tint is just a washed-out panel, so the window
+   goes nearly solid instead -- readable everywhere, pretty where it can be. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tile-float, .tile-float:not(:focus-within):not(:hover) {
+    background-color: rgb(var(--win-rgb) / .97);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .tile-float, .tile-float:not(:focus-within):not(:hover) {
+    background-color: rgb(var(--win-rgb) / .98);
+    background-image: none;
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+}
 
 /* ---------- sandbox ---------- */
 body.sandbox #btn-check,
@@ -745,22 +1226,40 @@ body.sandbox .hints { display: none; }
   /* Stacked: every split runs top to bottom whatever the stored tree says, the
      tiles size to their content, and the seams have nothing left to divide --
      layout.js also refuses to drag or move a tile below this width. */
-  .layout { display: block; height: auto; min-height: calc(100vh - 52px); width: 100%; overflow: visible; }
+  .layout { display: block; height: auto; min-height: calc(100vh - 52px); width: 100%; overflow: visible; padding: 10px; }
   body { overflow: auto; }
   /* A block container still overflows when an item's min-content width is
      wider than the window, so the widths are pinned explicitly. */
   .dock-split { display: block; }
-  .dock-split, .tile { width: 100%; max-width: 100%; min-width: 0; overflow-x: clip; }
+  .dock-split, .tile { width: 100%; max-width: 100%; min-width: 0; }
+  .dock-split { overflow-x: clip; }
   .splitter { display: none; }
   /* Nothing to rearrange while the tiles are stacked, so the handles, the move
      buttons and the layout-reset button all go away. */
   .tile-moves, #btn-reset-layout { display: none; }
   /* No dragging here, so the bar must not eat a scroll gesture. */
   .tile-bar { cursor: default; touch-action: auto; }
-  .tile { border-bottom: 1px solid var(--border); }
+  /* Stacked, the slabs separate by the gap between them rather than a seam. */
+  .tile { margin-bottom: 10px; }
   .sidebar { max-height: 280px; }
   .prompt-pane, .editor-pane, .output-pane, .assistant-pane { flex: none; height: auto; }
   .assistant-pane { display: flex; }
+  /* A window needs somewhere to float. Stacked, there is no workspace behind
+     it, so it goes back to being a tile whatever the stored setting says --
+     `!important` because float.js writes the geometry inline. */
+  .tile-float {
+    position: static !important;
+    left: auto !important; top: auto !important;
+    width: 100% !important; height: auto !important;
+    border: 0 !important; border-radius: var(--radius) !important;
+    background: var(--sheen), var(--glass) !important;
+    -webkit-backdrop-filter: var(--blur) !important; backdrop-filter: var(--blur) !important;
+    box-shadow: var(--glass-shadow),
+                inset 0 0 0 1px var(--glass-edge),
+                inset 0 1px 0 0 var(--glass-hi) !important;
+  }
+  .tile-float .win-grip, .win-ctl .win-tint { display: none !important; }
+  .tile-float .tile-bar { height: 24px; }
   .chat-body { max-height: 340px; }
   .editor-wrap { height: 216px; flex: none; }
   .hints, .solution { max-height: none; }
@@ -785,4 +1284,69 @@ body.sandbox .hints { display: none; }
   #btn-assistant { padding: 6px 9px; }
   .topbar { gap: 8px; padding: 0 8px; }
   .btn kbd { display: none; }
+}
+
+/* ---------- when the material is not available ----------
+   Without backdrop-filter every tint above is just a see-through div and the
+   text lands on the colour field. Firefox shipped it long ago, but a browser
+   with it switched off has to get opaque surfaces instead -- so the fallback
+   is a second set of token values, not a second set of rules. */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  :root {
+    --glass:   rgba(13,18,31,.95);
+    --glass-2: rgba(24,32,50,.96);
+    --chrome:  rgba(10,15,26,.96);
+    --panel:   rgba(13,18,31,.95);
+    --bg-sunk: rgba(3,6,13,.85);
+  }
+  [data-theme="light"] {
+    --glass:   rgba(252,253,255,.95);
+    --glass-2: rgba(255,255,255,.97);
+    --chrome:  rgba(252,253,255,.96);
+    --panel:   rgba(252,253,255,.95);
+    --bg-sunk: rgba(14,30,66,.06);
+  }
+}
+
+/* ---------- reduced transparency ----------
+   The floating window already answers this setting; the rest of the page owes
+   the same answer. Someone who has asked their OS to stop things showing
+   through each other should not have to read a query through four colour
+   blooms, so the glass goes opaque and the backdrop goes away -- the layout,
+   the radii and the highlights all stay. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass:   rgb(13 18 31);
+    --glass-2: rgb(24 32 50);
+    --chrome:  rgb(10 15 26);
+    --panel:   rgb(13 18 31);
+    --bg-sunk: rgb(6 10 19);
+    --sheen:   none;
+  }
+  [data-theme="light"] {
+    --glass:   rgb(252 253 255);
+    --glass-2: rgb(255 255 255);
+    --chrome:  rgb(252 253 255);
+    --panel:   rgb(252 253 255);
+    --bg-sunk: rgb(238 241 247);
+    --sheen:   none;
+  }
+  body::before, body::after { display: none; }
+  .tile, .topbar, .boot-card, .tbl-card, .tile-bar, table.grid th,
+  .editor-gutter, .chat-insert, #dock-drop, #dock-ghost {
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  }
+}
+
+/* ---------- reduced motion ----------
+   The drifting backdrop is decoration; the lift on a button is feedback. This
+   stops the first and shortens the second rather than removing both. */
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  .boot-card, .tbl-card, .verdict { animation: none; }
+  .btn:hover { transform: none; }
+  *, *::before, *::after {
+    transition-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
