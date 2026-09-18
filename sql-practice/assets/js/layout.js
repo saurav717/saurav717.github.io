@@ -22,7 +22,7 @@
 const STACK_WIDTH = 1000;
 
 /** Splitter thickness. Must match `.split-col` / `.split-row` in the CSS. */
-const BAR = 5;
+const BAR = 10;
 
 /** Keyboard resize step for a focused splitter. */
 const STEP = 16;
@@ -397,7 +397,7 @@ function sizeNode(node) {
   const axis = axisOf(node.dir);
   const box = axis === 'x' ? node._el.clientWidth : node._el.clientHeight;
 
-  // A seam only earns its 5px when there is a visible tile on both sides.
+  // A seam only earns its width when there is a visible tile on both sides.
   let seen = 0;
   for (const c of node.children) {
     const show = visible(c);
