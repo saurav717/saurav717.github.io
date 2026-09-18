@@ -396,9 +396,12 @@ function wireInserts(scope) {
 
 function renderThread({ keepScroll = false } = {}) {
   if (!el.body) return;
-  const atBottom = keepScroll
-    ? el.body.scrollHeight - el.body.scrollTop - el.body.clientHeight < 40
-    : true;
+  // Follow a streaming answer down, but never scroll a thread that has
+  // nothing in it: the key card is taller than the panel, and landing on its
+  // last line hides the heading that explains what it is asking for.
+  const atBottom = turns.length
+    ? (keepScroll ? el.body.scrollHeight - el.body.scrollTop - el.body.clientHeight < 40 : true)
+    : false;
 
   const mode = authMode();
   el.body.innerHTML =
