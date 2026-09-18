@@ -13,8 +13,8 @@
      api.anthropic.com and no API key is kept in the browser. Empty here so a
      local checkout reaches nobody. See proxy/README.md. -->
 <meta name="claude-endpoint" content="">
-<meta name="build" content="20260918-claude-panel">
-<link rel="stylesheet" href="assets/css/app.css?v=20260918-claude-panel">
+<meta name="build" content="20260918-claude-window">
+<link rel="stylesheet" href="assets/css/app.css?v=20260918-claude-window">
 </head>
 <body>
 
@@ -194,6 +194,25 @@
                 title="Move the Claude panel to the right edge"
                 aria-label="Move the Claude panel to the right edge">→</button>
       </span>
+      <!-- Window controls. The float toggle and the close button are always
+           here; the transparency slider and the style button only mean
+           anything once the panel is a window, so the stylesheet reveals
+           those two then. app.js sets the slider from the stored value at
+           boot -- the one below is only what an unvisited browser starts at. -->
+      <span class="win-ctl">
+        <label class="win-tint" title="Window transparency">
+          <span class="win-tint-mark" aria-hidden="true">◐</span>
+          <input type="range" id="chat-tint" min="25" max="100" step="5" value="70"
+                 aria-label="Window transparency">
+        </label>
+        <button type="button" id="chat-style" class="tile-move"
+                title="Window style" aria-label="Window style">◆</button>
+        <button type="button" id="chat-float" class="tile-move" aria-pressed="false"
+                title="Float this panel as a window over the workspace"
+                aria-label="Float this panel as a window over the workspace">⧉</button>
+        <button type="button" id="chat-close" class="tile-move"
+                title="Close Ask Claude" aria-label="Close Ask Claude">✕</button>
+      </span>
     </div>
 
     <div class="chat-toolbar">
@@ -263,6 +282,6 @@
 
 </main>
 
-<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260918-claude-panel"></script>
+<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260918-claude-window"></script>
 </body>
 </html>
