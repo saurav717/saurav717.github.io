@@ -58,6 +58,14 @@
 }
 
 * { box-sizing: border-box; }
+
+/* The `hidden` attribute means hidden. The browser's own rule for it is a
+   user-agent rule, so any author rule that sets `display` -- and half the
+   things below do, to be a flex row or an inline-block dot -- silently wins
+   and the element shows through `hidden` anyway. This puts the attribute back
+   in charge, which is what every line of JS setting `el.hidden = true`
+   already assumes. */
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body {
   margin: 0;
@@ -191,7 +199,6 @@ body.dock-dragging, body.dock-dragging * { cursor: grabbing !important; user-sel
   display: flex; align-items: center; justify-content: center;
 }
 [data-theme="light"] #dock-drop { background: rgba(22, 103, 204, .12); }
-#dock-drop[hidden], #dock-ghost[hidden] { display: none; }
 .dock-drop-label {
   font: 600 11px var(--sans); letter-spacing: .06em; text-transform: uppercase;
   color: #fff; background: var(--accent); padding: 3px 9px; border-radius: 99px;
@@ -329,7 +336,6 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
   padding: 10px 12px; color: var(--text-dim);
 }
 [data-theme="light"] .tbl-card { box-shadow: 0 10px 28px rgba(20,30,50,.18); }
-.tbl-card[hidden] { display: none; }
 .tip-head {
   display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
   font: 600 13px var(--mono); color: var(--text);
