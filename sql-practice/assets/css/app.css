@@ -380,6 +380,16 @@ body::after {
 }
 .tile-moves { margin-left: auto; display: flex; gap: 1px; opacity: 0; transition: opacity .12s; }
 .tile-bar:hover .tile-moves, .tile-moves:focus-within { opacity: 1; }
+/* Expand is not a rearranging control, so unlike the move arrows it is always
+   there: it is how you read a wide result or a long prompt, and hunting for a
+   button that only appears on hover is exactly the wrong moment to do that.
+   It stays in the stacked layout too, where there are no seams and this is
+   the only way to give a pane the screen. */
+.tile-zoomer { display: flex; margin-left: 2px; }
+.tile-zoom > .tile-bar .tile-move[data-zoom] { background: var(--accent-dim); color: var(--accent); }
+/* A floating window is already out of the layout -- there is nothing behind
+   it left to fill. It zooms with a double-click on its own bar instead. */
+.tile-float .tile-zoomer { display: none; }
 .tile-move {
   border: 0; background: transparent; color: var(--text-mute);
   font: 12px var(--sans); line-height: 1; cursor: pointer;
@@ -931,6 +941,9 @@ table.grid td.is-num { text-align: right; }
 .chat-set-row input { margin: 0; accent-color: var(--accent); }
 .chat-set-note { grid-column: 2; color: var(--text-mute); font-size: 11.5px; line-height: 1.45; }
 p.chat-set-note { margin: 0 0 8px; }
+/* The sentence under a heading, not the note beside a checkbox: it is not in
+   the row grid, so it keeps the full width rather than the second column. */
+.chat-set-lede { grid-column: auto; margin-bottom: 10px; }
 
 .chat-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 12px 12px 4px; }
 
@@ -1237,6 +1250,8 @@ body.sandbox .hints { display: none; }
   /* Nothing to rearrange while the tiles are stacked, so the handles, the move
      buttons and the layout-reset button all go away. */
   .tile-moves, #btn-reset-layout { display: none; }
+  /* Expand survives, though: stacked is where a pane most needs the screen. */
+  .tile-zoomer { display: flex; margin-left: auto; }
   /* No dragging here, so the bar must not eat a scroll gesture. */
   .tile-bar { cursor: default; touch-action: auto; }
   /* Stacked, the slabs separate by the gap between them rather than a seam. */

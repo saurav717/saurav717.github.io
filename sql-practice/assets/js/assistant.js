@@ -58,7 +58,19 @@ How to help:
   nobody -- but do not lead with it.
 - The learner picks a target dialect (Redshift, Snowflake, BigQuery, Postgres). Queries
   run on DuckDB regardless, so when the two differ, say which is which.
-- You cannot run queries or see anything the learner has not shared below.`;
+
+What you can see:
+- Each message carries a <screen> block holding what is on the learner's screen at that
+  moment: the exercise, the hints they have uncovered, the SQL in the editor and where
+  their caret is, the rows the last query returned, what Check answer said, and the
+  portability and dialect tabs. It is re-read for every message, so trust the newest one
+  and ignore earlier copies — the editor and the results will have moved on.
+- Read it before asking. If the answer is already on their screen, use it rather than
+  asking them to paste it back to you.
+- You still cannot run queries yourself, and a switch under ⚙ can withhold any part of
+  that block. If something you need is genuinely not there, say which part is missing.
+- If the reference solution appears, they revealed it themselves — you may discuss it
+  freely. If it does not appear, they have not, so coach rather than hand it over.`;
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -95,7 +107,15 @@ let memKey = '';               // set when localStorage is unavailable
 let prefs = loadPrefs();
 
 function loadPrefs() {
-  const base = { model: DEFAULT_MODEL, context: { schema: true, exercise: true, editor: true, result: true } };
+  const base = {
+    model: DEFAULT_MODEL,
+    // All on: the point of the panel is not having to paste the screen into
+    // it. Anyone who wants less can say so under ⚙, and that choice sticks.
+    context: {
+      schema: true, exercise: true, editor: true, result: true,
+      hints: true, feedback: true, lint: true, dialect: true, recent: true,
+    },
+  };
   try {
     const saved = JSON.parse(localStorage.getItem(PREFS_STORE) || '{}');
     return { ...base, ...saved, context: { ...base.context, ...(saved.context || {}) } };
@@ -151,38 +171,88 @@ async function anthropic() {
 // Context
 // ---------------------------------------------------------------------------
 
+/** An XML-ish tag with attributes, skipped entirely when the body is empty. */
+function tag(name, body, attrs = {}) {
+  const text = String(body ?? '').trim();
+  if (!text) return '';
+  const a = Object.entries(attrs)
+    .filter(([, v]) => v !== null && v !== undefined && v !== '')
+    .map(([k, v]) => ` ${k}="${String(v).replace(/"/g, "'")}"`).join('');
+  return `<${name}${a}>\n${text}\n</${name}>`;
+}
+
 /**
- * Turn whatever the page knows right now into the text block that leads the
- * request. Each part is here only if the matching switch is on, so a learner
- * who does not want their draft leaving the machine can turn it off and it
- * is simply never assembled.
+ * Everything on the screen, as the text block that leads a request.
+ *
+ * The rule this follows is the one a person sitting next to the learner would
+ * follow: look at the screen, then answer. So the exercise, the hints already
+ * uncovered, the query being written, the rows that came back, what Check
+ * said and what the portability tab is warning about all go in together --
+ * and they go in *fresh on every message*, not once at the top of the
+ * conversation, because "why did that fail?" is about the run that just
+ * happened, not the state of the page ten minutes ago.
+ *
+ * Each part is here only if the matching switch is on, so a learner who does
+ * not want their draft leaving the machine can turn it off and it is simply
+ * never assembled.
  */
 function contextBlock(ctx) {
   const on = prefs.context;
   const parts = [];
+  const seen = (name) => (ctx.activeTab === name ? 'yes' : 'no');
 
   if (on.schema && ctx.schema?.length) {
     const tables = ctx.schema.map(t => {
       const cols = t.columns.map(c => `    ${c.name} ${c.type}${c.note ? `  -- ${c.note}` : ''}`).join('\n');
       return `  ${t.name}${t.rowCount === null ? '' : ` (${t.rowCount.toLocaleString()} rows)`}\n${cols}`;
     }).join('\n');
-    parts.push(`<schema engine="DuckDB">\n${tables}\n</schema>`);
+    parts.push(tag('schema', tables, { engine: 'DuckDB' }));
   }
   if (ctx.targetEngine) {
     parts.push(`<target_dialect>${ctx.targetEngine}</target_dialect>`);
   }
-  if (on.exercise && ctx.exercise) {
-    parts.push(`<exercise id="${ctx.exercise.id}" title="${ctx.exercise.title}">\n${ctx.exercise.prompt}\n</exercise>`);
+
+  const ex = ctx.exercise;
+  if (on.exercise && ex) {
+    parts.push(tag('exercise', ex.prompt, {
+      id: ex.id, title: ex.title, track: ex.track,
+      difficulty: ex.difficulty, status: ex.status,
+      order_matters: ex.ordered === undefined ? '' : String(!!ex.ordered),
+    }));
+    if (on.hints && ex.hints?.length) {
+      parts.push(tag('hints_already_revealed',
+        ex.hints.map((h, i) => `${i + 1}. ${h}`).join('\n'),
+        { remaining: ex.hintsLeft }));
+    }
+    if (on.hints && ex.solution) {
+      parts.push(tag('reference_solution', ex.solution,
+        { note: 'the learner has revealed this already' }));
+    }
   } else if (ctx.sandbox) {
     parts.push('<mode>Sandbox: free-form SQL, no exercise in progress.</mode>');
   }
-  if (on.editor && ctx.editor?.trim()) {
-    parts.push(`<editor>\n${ctx.editor.trim()}\n</editor>`);
+
+  if (on.editor && ctx.editor) {
+    parts.push(tag('editor', ctx.editor.text,
+      { caret: ctx.editor.caret, would_run: ctx.editor.running }));
+    if (ctx.editor.selection) parts.push(tag('editor_selection', ctx.editor.selection));
   }
-  if (on.result && ctx.result) {
-    parts.push(`<last_result>\n${ctx.result}\n</last_result>`);
+
+  if (on.result) {
+    parts.push(tag('results_tab', ctx.results, { showing: seen('results'), summary: ctx.result }));
   }
-  return parts.join('\n\n');
+  if (on.feedback) parts.push(tag('feedback_tab', ctx.feedback, { showing: seen('feedback') }));
+  if (on.lint) parts.push(tag('portability_tab', ctx.lint, { showing: seen('portability') }));
+  if (on.dialect) parts.push(tag('dialect_notes_tab', ctx.dialect, { showing: seen('dialect') }));
+  if (on.result && ctx.status) parts.push(`<status_bar>${ctx.status}</status_bar>`);
+
+  if (on.recent && ctx.recent?.length) {
+    parts.push(tag('recent_runs', ctx.recent.map(r =>
+      `${r.what}: ${r.outcome}\n${String(r.sql ?? '').trim()}`).join('\n\n')));
+  }
+
+  const body = parts.filter(Boolean).join('\n\n');
+  return body ? `<screen>\n${body}\n</screen>` : '';
 }
 
 // ---------------------------------------------------------------------------
@@ -282,12 +352,20 @@ function renderSettings() {
   const mode = authMode();
   const rows = [
     ['schema', 'Warehouse schema', 'table and column names, types and notes'],
-    ['exercise', 'Current exercise', 'its title and prompt'],
-    ['editor', 'Editor contents', 'the SQL you have written'],
-    ['result', 'Last result', 'the columns, row count or error from your last run'],
+    ['exercise', 'Current exercise', 'its title, prompt and whether you have solved it'],
+    ['hints', 'Hints and solution', 'only the ones you have already revealed'],
+    ['editor', 'Editor contents', 'the SQL you have written, and where your caret is'],
+    ['result', 'Results tab', 'the rows that came back, or the error, and the status line'],
+    ['feedback', 'Feedback tab', 'what Check answer said about your query'],
+    ['lint', 'Portability tab', 'what will not run on your target engine'],
+    ['dialect', 'Dialect notes tab', 'how this answer is spelled on other warehouses'],
+    ['recent', 'Recent runs', 'the last few queries you ran, and how they went'],
   ];
   el.settings.innerHTML =
-    `<div class="chat-set-title">Send with each message</div>` +
+    `<div class="chat-set-title">What Claude sees on your screen</div>` +
+    `<p class="chat-set-note chat-set-lede">Read fresh every time you send, so you never
+      have to paste your query or your results in. Turn off anything you would rather
+      keep to yourself.</p>` +
     rows.map(([k, label, note]) => `
       <label class="chat-set-row" title="${esc(note)}">
         <input type="checkbox" data-ctx="${k}"${prefs.context[k] ? ' checked' : ''}>
@@ -351,13 +429,15 @@ function emptyState() {
     ? ['What does <code>QUALIFY</code> do, and which engines have it?',
        'Write a query that finds gaps in a daily series.',
        'How do I pivot rows into columns here?']
-    : ['Why is my window frame returning the wrong running total?',
-       'Explain the difference between <code>ROWS</code> and <code>RANGE</code>.',
-       'What is wrong with the query in my editor?'];
+    : ['Why did that fail?',
+       'Is this the right join for what the prompt is asking?',
+       'Why are my numbers off by one row?'];
   return `
     <div class="chat-empty">
-      <p>Ask about the exercise, the schema, or the SQL in your editor. Claude sees whatever
-         you have switched on under ⚙ — nothing else.</p>
+      <p>Just ask — Claude reads your screen first. The exercise, your query, the rows
+         that came back and what Check answer said all go along with the question, so
+         there is nothing to paste. The ⚙ menu says exactly what that means, and lets
+         you hold anything back.</p>
       <ul>${ideas.map(i => `<li>${i}</li>`).join('')}</ul>
     </div>`;
 }
@@ -473,16 +553,21 @@ async function send() {
     const ctx = deps.context?.() ?? {};
     const model = MODELS.find(m => m.id === prefs.model) ?? MODELS[0];
 
-    // The context block leads the first user turn only: it is the biggest
-    // thing in the request, and re-stating a schema that has not changed on
-    // every turn would spend tokens to say the same thing again.
+    // The screen block leads the *newest* user turn, not the first one.
+    //
+    // It used to lead the first, to avoid re-sending a schema that had not
+    // changed -- but the schema is the only part of it that does not change.
+    // The editor, the grid and the verdict move with every run, and a block
+    // pinned to the first turn meant the second question was answered against
+    // a screen the learner had left behind. One copy per request either way;
+    // this way it is the current one.
     const block = contextBlock(ctx);
-    const messages = turns
-      .filter(t => t.role === 'user' || t.content)
-      .map((t, i) => ({
-        role: t.role,
-        content: i === 0 && t.role === 'user' && block ? `${block}\n\n${t.content}` : t.content,
-      }));
+    const sent = turns.filter(t => t.role === 'user' || t.content);
+    const newest = sent.map(t => t.role).lastIndexOf('user');
+    const messages = sent.map((t, i) => ({
+      role: t.role,
+      content: i === newest && block ? `${block}\n\n${t.content}` : t.content,
+    }));
 
     live = api.messages.stream({
       model: model.id,

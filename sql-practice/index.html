@@ -13,8 +13,8 @@
      api.anthropic.com and no API key is kept in the browser. Empty here so a
      local checkout reaches nobody. See proxy/README.md. -->
 <meta name="claude-endpoint" content="">
-<meta name="build" content="20260918-glass-window">
-<link rel="stylesheet" href="assets/css/app.css?v=20260918-glass-window">
+<meta name="build" content="20260918-screen-context">
+<link rel="stylesheet" href="assets/css/app.css?v=20260918-screen-context">
 </head>
 <body>
 
@@ -79,6 +79,10 @@
                 title="Move the exercise list to the right edge"
                 aria-label="Move the exercise list to the right edge">→</button>
       </span>
+      <span class="tile-zoomer">
+        <button type="button" class="tile-move" data-zoom aria-pressed="false"
+                title="Expand this panel to fill the workspace">⤢</button>
+      </span>
     </div>
     <div class="sidebar-head">
       <input id="search" type="search" placeholder="Filter exercises…" autocomplete="off">
@@ -111,6 +115,10 @@
         <button type="button" class="tile-move" data-move="right"
                 title="Move the exercise prompt to the right edge"
                 aria-label="Move the exercise prompt to the right edge">→</button>
+      </span>
+      <span class="tile-zoomer">
+        <button type="button" class="tile-move" data-zoom aria-pressed="false"
+                title="Expand this panel to fill the workspace">⤢</button>
       </span>
     </div>
     <div class="prompt-body">
@@ -147,6 +155,10 @@
                 title="Move the editor to the right edge"
                 aria-label="Move the editor to the right edge">→</button>
       </span>
+      <span class="tile-zoomer">
+        <button type="button" class="tile-move" data-zoom aria-pressed="false"
+                title="Expand this panel to fill the workspace">⤢</button>
+      </span>
     </div>
     <div class="toolbar">
       <button id="btn-run" class="btn btn-primary"
@@ -177,7 +189,7 @@
 
 
   <article class="pane tile assistant-pane" data-tile="assistant">
-    <div class="tile-bar" title="Drag to move this panel; drop it against any edge">
+    <div class="tile-bar" title="Drag to move this window · ⌘ + an arrow throws it at an edge · ⌘⇧ + an arrow nudges it · double-click to zoom">
       <span class="tile-grip" aria-hidden="true">⠿</span>
       <span class="tile-name">Ask Claude</span>
       <span class="tile-moves">
@@ -193,6 +205,10 @@
         <button type="button" class="tile-move" data-move="right"
                 title="Move the Claude panel to the right edge"
                 aria-label="Move the Claude panel to the right edge">→</button>
+      </span>
+      <span class="tile-zoomer">
+        <button type="button" class="tile-move" data-zoom aria-pressed="false"
+                title="Expand this panel to fill the workspace">⤢</button>
       </span>
       <!-- Window controls. The float toggle and the close button are always
            here; the transparency slider and the style button only mean
@@ -255,6 +271,10 @@
                 title="Move the results panel to the right edge"
                 aria-label="Move the results panel to the right edge">→</button>
       </span>
+      <span class="tile-zoomer">
+        <button type="button" class="tile-move" data-zoom aria-pressed="false"
+                title="Expand this panel to fill the workspace">⤢</button>
+      </span>
     </div>
     <div class="tabs" id="tabs" title="Drag a tab sideways to reorder it">
       <button class="tab tab-on" data-tab="results">Results</button>
@@ -282,6 +302,6 @@
 
 </main>
 
-<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260918-glass-window"></script>
+<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260918-screen-context"></script>
 </body>
 </html>

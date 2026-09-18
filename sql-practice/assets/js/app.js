@@ -3,21 +3,26 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js?v=20260918-glass-window';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260918-glass-window';
-import * as activity from './activity.js?v=20260918-glass-window';
-import * as beacon from './beacon.js?v=20260918-glass-window';
-import * as layout from './layout.js?v=20260918-glass-window';
-import * as win from './float.js?v=20260918-glass-window';
-import * as assistant from './assistant.js?v=20260918-glass-window';
-import * as tabletip from './tabletip.js?v=20260918-glass-window';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260918-glass-window';
+import * as engine from './engine.js?v=20260918-screen-context';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260918-screen-context';
+import * as activity from './activity.js?v=20260918-screen-context';
+import * as beacon from './beacon.js?v=20260918-screen-context';
+import * as layout from './layout.js?v=20260918-screen-context';
+import * as win from './float.js?v=20260918-screen-context';
+import * as assistant from './assistant.js?v=20260918-screen-context';
+import * as tabletip from './tabletip.js?v=20260918-screen-context';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260918-screen-context';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 
 const STORE_KEY = 'sqlpractice.v1';
 const DIFF_LABEL = { 1: 'warm-up', 2: 'core', 3: 'hard', 4: 'interview-grade' };
+
+/** Arrow keys that drive the Claude window, and the edge each one means. */
+const WINDOW_KEYS = {
+  ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
+};
 
 const state = loadState();
 let schemaCache = null;
@@ -612,6 +617,7 @@ async function runSql(sql, note = '') {
       $('#tab-results').innerHTML = '<p class="placeholder">Statement executed. It returned no result set.</p>';
       schemaCache = null;
       lastRun = `Statement executed in ${ms.toFixed(0)} ms; no result set.`;
+      noteRun({ what: note || 'Run', sql, outcome: lastRun });
       setStatus(`Executed in ${ms.toFixed(0)} ms`, right('sandbox'));
       logActivity({ sql, action: 'run', rowCount: null, ms });
       return { ok: true, ms };
@@ -620,6 +626,7 @@ async function runSql(sql, note = '') {
     renderGrid(res);
     lastRun = `${res.rowCount.toLocaleString()} rows, ${res.columns.length} columns `
       + `(${res.columns.map((c, i) => `${c} ${res.types[i] || ''}`.trim()).join(', ')}) in ${res.ms.toFixed(0)} ms.`;
+    noteRun({ what: note || 'Run', sql, outcome: lastRun });
     setStatus(`${res.rowCount.toLocaleString()} rows in ${res.ms.toFixed(0)} ms`,
               right(`${res.columns.length} columns`));
     logActivity({ sql, action: 'run', rowCount: res.rowCount, ms: res.ms });
@@ -630,6 +637,7 @@ async function runSql(sql, note = '') {
       + `<pre>${esc(e.message ?? e)}</pre></div>`;
     setStatus('Query failed', note, true);
     lastRun = `The query failed: ${String(e.message ?? e)}`;
+    noteRun({ what: note || 'Run', sql, outcome: lastRun });
     return { ok: false, ms: 0 };
   }
 }
@@ -681,6 +689,12 @@ async function doCheck() {
   } catch (e) {
     verdict = { pass: false, reason: 'error', detail: String(e.message ?? e) };
   }
+
+  noteRun({
+    what: 'Check answer',
+    sql,
+    outcome: verdict.pass ? 'Correct.' : `Not correct (${verdict.reason}): ${verdict.detail}`,
+  });
 
   // verdict.got is only set when the user's query executed. A query that
   // errored never ran successfully, so it is not a submission worth logging.
@@ -809,6 +823,78 @@ async function ensureSchema() {
   return schemaCache;
 }
 
+// ---------------------------------------------------------------------------
+// What is on the screen
+// ---------------------------------------------------------------------------
+//
+// The Claude panel used to be handed four things: the schema, the exercise
+// prompt, the editor text and a one-line summary of the last run. Everything
+// else on the page -- the rows that came back, what Check actually said, the
+// portability warnings, the hints already revealed -- had to be pasted in by
+// hand, which is the one thing nobody wants to do while debugging a query.
+//
+// So this reads the page instead. The panels that hold prose are read as
+// rendered text, because that is literally what is on the screen and it
+// cannot drift out of step with the markup the way a second copy would; the
+// results grid is read as a grid, because its shape is the answer. Every
+// section is capped: a 5,000-row result is not context, it is a bill.
+
+/** Caps, in characters, per section. Generous enough to be useful, bounded. */
+const CAP = { panel: 3000, prompt: 2500, editor: 6000, cell: 60 };
+
+/** The first `n` characters, and an honest note about what was left out. */
+function cut(text, n) {
+  const s = String(text ?? '');
+  return s.length <= n ? s : `${s.slice(0, n)}\n… (${s.length - n} more characters on screen)`;
+}
+
+/** A rendered panel as the text a reader sees, blank lines collapsed. */
+function panelText(sel, cap = CAP.panel) {
+  const el = $(sel);
+  if (!el || el.hidden) return '';
+  const text = (el.innerText || '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  return text ? cut(text, cap) : '';
+}
+
+/**
+ * The results grid as a grid. `innerText` on a table runs the columns
+ * together, and the whole question is usually which column holds what -- so
+ * the header, its types and the first rows are pulled out cell by cell.
+ */
+function gridText(sel, maxRows = 15) {
+  const table = $(sel)?.querySelector('table.grid');
+  if (!table) return '';
+  const cells = (row) => [...row.cells];
+  const head = cells(table.tHead?.rows[0] ?? { cells: [] }).map(th => {
+    const type = th.querySelector('.col-type')?.textContent.trim() ?? '';
+    const name = th.textContent.slice(0, th.textContent.length - type.length).trim();
+    return type ? `${name} ${type}` : name;
+  });
+  const body = [...(table.tBodies[0]?.rows ?? [])];
+  const rows = body.slice(0, maxRows)
+    .map(r => cells(r).map(td => cut(td.textContent.trim().replace(/\s+/g, ' '), CAP.cell)).join(' | '));
+  const more = body.length > maxRows ? `\n… ${body.length - maxRows} more rows on screen` : '';
+  return `${head.join(' | ')}\n${head.map(() => '---').join(' | ')}\n${rows.join('\n')}${more}`;
+}
+
+/** Where the caret is, in the terms an error message would use. */
+function caretPosition() {
+  const upTo = editor.value.slice(0, editor.selectionStart);
+  const line = upTo.split('\n');
+  return `line ${line.length}, column ${line[line.length - 1].length + 1}`;
+}
+
+/**
+ * The last few queries this session ran, kept here rather than read out of
+ * activity.js: that log is off by default and carries a device id and a
+ * location, none of which belongs in a chat message.
+ */
+const recentRuns = [];
+function noteRun(entry) {
+  recentRuns.push(entry);
+  if (recentRuns.length > 5) recentRuns.shift();
+}
+
 /**
  * Everything the Claude panel is allowed to know about the page, gathered
  * fresh for each message. It picks which of these to actually send; this
@@ -816,13 +902,49 @@ async function ensureSchema() {
  */
 function assistantContext() {
   const ex = sandbox ? null : currentExercise();
+  const shown = ex ? (state.hintsShown[ex.id] || 0) : 0;
+  const target = runTarget();
+  const solutionOpen = !!(ex && state.revealed[ex.id] && !state.solutionHidden[ex.id]);
+
   return {
     sandbox,
     targetEngine: ENGINE_LABELS[state.engine] ?? state.engine,
     schema: [...tableDocs.values()],
-    exercise: ex && { id: ex.id, title: ex.title, prompt: ex.prompt },
-    editor: editor.value,
+    exercise: ex && {
+      id: ex.id,
+      title: ex.title,
+      prompt: cut(ex.prompt, CAP.prompt),
+      track: TRACKS.find(t => t.id === ex.track)?.name ?? ex.track,
+      difficulty: `L${ex.diff} ${DIFF_LABEL[ex.diff]}`,
+      status: { done: 'solved', try: 'attempted, not yet correct',
+                seen: 'solution revealed', todo: 'not started' }[exerciseStatus(ex.id)],
+      ordered: ex.ordered,
+      // The hints they have actually uncovered, so Claude picks up where the
+      // hints left off instead of repeating hint 1 at someone on hint 3.
+      hints: ex.hints.slice(0, shown),
+      hintsLeft: Math.max(0, ex.hints.length - shown),
+      // Only once they have chosen to see it. Before that it is the answer,
+      // and handing it over unasked is the one thing the panel must not do.
+      solution: solutionOpen ? ex.solution : null,
+    },
+    editor: {
+      text: cut(editor.value, CAP.editor),
+      caret: caretPosition(),
+      // Which statement ⌘↵ would run: on a worksheet with four queries in it,
+      // "the query" is ambiguous and this is the disambiguation.
+      running: target ? (target.label || 'the only statement') : 'nothing yet',
+      selection: editor.selectionEnd > editor.selectionStart
+        ? cut(editor.value.slice(editor.selectionStart, editor.selectionEnd), 1200) : '',
+    },
     result: lastRun,
+    results: gridText('#tab-results') || panelText('#tab-results'),
+    feedback: panelText('#tab-feedback'),
+    lint: panelText('#tab-portability'),
+    dialect: panelText('#tab-dialect'),
+    status: [$('#status-left')?.textContent, $('#status-right')?.textContent]
+      .filter(Boolean).join(' · '),
+    activeTab: $('.tab.tab-on')?.dataset.tab ?? '',
+    recent: recentRuns.slice(),
   };
 }
 
@@ -1281,12 +1403,40 @@ function wire() {
       e.preventDefault();
       setAssistantOpen(!state.assistantOpen);
     }
+    // Move the window with the arrow keys, the way every tiling helper on
+    // every desktop does it: ⌘ + an arrow throws it at that edge, pressing
+    // the same arrow again cycles half / a third / two thirds, and ⌘⇧ + an
+    // arrow slides it a little instead.
+    //
+    // ⌥ is excluded because ⌘⌥↑/↓ already walks the exercise list, and the
+    // editor keeps its own arrows because ⌘←/⌘→ is caret movement there and
+    // nothing is worth breaking that for. Everywhere else -- the chat box,
+    // the thread, the results, a page with nothing focused -- the window
+    // moves.
+    const side = WINDOW_KEYS[e.key];
+    if (mod && !e.altKey && side && state.assistantOpen && win.isOn()
+        && document.activeElement !== editor) {
+      const said = e.shiftKey ? win.nudge(side) : win.snap(side);
+      if (said) {
+        e.preventDefault();
+        layout.announce(said);
+      }
+    }
     // Escape gives the editor back. From inside the window, or from a page
     // where nothing holds focus at all -- clicking the thread to read it
     // leaves focus on the body, and that still counts as being in there. It
     // must not fire while something else is focused, which is what makes it
     // safe to claim the key.
     const idle = !document.activeElement || document.activeElement === document.body;
+    // Escape unwinds one thing at a time, outermost first: an expanded pane
+    // is the biggest change to the screen, so it is the first thing given
+    // back. Only once the layout is whole again does Escape close the window.
+    if (e.key === 'Escape' && !e.metaKey && !e.ctrlKey && layout.zoomedPane()
+        && document.activeElement !== editor) {
+      e.preventDefault();
+      layout.unzoom();
+      return;
+    }
     if (e.key === 'Escape' && state.assistantOpen &&
         (idle || $('[data-tile="assistant"]')?.contains(document.activeElement))) {
       e.preventDefault();
