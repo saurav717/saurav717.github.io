@@ -3,14 +3,15 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js?v=20260918-glass';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260918-glass';
-import * as activity from './activity.js?v=20260918-glass';
-import * as beacon from './beacon.js?v=20260918-glass';
-import * as layout from './layout.js?v=20260918-glass';
-import * as assistant from './assistant.js?v=20260918-glass';
-import * as tabletip from './tabletip.js?v=20260918-glass';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260918-glass';
+import * as engine from './engine.js?v=20260918-glass-window';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260918-glass-window';
+import * as activity from './activity.js?v=20260918-glass-window';
+import * as beacon from './beacon.js?v=20260918-glass-window';
+import * as layout from './layout.js?v=20260918-glass-window';
+import * as win from './float.js?v=20260918-glass-window';
+import * as assistant from './assistant.js?v=20260918-glass-window';
+import * as tabletip from './tabletip.js?v=20260918-glass-window';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260918-glass-window';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -31,6 +32,10 @@ function loadState() {
     hintsShown: {}, hintsHidden: {}, solutionHidden: {},
     engine: 'redshift', theme: 'dark', lineNumbers: false,
     current: EXERCISES[0].id, layout: {}, tabOrder: [], assistantOpen: false,
+    // The Claude panel remembers whether it was a window, where that window
+    // sat and how far you could see through it.
+    assistantFloat: true, assistantRect: null, assistantTint: 0.70,
+    assistantWinStyle: 'frosted',
   };
   try {
     return { ...base, ...JSON.parse(localStorage.getItem(STORE_KEY) || '{}') };
@@ -1048,6 +1053,33 @@ function setAssistantOpen(open) {
   }
 }
 
+/** Keep the style button saying which frame the window is wearing. */
+function labelWinStyle(style) {
+  const btn = $('#chat-style');
+  btn.title = `Window style: ${style.label} — click for the next one`;
+  btn.setAttribute('aria-label', btn.title);
+}
+
+/**
+ * Float the Claude panel as a window over the workspace, or dock it back into
+ * the layout. Floating is the default: the answer belongs on top of the query
+ * it is about, not in a column that squeezes it. The tile keeps its slot in
+ * the tree either way, so docking puts it back exactly where it was.
+ */
+function setAssistantFloat(floating) {
+  state.assistantFloat = !!floating;
+  saveState();
+  win.setOn(state.assistantFloat);
+  layout.setFloating('assistant', state.assistantFloat);
+  const btn = $('#chat-float');
+  btn.setAttribute('aria-pressed', String(state.assistantFloat));
+  btn.textContent = state.assistantFloat ? '⊟' : '⧉';
+  btn.title = state.assistantFloat
+    ? 'Dock this window back into the layout'
+    : 'Float this panel as a window over the workspace';
+  btn.setAttribute('aria-label', btn.title);
+}
+
 // ---------------------------------------------------------------------------
 // Wiring
 // ---------------------------------------------------------------------------
@@ -1139,6 +1171,23 @@ function wire() {
     setAssistantOpen(!state.assistantOpen);
   });
 
+  $('#chat-float').addEventListener('click', () => setAssistantFloat(!state.assistantFloat));
+  $('#chat-close').addEventListener('click', () => setAssistantOpen(false));
+
+  const tintInput = $('#chat-tint');
+  tintInput.addEventListener('input', () => win.setTint(Number(tintInput.value) / 100));
+  // A double-click on the slider is the fastest way back to a legible window.
+  tintInput.addEventListener('dblclick', () => {
+    win.setTint(0.70);
+    tintInput.value = '70';
+  });
+
+  $('#chat-style').addEventListener('click', () => {
+    const next = win.nextStyle();
+    tintInput.value = String(Math.round(win.getTint() * 100));
+    labelWinStyle(next);
+  });
+
   $('#btn-sandbox').addEventListener('click', () => {
     sandbox = !sandbox;
     document.body.classList.toggle('sandbox', sandbox);
@@ -1217,6 +1266,33 @@ function wire() {
       const n = neighborExercise(e.key === 'ArrowDown' ? 1 : -1);
       if (n) selectExercise(n.id);
     }
+    // Summon and dismiss the Claude window from anywhere: a window you can
+    // call up without reaching for the toolbar is half the point of one.
+    // ⌘\ is the one to reach for -- it is the key every other app puts its
+    // side panel on, and no browser claims it. ⌘J stays because it shipped
+    // first and someone's fingers already know it; Firefox binds Ctrl+J to
+    // its downloads panel, which is why both of these preventDefault -- a
+    // page is allowed to take that one, and does.
+    //
+    // Shift is excluded rather than ignored: ⇧\ is `|`, and a shortcut that
+    // fires on two different characters is a shortcut you trigger by accident.
+    if (mod && !e.altKey && !e.shiftKey &&
+        (e.key === '\\' || e.key === 'j' || e.key === 'J')) {
+      e.preventDefault();
+      setAssistantOpen(!state.assistantOpen);
+    }
+    // Escape gives the editor back. From inside the window, or from a page
+    // where nothing holds focus at all -- clicking the thread to read it
+    // leaves focus on the body, and that still counts as being in there. It
+    // must not fire while something else is focused, which is what makes it
+    // safe to claim the key.
+    const idle = !document.activeElement || document.activeElement === document.body;
+    if (e.key === 'Escape' && state.assistantOpen &&
+        (idle || $('[data-tile="assistant"]')?.contains(document.activeElement))) {
+      e.preventDefault();
+      setAssistantOpen(false);
+      editor.focus();
+    }
   });
 
   // sandbox drafts are kept separately from exercise drafts
@@ -1281,7 +1357,23 @@ function wire() {
     insertSql: insertFromAssistant,
   });
 
+  win.init({
+    tile: 'assistant',
+    rect: state.assistantRect,
+    tint: state.assistantTint,
+    style: state.assistantWinStyle,
+    onChange: ({ rect, tint, style }) => {
+      state.assistantRect = rect;
+      state.assistantTint = tint;
+      state.assistantWinStyle = style;
+      saveState();
+    },
+  });
+  $('#chat-tint').value = String(Math.round(win.getTint() * 100));
+  labelWinStyle(win.currentStyle());
+
   wire();
+  setAssistantFloat(state.assistantFloat);
   setAssistantOpen(state.assistantOpen);
   renderExercise();
   renderSidebar();

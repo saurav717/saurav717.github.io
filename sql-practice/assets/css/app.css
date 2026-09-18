@@ -65,6 +65,15 @@
   --radius-lg: 22px;
   --pill:      999px;
   --ease: cubic-bezier(.22,.8,.24,1);
+
+  /* the floating window. Its colour is a raw triple that an alpha gets
+     multiplied into -- float.js writes --win-tint on the element, and the
+     slider in the title bar moves it. */
+  --win-rgb:   18 25 42;
+  --win-edge:  255 255 255;
+  --win-edge-a: .13;
+  --win-shadow: 0 26px 70px -18px rgba(0,0,0,.80), 0 2px 10px rgba(0,0,0,.45);
+  --accent-rgb: 99 179 255;
   --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
 }
@@ -113,6 +122,12 @@
   --wall-3: rgba(112,235,214,.40);
   --wall-4: rgba(255,168,200,.40);
   --grain: .035;
+
+  --win-rgb:   255 255 255;
+  --win-edge:  18 34 70;
+  --win-edge-a: .16;
+  --win-shadow: 0 24px 60px -20px rgba(24,40,82,.40), 0 2px 8px rgba(24,40,82,.14);
+  --accent-rgb: 10 111 232;
 }
 
 * { box-sizing: border-box; }
@@ -1019,6 +1034,186 @@ p.chat-set-note { margin: 0 0 8px; }
 #chat-input::placeholder { color: var(--text-mute); }
 #chat-input:disabled { opacity: .5; }
 
+/* ---------- Ask Claude as a floating window ----------
+   The same tile, lifted out of the layout and given a frame: it sits over the
+   workspace rather than taking room from it, it is dragged by its bar and
+   resized from any edge, and it is tinted instead of painted so the query
+   underneath stays readable.
+
+   Two knobs, and they are independent. `--win-tint` is the alpha -- float.js
+   writes it, the slider in the title bar moves it. `data-win-style` is the
+   frame: blur, radius, rim, shadow and what the title bar looks like. Every
+   style leaves the tint alone, so picking a frame never costs you the
+   transparency you had settled on. */
+
+.tile-float {
+  position: fixed; z-index: 55;
+  --win-tint: .70;
+  --win-blur: 22px;
+  --win-sat: 165%;
+  background-color: rgb(var(--win-rgb) / var(--win-tint));
+  background-image: none;
+  -webkit-backdrop-filter: blur(var(--win-blur)) saturate(var(--win-sat));
+  backdrop-filter: blur(var(--win-blur)) saturate(var(--win-sat));
+  border: 1px solid rgb(var(--win-edge) / var(--win-edge-a));
+  border-radius: var(--radius);
+  box-shadow: var(--win-shadow), inset 0 1px 0 rgb(var(--win-edge) / .07);
+  overflow: hidden;
+  transition: box-shadow .16s var(--ease), background-color .16s var(--ease);
+}
+/* An unfocused window steps back, the way an unfocused terminal does: less
+   tint, a flatter shadow, so the thing you are typing into is obvious. Only
+   the alpha changes, so a style's own background-image survives. */
+.tile-float:not(:focus-within):not(:hover) {
+  background-color: rgb(var(--win-rgb) / calc(var(--win-tint) * .82));
+  box-shadow: 0 14px 34px -16px rgba(0,0,0,.7);
+}
+/* Every surface inside has to give up its own background, or the glass is
+   glass around an opaque brick. */
+.tile-float .chat-toolbar,
+.tile-float .chat-compose { background: transparent; }
+.tile-float .chat-settings { background: rgb(var(--win-rgb) / .35); }
+.tile-float #chat-input,
+.tile-float #chat-model,
+.tile-float #chat-key-input,
+.tile-float .chat-claude pre,
+.tile-float .chat-card { background: rgb(var(--win-rgb) / .45); }
+.tile-float .chat-claude code { background: rgb(var(--win-rgb) / .5); }
+.tile-float .chat-insert { background: rgb(var(--win-rgb) / .75); }
+
+/* The bar becomes a title bar: taller, no docking arrows -- a window is moved
+   by dragging it, not by sending it to an edge. */
+.tile-float .tile-bar {
+  height: 30px;
+  background: rgb(var(--win-edge) / .045);
+  border-bottom: 1px solid rgb(var(--win-edge) / calc(var(--win-edge-a) * .8));
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.tile-float .tile-name { margin-left: 4px; }
+.tile-float .tile-moves { display: none; }
+.tile-float .win-tint, .tile-float #chat-style { display: flex; }
+
+/* ---------- window styles ----------
+   Four frames for the same window. "frosted" is the base above. */
+
+/* Clear: the Cluely end of the range -- as little glass as stays readable,
+   a wide blur doing the work instead of opacity. */
+.tile-float[data-win-style="clear"] {
+  --win-blur: 34px; --win-sat: 185%;
+  border-radius: 16px;
+  border-color: rgb(var(--win-edge) / .16);
+  box-shadow: 0 30px 80px -24px rgba(0,0,0,.8), inset 0 1px 0 rgb(var(--win-edge) / .12);
+}
+.tile-float[data-win-style="clear"] .tile-bar { background: rgb(var(--win-edge) / .03); }
+
+/* Terminal: a macOS window with transparency turned up. Little blur, mostly
+   opacity, traffic lights where your hand already expects them. */
+.tile-float[data-win-style="terminal"] {
+  --win-blur: 9px; --win-sat: 120%;
+  border-radius: 9px;
+  border-color: rgb(var(--win-edge) / .18);
+  box-shadow: 0 20px 44px -14px rgba(0,0,0,.9), 0 0 0 .5px rgba(0,0,0,.55);
+}
+.tile-float[data-win-style="terminal"] .tile-bar {
+  height: 32px; background: rgb(var(--win-edge) / .07);
+}
+.tile-float[data-win-style="terminal"] .tile-grip { display: none; }
+.tile-float[data-win-style="terminal"] .tile-name {
+  font-family: var(--mono); font-size: 11px; text-transform: none; letter-spacing: 0;
+}
+/* Decoration, not controls: the close button is the ✕ on the right, which is
+   where this app's other close buttons are. These only say "window". */
+.tile-float[data-win-style="terminal"] .tile-bar::before {
+  content: ""; flex: none; width: 38px; height: 10px; margin-left: 2px;
+  background:
+    radial-gradient(circle 5px at 5px 5px, #ff5f57 98%, transparent) 0 0/14px 10px no-repeat,
+    radial-gradient(circle 5px at 5px 5px, #febc2e 98%, transparent) 14px 0/14px 10px no-repeat,
+    radial-gradient(circle 5px at 5px 5px, #28c840 98%, transparent) 28px 0/14px 10px no-repeat;
+}
+
+/* Aurora: the same glass with the accent bled into the top corner and the
+   rim, so the window reads as Claude's rather than as the OS's. */
+.tile-float[data-win-style="aurora"] {
+  --win-blur: 26px; --win-sat: 175%;
+  border-radius: var(--radius);
+  border-color: rgb(var(--accent-rgb) / .30);
+  background-image: linear-gradient(168deg, rgb(var(--accent-rgb) / .20),
+                                    rgb(var(--accent-rgb) / .03) 46%, transparent 74%);
+  box-shadow: 0 0 0 1px rgb(var(--accent-rgb) / .10), 0 30px 76px -22px rgba(0,0,0,.80),
+              0 0 70px -28px rgb(var(--accent-rgb) / .5);
+}
+.tile-float[data-win-style="aurora"] .tile-bar {
+  background: transparent; border-bottom-color: rgb(var(--accent-rgb) / .22);
+}
+
+/* ---------- window controls ---------- */
+.win-ctl { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.assistant-pane .tile-moves { margin-left: auto; }
+.assistant-pane .win-ctl { margin-left: 4px; }
+#chat-float[aria-pressed="true"] { background: var(--accent-dim); color: var(--accent); }
+/* Docked, there is nothing behind the panel to see through and no frame to
+   restyle, so neither control is offered. */
+#chat-style { display: none; font-size: 11px; }
+
+/* The transparency slider. */
+.win-tint { display: none; align-items: center; gap: 5px; padding: 0 5px 0 2px; }
+.win-tint-mark { color: var(--text-mute); font-size: 11px; line-height: 1; }
+.win-tint input {
+  -webkit-appearance: none; appearance: none; width: 54px; height: 3px;
+  background: var(--border); border-radius: 99px; outline: none; cursor: ew-resize;
+}
+.win-tint input::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--text-dim); cursor: ew-resize;
+}
+.win-tint input::-moz-range-thumb {
+  width: 10px; height: 10px; border: 0; border-radius: 50%; background: var(--text-dim);
+}
+.win-tint input:hover::-webkit-slider-thumb { background: var(--accent); }
+.win-tint input:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
+
+/* ---------- resize grips ----------
+   Eight invisible strips over the frame. They overhang the border a little,
+   because a 1px target is a target you miss. */
+.win-grip { position: absolute; z-index: 2; }
+.win-grip-n, .win-grip-s { left: 10px; right: 10px; height: 8px; cursor: ns-resize; }
+.win-grip-e, .win-grip-w { top: 10px; bottom: 10px; width: 8px; cursor: ew-resize; }
+.win-grip-n { top: -3px; }
+.win-grip-s { bottom: -3px; }
+.win-grip-w { left: -3px; }
+.win-grip-e { right: -3px; }
+.win-grip-ne, .win-grip-nw, .win-grip-se, .win-grip-sw { width: 15px; height: 15px; }
+.win-grip-nw { top: -3px; left: -3px; cursor: nwse-resize; }
+.win-grip-se { bottom: -3px; right: -3px; cursor: nwse-resize; }
+.win-grip-ne { top: -3px; right: -3px; cursor: nesw-resize; }
+.win-grip-sw { bottom: -3px; left: -3px; cursor: nesw-resize; }
+/* The one grip worth showing: the corner you reach for. */
+.win-grip-se::after {
+  content: ""; position: absolute; right: 4px; bottom: 4px; width: 7px; height: 7px;
+  border-right: 1.5px solid var(--text-mute); border-bottom: 1.5px solid var(--text-mute);
+  border-radius: 0 0 2px 0; opacity: 0; transition: opacity .12s;
+}
+.tile-float:hover .win-grip-se::after { opacity: .5; }
+
+body.win-moving, body.win-moving * { user-select: none; }
+body.win-moving .tile-float { transition: none; }
+
+/* Without backdrop-filter the tint is just a washed-out panel, so the window
+   goes nearly solid instead -- readable everywhere, pretty where it can be. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tile-float, .tile-float:not(:focus-within):not(:hover) {
+    background-color: rgb(var(--win-rgb) / .97);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .tile-float, .tile-float:not(:focus-within):not(:hover) {
+    background-color: rgb(var(--win-rgb) / .98);
+    background-image: none;
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+}
+
 /* ---------- sandbox ---------- */
 body.sandbox #btn-check,
 body.sandbox #btn-hint,
@@ -1049,6 +1244,22 @@ body.sandbox .hints { display: none; }
   .sidebar { max-height: 280px; }
   .prompt-pane, .editor-pane, .output-pane, .assistant-pane { flex: none; height: auto; }
   .assistant-pane { display: flex; }
+  /* A window needs somewhere to float. Stacked, there is no workspace behind
+     it, so it goes back to being a tile whatever the stored setting says --
+     `!important` because float.js writes the geometry inline. */
+  .tile-float {
+    position: static !important;
+    left: auto !important; top: auto !important;
+    width: 100% !important; height: auto !important;
+    border: 0 !important; border-radius: var(--radius) !important;
+    background: var(--sheen), var(--glass) !important;
+    -webkit-backdrop-filter: var(--blur) !important; backdrop-filter: var(--blur) !important;
+    box-shadow: var(--glass-shadow),
+                inset 0 0 0 1px var(--glass-edge),
+                inset 0 1px 0 0 var(--glass-hi) !important;
+  }
+  .tile-float .win-grip, .win-ctl .win-tint { display: none !important; }
+  .tile-float .tile-bar { height: 24px; }
   .chat-body { max-height: 340px; }
   .editor-wrap { height: 216px; flex: none; }
   .hints, .solution { max-height: none; }
@@ -1094,6 +1305,36 @@ body.sandbox .hints { display: none; }
     --chrome:  rgba(252,253,255,.96);
     --panel:   rgba(252,253,255,.95);
     --bg-sunk: rgba(14,30,66,.06);
+  }
+}
+
+/* ---------- reduced transparency ----------
+   The floating window already answers this setting; the rest of the page owes
+   the same answer. Someone who has asked their OS to stop things showing
+   through each other should not have to read a query through four colour
+   blooms, so the glass goes opaque and the backdrop goes away -- the layout,
+   the radii and the highlights all stay. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass:   rgb(13 18 31);
+    --glass-2: rgb(24 32 50);
+    --chrome:  rgb(10 15 26);
+    --panel:   rgb(13 18 31);
+    --bg-sunk: rgb(6 10 19);
+    --sheen:   none;
+  }
+  [data-theme="light"] {
+    --glass:   rgb(252 253 255);
+    --glass-2: rgb(255 255 255);
+    --chrome:  rgb(252 253 255);
+    --panel:   rgb(252 253 255);
+    --bg-sunk: rgb(238 241 247);
+    --sheen:   none;
+  }
+  body::before, body::after { display: none; }
+  .tile, .topbar, .boot-card, .tbl-card, .tile-bar, table.grid th,
+  .editor-gutter, .chat-insert, #dock-drop, #dock-ghost {
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
   }
 }
 
