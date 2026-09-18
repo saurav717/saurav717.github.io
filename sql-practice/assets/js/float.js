@@ -48,8 +48,24 @@ const SNAP_STEPS = [
   { f: 2 / 3, label: 'two thirds' },
 ];
 
-/** How far one ⌘⇧ + arrow moves the window. A line of chat, roughly. */
-const NUDGE = 40;
+/** How far one ⌘ + arrow moves the window from a standing start. */
+const NUDGE = 44;
+
+/**
+ * A held arrow has to carry the window across the page, not creep it there
+ * forty pixels at a time, so a run of presses accelerates: each repeat is a
+ * little longer than the last, up to a stride that crosses the workspace in
+ * about a second. Let the key go for longer than RUN_GAP and the next press
+ * starts over at NUDGE, so a single tap is always a small, precise move.
+ *
+ * The numbers are the ones a key-repeat rate makes sense of: browsers fire
+ * roughly thirty repeats a second, so 1.22× reaches the ceiling in about a
+ * third of a second of holding -- long enough that a double tap is still
+ * two small moves, short enough that crossing the screen is one gesture.
+ */
+const NUDGE_MAX = 200;
+const NUDGE_GROWTH = 1.22;
+const RUN_GAP = 260;
 
 /**
  * The frames the window can wear, and the tint each one is drawn for. The
@@ -79,6 +95,8 @@ let onChange = () => {};
 let grips = [];
 let drag = null;
 let snapped = null;            // { side, step } -- the last keyboard snap
+let run = null;                // { side, step, at, stuck } -- an arrow being held
+let runSave = 0;               // the timer that persists a run once it settles
 
 const stacked = () => window.innerWidth <= STACK_WIDTH;
 
@@ -163,8 +181,10 @@ function step(e) {
   if (!drag || e.pointerId !== drag.id) return;
   // A window moved by hand is no longer sitting where a snap put it, so the
   // next arrow press starts the cycle over rather than resizing from a size
-  // nobody asked for.
+  // nobody asked for. The same goes for a run of arrow presses: the hand has
+  // taken over, so the keyboard starts again from its smallest step.
   snapped = null;
+  run = null;
   const dx = e.clientX - drag.x0;
   const dy = e.clientY - drag.y0;
   const s = drag.start;
@@ -207,6 +227,7 @@ function end(e) {
  */
 function zoom() {
   snapped = null;
+  run = null;
   const home = defaultRect();
   const atHome = Math.abs(rect.x - home.x) < 6 && Math.abs(rect.w - home.w) < 6 &&
                  Math.abs(rect.y - home.y) < 6;
@@ -329,6 +350,7 @@ export const currentStyle = () => styleAt(style);
 /** Put the window back where it starts, at the size it starts. */
 export function home() {
   snapped = null;
+  run = null;
   rect = fit(defaultRect());
   paint();
   save();
@@ -339,25 +361,46 @@ export function home() {
 // ---------------------------------------------------------------------------
 //
 // A window you can only move with the pointer is a window you stop moving.
-// ⌘ + an arrow throws it at that edge; pressing the same arrow again cycles
-// the size it takes there. ⌘⇧ + an arrow slides it a little, for the times
-// the edge is not where you want it.
+// ⌘ + an arrow *moves* it that way, and keeps moving it for as long as the
+// key is held -- the window goes where you are steering it and stops where
+// you stop, which is the one behaviour everyone already expects from an
+// overlay they can call up over their work. ⌘⇧ + an arrow is the tiling
+// gesture: it throws the window at that edge and cycles half / a third / two
+// thirds there, for the times you want it parked rather than placed.
 //
 // Both are no-ops when the window is docked or the layout has stacked --
-// there is nothing to move and nothing to move it over.
+// there is nothing to move and nothing to move it over. Both return null in
+// that case, and a string (sometimes empty) when they acted, so the caller
+// can tell 'nothing to do, leave the key alone' apart from 'moved, and there
+// is nothing worth saying about it'.
+
+/** What each arrow's edge is called out loud. */
+const EDGE_NAME = { left: 'left', right: 'right', up: 'top', down: 'bottom' };
 
 /** Can the window be driven from the keyboard right now? */
 const drivable = () => !!el && on && !stacked() && !!rect;
 
 /**
+ * Persist where a run of arrow presses left the window, once it has left it
+ * there. Writing on every repeat would put thirty `localStorage` writes a
+ * second behind a held key for a rectangle that is still moving; the only
+ * one that matters is the last.
+ */
+function saveSoon() {
+  clearTimeout(runSave);
+  runSave = setTimeout(save, RUN_GAP);
+}
+
+/**
  * Throw the window at one edge. Repeating the same side cycles the fraction
  * it takes; a different side starts over at a half. Returns what happened,
- * for the caller to announce, or '' if there was nothing to move.
+ * for the caller to announce, or null if there was nothing to move.
  *
  * @param {'left'|'right'|'up'|'down'} side
  */
 export function snap(side) {
-  if (!drivable()) return '';
+  if (!drivable()) return null;
+  run = null;
   const b = bounds();
   const i = snapped?.side === side ? (snapped.step + 1) % SNAP_STEPS.length : 0;
   const { f, label } = SNAP_STEPS[i];
@@ -374,27 +417,52 @@ export function snap(side) {
   }
   paint();
   save();
-  const where = { left: 'left', right: 'right', up: 'top', down: 'bottom' }[side];
-  return `Claude window: ${where} ${label}`;
+  return `Claude window: ${EDGE_NAME[side]} ${label}`;
 }
 
 /**
- * Slide the window one step. `fit` stops it at the edge of the page rather
- * than letting it walk off, so holding the key is safe.
+ * Move the window one step that way, and a longer step each time the key
+ * repeats -- a tap places it, a held key flies it across the page. Its size
+ * never changes: this is moving, not tiling. `fit` stops it at the edge of
+ * the page rather than letting it walk off, so holding the key is safe.
  *
  * @param {'left'|'right'|'up'|'down'} side
  */
 export function nudge(side) {
-  if (!drivable()) return '';
+  if (!drivable()) return null;
+  const by = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] }[side];
+  if (!by) return null;
+  // Moving by hand leaves the window somewhere no snap put it, so the next
+  // ⌘⇧ + arrow starts its cycle at a half rather than resizing from a
+  // fraction chosen for a position the window has since left.
   snapped = null;
-  const by = { left: [-NUDGE, 0], right: [NUDGE, 0], up: [0, -NUDGE], down: [0, NUDGE] }[side];
-  if (!by) return '';
-  const moved = fit({ ...rect, x: rect.x + by[0], y: rect.y + by[1] });
+
+  // A run is one gesture: the same arrow, still going. A different arrow, or
+  // a gap long enough to be a second press rather than a repeat, starts over
+  // at the smallest step.
+  const now = performance.now();
+  const going = !!run && run.side === side && now - run.at < RUN_GAP;
+  const step = going ? Math.min(run.step * NUDGE_GROWTH, NUDGE_MAX) : NUDGE;
+
+  const moved = fit({ ...rect, x: rect.x + by[0] * step, y: rect.y + by[1] * step });
   // At the edge already: say so rather than reporting a move that did not
   // happen, which is the whole difference for someone listening to this.
   const stuck = moved.x === rect.x && moved.y === rect.y;
   rect = moved;
   paint();
-  save();
-  return stuck ? 'Claude window: already at the edge' : `Claude window moved ${side}`;
+  // The first press of a gesture is written straight away, so a window moved
+  // once and then abandoned -- tab closed, laptop shut -- is still where it
+  // was left. The repeats that follow are coalesced into one write when the
+  // run settles.
+  if (!going) save();
+  saveSoon();
+
+  // A held arrow fires about thirty times a second, and a live region that is
+  // rewritten thirty times a second is noise, not narration. Speak once when
+  // the run starts, and once more the first time it runs out of room.
+  const say = stuck
+    ? (going && run.stuck ? '' : `Claude window: at the ${EDGE_NAME[side]}`)
+    : (going ? '' : `Claude window moving ${side}`);
+  run = { side, step, at: now, stuck };
+  return say;
 }

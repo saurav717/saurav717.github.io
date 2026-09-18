@@ -3,15 +3,15 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js?v=20260918-screen-context';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260918-screen-context';
-import * as activity from './activity.js?v=20260918-screen-context';
-import * as beacon from './beacon.js?v=20260918-screen-context';
-import * as layout from './layout.js?v=20260918-screen-context';
-import * as win from './float.js?v=20260918-screen-context';
-import * as assistant from './assistant.js?v=20260918-screen-context';
-import * as tabletip from './tabletip.js?v=20260918-screen-context';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260918-screen-context';
+import * as engine from './engine.js?v=20260918-window-move';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260918-window-move';
+import * as activity from './activity.js?v=20260918-window-move';
+import * as beacon from './beacon.js?v=20260918-window-move';
+import * as layout from './layout.js?v=20260918-window-move';
+import * as win from './float.js?v=20260918-window-move';
+import * as assistant from './assistant.js?v=20260918-window-move';
+import * as tabletip from './tabletip.js?v=20260918-window-move';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260918-window-move';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -1403,10 +1403,17 @@ function wire() {
       e.preventDefault();
       setAssistantOpen(!state.assistantOpen);
     }
-    // Move the window with the arrow keys, the way every tiling helper on
-    // every desktop does it: ⌘ + an arrow throws it at that edge, pressing
-    // the same arrow again cycles half / a third / two thirds, and ⌘⇧ + an
-    // arrow slides it a little instead.
+    // Move the window with the arrow keys. ⌘ + an arrow *moves* it that way
+    // and keeps moving it while the key is held, accelerating as it goes --
+    // steering, not filing: the window ends up where you stopped pressing,
+    // at the size it already was. ⌘⇧ + an arrow is the tiling gesture that
+    // used to be on ⌘: it throws the window at that edge and cycles half /
+    // a third / two thirds there.
+    //
+    // The two were the other way round, and the wrong way round: the common
+    // case is nudging the window off whatever you are trying to read, and a
+    // gesture that answers that by resizing it and pinning it to an edge
+    // makes you fight it back into place afterwards.
     //
     // ⌥ is excluded because ⌘⌥↑/↓ already walks the exercise list, and the
     // editor keeps its own arrows because ⌘←/⌘→ is caret movement there and
@@ -1416,10 +1423,13 @@ function wire() {
     const side = WINDOW_KEYS[e.key];
     if (mod && !e.altKey && side && state.assistantOpen && win.isOn()
         && document.activeElement !== editor) {
-      const said = e.shiftKey ? win.nudge(side) : win.snap(side);
-      if (said) {
+      const said = e.shiftKey ? win.snap(side) : win.nudge(side);
+      // null means there was nothing to move, and the key belongs to whoever
+      // wants it next; an empty string means the window moved and simply had
+      // nothing new to announce -- a held arrow says its piece once.
+      if (said !== null) {
         e.preventDefault();
-        layout.announce(said);
+        if (said) layout.announce(said);
       }
     }
     // Escape gives the editor back. From inside the window, or from a page
