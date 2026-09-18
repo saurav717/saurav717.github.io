@@ -208,8 +208,11 @@
     <div id="chat-body" class="chat-body"></div>
 
     <form id="chat-form" class="chat-compose">
+      <!-- The ↵ / ⇧↵ hint is a title, not placeholder text: the panel is narrow
+           enough that a placeholder that long wraps past the box. -->
       <textarea id="chat-input" rows="1" spellcheck="false"
-                placeholder="Ask about the exercise, the schema, or your query…  ↵ to send, ⇧↵ for a new line"></textarea>
+                title="↵ sends · ⇧↵ makes a new line"
+                placeholder="Ask about this exercise or your query…"></textarea>
       <button type="submit" id="chat-send" class="btn btn-primary">Send</button>
       <button type="button" id="chat-stop" class="btn btn-ghost" hidden>Stop</button>
     </form>
