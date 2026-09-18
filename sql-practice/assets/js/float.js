@@ -36,6 +36,22 @@ const STACK_WIDTH = 1000;
 const DIRS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
 
 /**
+ * The fractions a snap cycles through when the same arrow is pressed again.
+ * Half first because half is what you almost always want; a third when the
+ * answer is short and the query matters more; two thirds when it is a long
+ * one and the query can wait. Rectangle and PowerToys both do this, and the
+ * muscle memory is worth matching.
+ */
+const SNAP_STEPS = [
+  { f: 1 / 2, label: 'half' },
+  { f: 1 / 3, label: 'third' },
+  { f: 2 / 3, label: 'two thirds' },
+];
+
+/** How far one ⌘⇧ + arrow moves the window. A line of chat, roughly. */
+const NUDGE = 40;
+
+/**
  * The frames the window can wear, and the tint each one is drawn for. The
  * stylesheet owns what they look like; all this needs to know is the order to
  * cycle them in and where the slider should land when you switch, because a
@@ -62,6 +78,7 @@ let style = STYLES[0].id;
 let onChange = () => {};
 let grips = [];
 let drag = null;
+let snapped = null;            // { side, step } -- the last keyboard snap
 
 const stacked = () => window.innerWidth <= STACK_WIDTH;
 
@@ -144,6 +161,10 @@ function begin(e, dir) {
 
 function step(e) {
   if (!drag || e.pointerId !== drag.id) return;
+  // A window moved by hand is no longer sitting where a snap put it, so the
+  // next arrow press starts the cycle over rather than resizing from a size
+  // nobody asked for.
+  snapped = null;
   const dx = e.clientX - drag.x0;
   const dy = e.clientY - drag.y0;
   const s = drag.start;
@@ -185,6 +206,7 @@ function end(e) {
  * double-click, from that position, fills the workspace instead.
  */
 function zoom() {
+  snapped = null;
   const home = defaultRect();
   const atHome = Math.abs(rect.x - home.x) < 6 && Math.abs(rect.w - home.w) < 6 &&
                  Math.abs(rect.y - home.y) < 6;
@@ -306,7 +328,73 @@ export const currentStyle = () => styleAt(style);
 
 /** Put the window back where it starts, at the size it starts. */
 export function home() {
+  snapped = null;
   rect = fit(defaultRect());
   paint();
   save();
+}
+
+// ---------------------------------------------------------------------------
+// The keyboard
+// ---------------------------------------------------------------------------
+//
+// A window you can only move with the pointer is a window you stop moving.
+// ⌘ + an arrow throws it at that edge; pressing the same arrow again cycles
+// the size it takes there. ⌘⇧ + an arrow slides it a little, for the times
+// the edge is not where you want it.
+//
+// Both are no-ops when the window is docked or the layout has stacked --
+// there is nothing to move and nothing to move it over.
+
+/** Can the window be driven from the keyboard right now? */
+const drivable = () => !!el && on && !stacked() && !!rect;
+
+/**
+ * Throw the window at one edge. Repeating the same side cycles the fraction
+ * it takes; a different side starts over at a half. Returns what happened,
+ * for the caller to announce, or '' if there was nothing to move.
+ *
+ * @param {'left'|'right'|'up'|'down'} side
+ */
+export function snap(side) {
+  if (!drivable()) return '';
+  const b = bounds();
+  const i = snapped?.side === side ? (snapped.step + 1) % SNAP_STEPS.length : 0;
+  const { f, label } = SNAP_STEPS[i];
+  snapped = { side, step: i };
+
+  // Each snap fills the other axis: half the width means the full height, or
+  // it is not an edge any more, it is a corner nobody asked for.
+  if (side === 'left' || side === 'right') {
+    const w = clamp(Math.round(b.w * f), MIN.w, b.w);
+    rect = fit({ w, h: b.h, y: b.y, x: side === 'left' ? b.x : b.x + b.w - w });
+  } else {
+    const h = clamp(Math.round(b.h * f), MIN.h, b.h);
+    rect = fit({ w: b.w, h, x: b.x, y: side === 'up' ? b.y : b.y + b.h - h });
+  }
+  paint();
+  save();
+  const where = { left: 'left', right: 'right', up: 'top', down: 'bottom' }[side];
+  return `Claude window: ${where} ${label}`;
+}
+
+/**
+ * Slide the window one step. `fit` stops it at the edge of the page rather
+ * than letting it walk off, so holding the key is safe.
+ *
+ * @param {'left'|'right'|'up'|'down'} side
+ */
+export function nudge(side) {
+  if (!drivable()) return '';
+  snapped = null;
+  const by = { left: [-NUDGE, 0], right: [NUDGE, 0], up: [0, -NUDGE], down: [0, NUDGE] }[side];
+  if (!by) return '';
+  const moved = fit({ ...rect, x: rect.x + by[0], y: rect.y + by[1] });
+  // At the edge already: say so rather than reporting a move that did not
+  // happen, which is the whole difference for someone listening to this.
+  const stuck = moved.x === rect.x && moved.y === rect.y;
+  rect = moved;
+  paint();
+  save();
+  return stuck ? 'Claude window: already at the edge' : `Claude window moved ${side}`;
 }

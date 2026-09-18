@@ -91,24 +91,103 @@ const hidden = new Set(['assistant']);
  */
 const floatingSet = new Set();
 
+/**
+ * The tile that is currently filling the workspace on its own, or null.
+ *
+ * Zoom is not a fifth kind of geometry: it is "every other tile is hidden for
+ * a moment". The tree is untouched, so restoring is exactly as cheap as
+ * zooming, nothing is persisted, and every size the learner set by hand is
+ * still there when they come back. It works stacked, too, where the seams are
+ * gone and this is the only way to give a pane the whole screen.
+ */
+let zoomed = null;
+
 const tileFloating = (pane) => floatingSet.has(pane);
 const tileHidden = (pane) =>
-  hidden.has(pane) || floatingSet.has(pane) ||
+  (zoomed !== null && pane !== zoomed) ||
+  hidden.has(pane) ||
+  // Floating costs the layout nothing -- but only where floating is real.
+  // Stacked, the stylesheet puts the window back in the flow as a tile, so
+  // it has to be reserved room like every other tile.
+  (!stacked() && floatingSet.has(pane)) ||
   (pane === 'prompt' && document.body.classList.contains('sandbox'));
 
 /**
- * A leaf whose tile is floating: out of flow, but still on screen. A tile
- * that is also `hidden` is closed, and a closed window shows nothing.
+ * Does this node have to stay displayed to carry a window?
+ *
+ * A floating tile is out of flow but still on screen, and `display: none` on
+ * any ancestor takes it down with it however fixed its position is -- so this
+ * asks the question of splits as well as leaves. Before zoom nothing ever
+ * hid a whole branch and the leaf test was enough; expanding one tile hides
+ * every other branch at once, and the Claude window used to disappear with
+ * the branch it happens to live in.
+ *
+ * Stacked, there is no window: the stylesheet puts the tile back in the flow,
+ * so it is subject to hiding like any other tile.
  */
-const floats = (n) => isLeaf(n) && tileFloating(n.pane) && !hidden.has(n.pane);
+const floats = (n) => !stacked() && (isLeaf(n)
+  ? tileFloating(n.pane) && !hidden.has(n.pane)
+  : n.children.some(floats));
 
 /** Show or hide a tile without disturbing where it sits in the tree. */
 export function setHidden(pane, off) {
   if (!PANES.includes(pane)) return;
   if (off) hidden.add(pane); else hidden.delete(pane);
+  // Closing the zoomed tile would leave an empty workspace with no way back.
+  if (off && zoomed === pane) zoomed = null;
   apply();
+  paintZoom();
 }
 export const isHidden = (pane) => hidden.has(pane);
+
+// ---------------------------------------------------------------------------
+// Zoom
+// ---------------------------------------------------------------------------
+
+/** Keep every zoom button saying what it will do next. */
+function paintZoom() {
+  document.body.classList.toggle('dock-zoomed', zoomed !== null);
+  for (const pane of PANES) {
+    const btn = tileEl(pane)?.querySelector('[data-zoom]');
+    if (!btn) continue;
+    const on = zoomed === pane;
+    btn.textContent = on ? '⤡' : '⤢';       // ⤡ shrink, ⤢ expand
+    btn.setAttribute('aria-pressed', String(on));
+    btn.title = on
+      ? `Put ${nameOf(pane)} back in the layout`
+      : `Expand ${nameOf(pane)} to fill the workspace`;
+    btn.setAttribute('aria-label', btn.title);
+    tileEl(pane)?.classList.toggle('tile-zoom', on);
+  }
+}
+
+/**
+ * Give one tile the whole workspace, or hand the workspace back. Zooming a
+ * second tile moves the zoom rather than stacking it, which is what the
+ * button looks like it does.
+ */
+export function toggleZoom(pane) {
+  // A closed tile has nothing to show, and a floating one is already out of
+  // the workspace -- zooming it would hide every tile behind a window that
+  // was never in the way.
+  if (!PANES.includes(pane) || hidden.has(pane) || tileFloating(pane)) return;
+  const on = zoomed !== pane;
+  zoomed = on ? pane : null;
+  apply();
+  paintZoom();
+  fitPrompt();
+  announce(on ? `${nameOf(pane)} expanded to fill the workspace`
+              : `${nameOf(pane)} back in the layout`);
+}
+
+/** Hand the workspace back, wherever the zoom is. True if there was one. */
+export function unzoom() {
+  if (zoomed === null) return false;
+  toggleZoom(zoomed);
+  return true;
+}
+
+export const zoomedPane = () => zoomed;
 
 /**
  * Lift a tile out of the tree, or put it back. The tree keeps the slot it
@@ -117,7 +196,11 @@ export const isHidden = (pane) => hidden.has(pane);
 export function setFloating(pane, lift) {
   if (!PANES.includes(pane)) return;
   if (lift) floatingSet.add(pane); else floatingSet.delete(pane);
+  // A tile lifted into a window is not in the workspace any more, so leaving
+  // the zoom on it would hide every tile and show an empty page.
+  if (lift && zoomed === pane) zoomed = null;
   apply();
+  paintZoom();
 }
 const visible = (n) => (isLeaf(n) ? !tileHidden(n.pane) : n.children.some(visible));
 const holds = (n, pane) => (isLeaf(n) ? n.pane === pane : n.children.some((c) => holds(c, pane)));
@@ -430,7 +513,12 @@ function sizeNode(node) {
   for (const c of node.children) {
     const show = visible(c);
     if (c._bar) c._bar.style.display = show && seen ? '' : 'none';
-    if (c._el) c._el.style.display = show || floats(c) ? '' : 'none';
+    if (c._el) {
+      c._el.style.display = show || floats(c) ? '' : 'none';
+      // Kept on screen only to carry a window: it must reserve no room, or an
+      // expanded tile would stop short of a branch with nothing in it.
+      if (!show && c._el.style.display === '') c._el.style.flex = '0 0 0';
+    }
     if (show) seen++;
   }
 
@@ -559,7 +647,12 @@ function wireSplitter(bar, node, i, axis) {
 
 let live = null;                        // the polite announcement region
 
-function announce(msg) {
+/**
+ * Say something to a screen reader without putting it on the screen. Exported
+ * because the Claude window and the pane shortcuts move things too, and one
+ * live region beats three of them talking over each other.
+ */
+export function announce(msg) {
   if (!live) {
     live = document.createElement('div');
     live.id = 'dock-live';
@@ -599,7 +692,9 @@ export function dropOn(pane, targetPane, side) {
 /** Back to the arrangement the site ships with. */
 export function reset() {
   tree = defaultTree();
+  zoomed = null;
   commit('Layout reset');
+  paintZoom();
 }
 
 // --- drag and drop ---------------------------------------------------------
@@ -733,11 +828,27 @@ function wireTiles() {
   const root = host();
   if (!root) return;
   root.addEventListener('click', (e) => {
+    const zoom = e.target.closest('[data-zoom]');
+    if (zoom) {
+      const pane = zoom.closest('[data-tile]')?.dataset.tile;
+      if (pane) toggleZoom(pane);
+      return;
+    }
     const btn = e.target.closest('.tile-move');
     if (!btn) return;
     const pane = btn.closest('[data-tile]')?.dataset.tile;
     if (pane) move(pane, btn.dataset.move);
   });
+
+  // Double-clicking a title bar zooms, the way it does on a desktop window.
+  // Not on a floating tile: float.js owns that bar and that gesture.
+  root.addEventListener('dblclick', (e) => {
+    const bar = e.target.closest('.tile-bar');
+    if (!bar || e.target.closest('button, a, input, select, textarea')) return;
+    const pane = bar.closest('[data-tile]')?.dataset.tile;
+    if (pane && !tileFloating(pane)) toggleZoom(pane);
+  });
+
   root.addEventListener('pointerdown', onTileDown);
   root.addEventListener('pointermove', onTileMove);
   root.addEventListener('pointerup', (e) => endTileDrag(e));
@@ -970,6 +1081,7 @@ export function init({ saved = {}, onLayout = () => {} } = {}) {
   apply();
   fitPrompt();
   wireTiles();
+  paintZoom();
   window.addEventListener('resize', () => { apply(); fitPrompt(); });
 }
 

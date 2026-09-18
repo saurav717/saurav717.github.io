@@ -15,7 +15,7 @@
 //  -- so `npm run serve` and a plain checkout never phone anywhere.
 // ===========================================================================
 
-import { deviceId } from './activity.js?v=20260918-glass-window';
+import { deviceId } from './activity.js?v=20260918-screen-context';
 
 /** Endpoint from <meta name="collector-endpoint">, or '' when unconfigured. */
 function endpoint() {
