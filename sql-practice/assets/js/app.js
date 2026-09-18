@@ -3,13 +3,14 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js?v=20260917-layout';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260917-layout';
-import * as activity from './activity.js?v=20260917-layout';
-import * as beacon from './beacon.js?v=20260917-layout';
-import * as layout from './layout.js?v=20260917-layout';
-import * as tabletip from './tabletip.js?v=20260917-layout';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260917-layout';
+import * as engine from './engine.js?v=20260918-claude-panel';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260918-claude-panel';
+import * as activity from './activity.js?v=20260918-claude-panel';
+import * as beacon from './beacon.js?v=20260918-claude-panel';
+import * as layout from './layout.js?v=20260918-claude-panel';
+import * as assistant from './assistant.js?v=20260918-claude-panel';
+import * as tabletip from './tabletip.js?v=20260918-claude-panel';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260918-claude-panel';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -22,13 +23,14 @@ let schemaCache = null;
 let tableDocs = new Map();     // table name -> what the hover card shows
 let ddlNotes = null;           // parsed assets/data/schema.sql, fetched once
 let sandbox = false;
+let lastRun = null;            // a one-line summary of the last query, for assistant.js
 
 function loadState() {
   const base = {
     solved: {}, attempted: {}, revealed: {}, drafts: {},
     hintsShown: {}, hintsHidden: {}, solutionHidden: {},
     engine: 'redshift', theme: 'dark', lineNumbers: false,
-    current: EXERCISES[0].id, layout: {}, tabOrder: [],
+    current: EXERCISES[0].id, layout: {}, tabOrder: [], assistantOpen: false,
   };
   try {
     return { ...base, ...JSON.parse(localStorage.getItem(STORE_KEY) || '{}') };
@@ -622,12 +624,15 @@ async function runSql(sql, note = '') {
       const { ms } = await engine.exec(sql);
       $('#tab-results').innerHTML = '<p class="placeholder">Statement executed. It returned no result set.</p>';
       schemaCache = null;
+      lastRun = `Statement executed in ${ms.toFixed(0)} ms; no result set.`;
       setStatus(`Executed in ${ms.toFixed(0)} ms`, right('sandbox'));
       logActivity({ sql, action: 'run', rowCount: null, ms });
       return { ok: true, ms };
     }
     const res = await engine.run(sql);
     renderGrid(res);
+    lastRun = `${res.rowCount.toLocaleString()} rows, ${res.columns.length} columns `
+      + `(${res.columns.map((c, i) => `${c} ${res.types[i] || ''}`.trim()).join(', ')}) in ${res.ms.toFixed(0)} ms.`;
     setStatus(`${res.rowCount.toLocaleString()} rows in ${res.ms.toFixed(0)} ms`,
               right(`${res.columns.length} columns`));
     logActivity({ sql, action: 'run', rowCount: res.rowCount, ms: res.ms });
@@ -637,6 +642,7 @@ async function runSql(sql, note = '') {
       `<div class="verdict verdict-bad"><h3>Query error${note ? ` in ${esc(note)}` : ''}</h3>`
       + `<pre>${esc(e.message ?? e)}</pre></div>`;
     setStatus('Query failed', note, true);
+    lastRun = `The query failed: ${String(e.message ?? e)}`;
     return { ok: false, ms: 0 };
   }
 }
@@ -814,6 +820,35 @@ async function ensureSchema() {
     }];
   }));
   return schemaCache;
+}
+
+/**
+ * Everything the Claude panel is allowed to know about the page, gathered
+ * fresh for each message. It picks which of these to actually send; this
+ * function only says what is available.
+ */
+function assistantContext() {
+  const ex = sandbox ? null : currentExercise();
+  return {
+    sandbox,
+    targetEngine: ENGINE_LABELS[state.engine] ?? state.engine,
+    schema: [...tableDocs.values()],
+    exercise: ex && { id: ex.id, title: ex.title, prompt: ex.prompt },
+    editor: editor.value,
+    result: lastRun,
+  };
+}
+
+/** Drop a query Claude wrote into the editor, never silently over a draft. */
+function insertFromAssistant(sql) {
+  const draft = editor.value;
+  if (draft.trim() && draft.trim() !== sql.trim()
+      && !confirm('Replace what is in the editor with this query?\n\nYour own SQL will be lost.')) return;
+  setEditor(sql.replace(/\n$/, ''));
+  if (sandbox) state.drafts.__sandbox = editor.value;
+  else state.drafts[state.current] = editor.value;
+  saveState();
+  editor.focus();
 }
 
 /** What the hover card knows about a table, or null for one it has never seen. */
@@ -1018,6 +1053,22 @@ function showTab(name) {
   if (name === 'activity') renderActivity();
 }
 
+/**
+ * Open or close the Claude panel. It is a tile like any other -- it can be
+ * dragged anywhere the rest can -- so opening it is a matter of giving it
+ * room back, not of building it.
+ */
+function setAssistantOpen(open) {
+  state.assistantOpen = !!open;
+  saveState();
+  layout.setHidden('assistant', !open);
+  $('#btn-assistant').classList.toggle('btn-primary', !!open);
+  if (open) {
+    assistant.refresh();
+    $('#chat-input')?.focus();
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Wiring
 // ---------------------------------------------------------------------------
@@ -1105,6 +1156,10 @@ function wire() {
   });
   applyLineNumbers();
 
+  $('#btn-assistant').addEventListener('click', () => {
+    setAssistantOpen(!state.assistantOpen);
+  });
+
   $('#btn-sandbox').addEventListener('click', () => {
     sandbox = !sandbox;
     document.body.classList.toggle('sandbox', sandbox);
@@ -1115,6 +1170,7 @@ function wire() {
       renderExercise();
     }
     layout.refresh();
+    assistant.refresh();
     renderSidebar();
   });
 
@@ -1240,7 +1296,14 @@ function wire() {
     onLayout: (arrangement) => { state.layout = arrangement; saveState(); },
   });
 
+  assistant.init({
+    markdown,
+    context: assistantContext,
+    insertSql: insertFromAssistant,
+  });
+
   wire();
+  setAssistantOpen(state.assistantOpen);
   renderExercise();
   renderSidebar();
   renderLint();

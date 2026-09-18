@@ -9,8 +9,12 @@
 <!-- Filled in at deploy time from $COLLECTOR_ENDPOINT; empty here so a
      local checkout never reports anywhere. See collector/README.md. -->
 <meta name="collector-endpoint" content="">
-<meta name="build" content="20260917-layout">
-<link rel="stylesheet" href="assets/css/app.css?v=20260917-layout">
+<!-- Optional. When set, the Ask Claude panel talks to this endpoint instead of
+     api.anthropic.com and no API key is kept in the browser. Empty here so a
+     local checkout reaches nobody. See proxy/README.md. -->
+<meta name="claude-endpoint" content="">
+<meta name="build" content="20260918-claude-panel">
+<link rel="stylesheet" href="assets/css/app.css?v=20260918-claude-panel">
 </head>
 <body>
 
@@ -40,6 +44,9 @@
       <span class="engine-label">Target</span>
       <select id="engine-select"></select>
     </label>
+    <button id="btn-assistant" class="btn btn-ghost" aria-label="Ask Claude"
+            title="Ask Claude about the exercise, the schema, or your query"><span
+            class="btn-wide">Ask Claude</span><span class="btn-narrow" aria-hidden="true">✦</span></button>
     <button id="btn-sandbox" class="btn btn-ghost" title="Free-form query editor">Sandbox</button>
     <button id="btn-reset-db" class="btn btn-ghost" title="Reload the dataset from scratch">Reset data</button>
     <button id="btn-reset-layout" class="btn btn-icon"
@@ -168,6 +175,46 @@
     <div id="solution" class="solution" hidden></div>
   </article>
 
+
+  <article class="pane tile assistant-pane" data-tile="assistant">
+    <div class="tile-bar" title="Drag to move this panel; drop it against any edge">
+      <span class="tile-grip" aria-hidden="true">⠿</span>
+      <span class="tile-name">Ask Claude</span>
+      <span class="tile-moves">
+        <button type="button" class="tile-move" data-move="left"
+                title="Move the Claude panel to the left edge"
+                aria-label="Move the Claude panel to the left edge">←</button>
+        <button type="button" class="tile-move" data-move="top"
+                title="Move the Claude panel to the top edge"
+                aria-label="Move the Claude panel to the top edge">↑</button>
+        <button type="button" class="tile-move" data-move="bottom"
+                title="Move the Claude panel to the bottom edge"
+                aria-label="Move the Claude panel to the bottom edge">↓</button>
+        <button type="button" class="tile-move" data-move="right"
+                title="Move the Claude panel to the right edge"
+                aria-label="Move the Claude panel to the right edge">→</button>
+      </span>
+    </div>
+
+    <div class="chat-toolbar">
+      <select id="chat-model" title="Which Claude model answers"></select>
+      <span class="toolbar-gap"></span>
+      <button type="button" id="chat-reset" class="btn btn-ghost btn-mini" title="Start a new conversation">New chat</button>
+      <button type="button" id="chat-gear" class="btn btn-icon" title="What gets sent, and your account">⚙</button>
+    </div>
+
+    <div id="chat-settings" class="chat-settings" hidden></div>
+
+    <div id="chat-body" class="chat-body"></div>
+
+    <form id="chat-form" class="chat-compose">
+      <textarea id="chat-input" rows="1" spellcheck="false"
+                placeholder="Ask about the exercise, the schema, or your query…  ↵ to send, ⇧↵ for a new line"></textarea>
+      <button type="submit" id="chat-send" class="btn btn-primary">Send</button>
+      <button type="button" id="chat-stop" class="btn btn-ghost" hidden>Stop</button>
+    </form>
+  </article>
+
   <article class="pane tile output-pane" data-tile="output">
     <div class="tile-bar" title="Drag to move this panel; drop it against any edge">
       <span class="tile-grip" aria-hidden="true">⠿</span>
@@ -213,6 +260,6 @@
 
 </main>
 
-<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260917-layout"></script>
+<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260918-claude-panel"></script>
 </body>
 </html>

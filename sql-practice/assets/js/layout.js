@@ -31,22 +31,24 @@ const STEP = 16;
 const PROMPT_FIT_MAX = 0.42;
 
 /** The tiles, in the order they appear in the markup. */
-const PANES = ['sidebar', 'prompt', 'editor', 'output'];
+const PANES = ['sidebar', 'prompt', 'editor', 'assistant', 'output'];
 
 /** Smallest usable size for each tile, per axis, in px. */
 const MIN = {
-  sidebar: { x: 190, y: 120 },
-  prompt:  { x: 240, y:  88 },
-  editor:  { x: 300, y: 160 },
-  output:  { x: 280, y: 120 },
+  sidebar:   { x: 190, y: 120 },
+  prompt:    { x: 240, y:  88 },
+  editor:    { x: 300, y: 160 },
+  assistant: { x: 280, y: 180 },
+  output:    { x: 280, y: 120 },
 };
 
 /** Size a tile gets when it lands in a slot that has no measurement yet. */
 const DEFAULT = {
-  sidebar: { x: 284, y: 220 },
-  prompt:  { x: 360, y: 196 },
-  editor:  { x: 480, y: 300 },
-  output:  { x: 520, y: 300 },
+  sidebar:   { x: 284, y: 220 },
+  prompt:    { x: 360, y: 196 },
+  editor:    { x: 480, y: 300 },
+  assistant: { x: 380, y: 320 },
+  output:    { x: 520, y: 300 },
 };
 
 /** side -> which way the split runs, and which side of it the tile lands on. */
@@ -72,8 +74,23 @@ const tileEl = (pane) => tiles.get(pane) || null;
 const host = () => document.getElementById('layout');
 const stacked = () => window.innerWidth <= STACK_WIDTH;
 
-/** The prompt tile (and its seam) are hidden in Sandbox mode. */
-const tileHidden = (pane) => pane === 'prompt' && document.body.classList.contains('sandbox');
+/**
+ * Tiles that are currently taking up no room. The prompt goes when Sandbox
+ * mode is on; the Claude panel is closed until someone asks for it, and is
+ * the only tile that starts that way -- so a visitor who never opens it sees
+ * exactly the layout this site has always had.
+ */
+const hidden = new Set(['assistant']);
+const tileHidden = (pane) =>
+  hidden.has(pane) || (pane === 'prompt' && document.body.classList.contains('sandbox'));
+
+/** Show or hide a tile without disturbing where it sits in the tree. */
+export function setHidden(pane, off) {
+  if (!PANES.includes(pane)) return;
+  if (off) hidden.add(pane); else hidden.delete(pane);
+  apply();
+}
+export const isHidden = (pane) => hidden.has(pane);
 const visible = (n) => (isLeaf(n) ? !tileHidden(n.pane) : n.children.some(visible));
 const holds = (n, pane) => (isLeaf(n) ? n.pane === pane : n.children.some((c) => holds(c, pane)));
 const leadPane = (n) => (isLeaf(n) ? n.pane : leadPane(n.children[0]));
@@ -99,7 +116,17 @@ function defaultTree() {
         dir: 'col', size: null, sizeAxis: null,
         children: [
           leaf('prompt', DEFAULT.prompt.y, 'y', true),
-          leaf('editor', DEFAULT.editor.y, 'y'),
+          // The editor and the Claude panel share a row, so the panel is
+          // beside the query rather than under it -- that is the whole point
+          // of it. It is hidden until asked for, and a hidden tile costs the
+          // editor nothing.
+          {
+            dir: 'row', size: DEFAULT.editor.y, sizeAxis: 'y',
+            children: [
+              leaf('editor', DEFAULT.editor.x, 'x'),
+              leaf('assistant', DEFAULT.assistant.x, 'x'),
+            ],
+          },
           leaf('output', DEFAULT.output.y, 'y'),
         ],
       },
@@ -165,12 +192,20 @@ function parentOf(node, from = tree) {
 
 /**
  * The elastic child of a split: whichever one holds the results panel, else
- * the last visible one. Everything else in the split is a fixed pixel size,
- * so a resize anywhere is absorbed here.
+ * the last visible one that is not the Claude panel. Everything else in the
+ * split is a fixed pixel size, so a resize anywhere is absorbed here.
+ *
+ * The Claude panel is excluded because it is a side panel: it sits at the end
+ * of the row it shares with the editor, so the plain "last one" rule would
+ * hand it every pixel a wider window brings and leave the editor -- where the
+ * work happens -- exactly as narrow as it was.
  */
 function growChild(node) {
   const vis = node.children.filter(visible);
-  return vis.find((c) => holds(c, 'output')) ?? vis[vis.length - 1] ?? null;
+  const body = vis.filter((c) => !holds(c, 'assistant'));
+  return vis.find((c) => holds(c, 'output'))
+      ?? body[body.length - 1]
+      ?? vis[vis.length - 1] ?? null;
 }
 
 /**
@@ -270,15 +305,30 @@ function swapPanes(a, b) {
 // Rendering
 // ---------------------------------------------------------------------------
 
+/** Seam ids handed out in the current render, so no two can collide. */
+const seamIds = new Set();
+
 /**
- * A seam. Its id names the tile in front of it -- `#split-sidebar`,
- * `#split-prompt`, `#split-editor` in the default layout -- which is also
- * the tile it resizes.
+ * A seam. Its id names the tile the seam actually resizes -- `#split-sidebar`,
+ * `#split-prompt`, `#split-editor` in the default layout -- which is the same
+ * tile its label names. That is usually the tile in front of it, but not when
+ * the tile in front is the elastic one: there the seam resizes what is behind
+ * it instead, and the id follows.
+ *
+ * Tree surgery can still put two seams in front of the same tile (drop the
+ * results panel beside the exercise list and both seams answer to the
+ * sidebar), so the second one to be built takes a suffix. Duplicate ids break
+ * every query in this module and every test that names a seam, and a layout
+ * anyone can rearrange by hand cannot promise they never happen.
  */
 function splitter(node, i, axis) {
   const bar = document.createElement('div');
-  const lead = leadPane(node.children[i - 1]);
-  bar.id = `split-${lead}`;
+  const target = seamTarget(node, i);
+  const lead = leadPane(target.node ?? node.children[i - 1]);
+  let id = `split-${lead}`;
+  for (let n = 2; seamIds.has(id); n++) id = `split-${lead}-${n}`;
+  seamIds.add(id);
+  bar.id = id;
   bar.className = `splitter ${axis === 'x' ? 'split-col' : 'split-row'}`;
   bar.setAttribute('role', 'separator');
   bar.setAttribute('aria-orientation', axis === 'x' ? 'vertical' : 'horizontal');
@@ -324,6 +374,7 @@ function render() {
   const root = host();
   if (!root) return;
   const keep = saveFocus();
+  seamIds.clear();
   root.replaceChildren(build(tree));
   restoreFocus(keep);
 }
@@ -738,9 +789,20 @@ function adopt(saved) {
   if (!stored) return defaultTree();
   tree = stored;
   collapse();
-  // A tile the stored tree lost comes back at the bottom rather than vanishing.
+  // A tile the stored tree lost comes back at the bottom rather than
+  // vanishing -- except the Claude panel, which belongs beside the editor and
+  // would be useless stretched across the foot of the window.
   for (const pane of PANES) {
     if (seen.has(pane)) continue;
+    if (pane === 'assistant' && findLeaf('editor')) {
+      tree = {
+        dir: 'col', size: null, sizeAxis: null,
+        children: [tree, leaf(pane, DEFAULT[pane].x, 'x')],
+      };
+      collapse();
+      placeBeside('assistant', 'editor', 'right');
+      continue;
+    }
     tree = {
       dir: 'col', size: null, sizeAxis: null,
       children: [tree, leaf(pane, DEFAULT[pane].y, 'y', pane === 'prompt')],
