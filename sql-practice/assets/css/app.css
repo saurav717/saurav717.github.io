@@ -917,13 +917,17 @@ table.grid td.is-num { text-align: right; }
 /* The panel is a tile like any other now, so it carries no edge of its own --
    the gap between slabs is the separation. */
 .assistant-pane { border-left: 0; }
+/* Five controls in a panel that is 360px wide on a phone: the row wraps rather
+   than pushing the tile wider than the screen, and the model picker is what
+   gives up its width first. */
 .chat-toolbar {
-  display: flex; align-items: center; gap: 6px; flex: none;
+  display: flex; align-items: center; gap: 6px; flex: none; flex-wrap: wrap;
   padding: 6px 10px; border-bottom: 1px solid var(--border-soft);
 }
 #chat-model {
   background: var(--btn); color: var(--text); border: 1px solid var(--glass-edge);
   border-radius: var(--pill); padding: 4px 10px; font: 12px var(--sans); max-width: 190px;
+  flex: 0 1 auto; min-width: 0;
   box-shadow: inset 0 1px 0 var(--glass-hi);
 }
 #chat-model:hover { background: var(--btn-hi); }
@@ -948,6 +952,42 @@ p.chat-set-note { margin: 0 0 8px; }
 /* The sentence under a heading, not the note beside a checkbox: it is not in
    the row grid, so it keeps the full width rather than the second column. */
 .chat-set-lede { grid-column: auto; margin-bottom: 10px; }
+
+/* The History drawer. Same slab as the ⚙ drawer -- they open in the same slot
+   above the thread and only one of them is ever out. */
+.chat-history {
+  flex: none; max-height: 45%; overflow-y: auto;
+  padding: 10px 12px 12px; border-bottom: 1px solid var(--border-soft);
+  background: var(--bg-raise);
+}
+.chat-hist-row {
+  display: flex; align-items: stretch; gap: 4px;
+  border-radius: var(--radius-sm);
+}
+.chat-hist-row:hover { background: var(--btn); }
+.chat-hist-row.chat-hist-on { background: var(--accent-dim); }
+.chat-hist-open {
+  flex: 1 1 auto; min-width: 0; display: grid; gap: 1px; text-align: left;
+  background: none; border: 0; color: var(--text); cursor: pointer;
+  padding: 6px 8px; font: 13px var(--sans); border-radius: var(--radius-sm);
+}
+.chat-hist-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-hist-meta { color: var(--text-mute); font-size: 11.5px; }
+.chat-hist-del {
+  flex: none; background: none; border: 0; color: var(--text-mute);
+  cursor: pointer; padding: 0 8px; border-radius: var(--radius-sm); font-size: 12px;
+  opacity: 0; transition: opacity .15s var(--ease), color .15s var(--ease);
+}
+.chat-hist-row:hover .chat-hist-del, .chat-hist-del:focus-visible { opacity: 1; }
+.chat-hist-del:hover { color: var(--bad); background: var(--bad-dim); }
+@media (hover: none) { .chat-hist-del { opacity: 1; } }
+.chat-hist-foot {
+  display: flex; align-items: flex-end; gap: 10px; margin-top: 8px;
+  padding-top: 8px; border-top: 1px solid var(--border-soft);
+}
+.chat-hist-foot .chat-set-note { flex: 1 1 auto; margin: 0; }
+.chat-hist-foot .btn { flex: none; }
+#chat-history-count { margin-left: 2px; }
 
 .chat-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 12px 12px 4px; }
 
@@ -1089,7 +1129,8 @@ p.chat-set-note { margin: 0 0 8px; }
    glass around an opaque brick. */
 .tile-float .chat-toolbar,
 .tile-float .chat-compose { background: transparent; }
-.tile-float .chat-settings { background: rgb(var(--win-rgb) / .35); }
+.tile-float .chat-settings,
+.tile-float .chat-history { background: rgb(var(--win-rgb) / .35); }
 .tile-float #chat-input,
 .tile-float #chat-model,
 .tile-float #chat-key-input,
@@ -1231,6 +1272,72 @@ body.win-moving .tile-float { transition: none; }
   }
 }
 
+/* ---------- Ask Claude ----------
+   The panel is the one thing on this page nobody discovers by accident, so its
+   button gets a standing highlight the rest of the bar does not have. The
+   Sandbox button beside it announces a *mode*, which is why it is allowed to
+   fill with the accent and blink; this one only has to be findable, so it is
+   lit the way the tiles are -- a frosted pane with a hairline edge, a faint
+   accent-tinted ring, and a slow specular sweep across the glass. No accent
+   fill, no saturated colour, nothing moving fast enough to pull your eye off
+   the query you are writing. */
+#btn-assistant {
+  position: relative; isolation: isolate; overflow: hidden;
+  color: var(--text);
+  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
+  border-color: var(--glass-edge);
+  -webkit-backdrop-filter: var(--blur-sm); backdrop-filter: var(--blur-sm);
+  box-shadow: inset 0 1px 0 var(--glass-hi),
+              0 0 0 1px rgb(var(--accent-rgb) / .16),
+              0 2px 10px rgba(0,0,0,.18);
+}
+#btn-assistant:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.09));
+  box-shadow: inset 0 1px 0 var(--glass-hi),
+              0 0 0 1px rgb(var(--accent-rgb) / .30),
+              0 6px 18px rgba(0,0,0,.22);
+}
+/* The sweep. Behind the label (z-index below the button's own text, inside the
+   stacking context the `isolation` above opens) and mostly idle -- it crosses
+   once, then waits out the rest of the cycle. */
+#btn-assistant::after {
+  content: ''; position: absolute; inset: -1px; z-index: -1; pointer-events: none;
+  background: linear-gradient(104deg,
+              rgba(255,255,255,0) 38%, rgba(255,255,255,.20) 50%, rgba(255,255,255,0) 62%);
+  transform: translateX(-130%);
+  animation: glass-sweep 9s var(--ease) infinite;
+}
+@keyframes glass-sweep { 0% { transform: translateX(-130%); } 24%, 100% { transform: translateX(130%); } }
+/* Open. A shade deeper and a quiet dot -- the same "not by colour alone" rule
+   the Sandbox button follows, minus the pulse. */
+#btn-assistant[aria-pressed="true"] {
+  background: linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.08));
+  box-shadow: inset 0 1px 0 var(--glass-hi),
+              0 0 0 1px rgb(var(--accent-rgb) / .38),
+              0 2px 12px rgba(0,0,0,.22);
+}
+#btn-assistant[aria-pressed="true"]::before {
+  content: ''; width: 6px; height: 6px; border-radius: var(--pill);
+  background: var(--accent); opacity: .85; flex: none;
+}
+/* Light mode has white glass on a pale wall, so the fill alone gives nothing
+   to see; the edge does the work there instead. */
+[data-theme="light"] #btn-assistant {
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.62));
+  box-shadow: inset 0 1px 0 var(--glass-hi),
+              0 0 0 1px rgb(var(--accent-rgb) / .22),
+              0 2px 10px rgba(24,40,82,.10);
+}
+[data-theme="light"] #btn-assistant::after {
+  background: linear-gradient(104deg,
+              rgba(255,255,255,0) 38%, rgba(255,255,255,.75) 50%, rgba(255,255,255,0) 62%);
+}
+[data-theme="light"] #btn-assistant[aria-pressed="true"] {
+  box-shadow: inset 0 1px 0 var(--glass-hi),
+              0 0 0 1px rgb(var(--accent-rgb) / .42),
+              0 2px 12px rgba(24,40,82,.14);
+}
+
 /* ---------- sandbox ---------- */
 body.sandbox #btn-check,
 body.sandbox #btn-hint,
@@ -1296,6 +1403,7 @@ body.sandbox .hints { display: none; }
   .tile-float .win-grip, .win-ctl .win-tint { display: none !important; }
   .tile-float .tile-bar { height: 24px; }
   .chat-body { max-height: 340px; }
+  .chat-history { max-height: 260px; }
   .editor-wrap { height: 216px; flex: none; }
   .hints, .solution { max-height: none; }
   .toolbar { overflow-x: auto; }
@@ -1317,6 +1425,10 @@ body.sandbox .hints { display: none; }
   .topbar-right { gap: 6px; }
   .topbar-right .btn { padding: 6px 8px; }
   #btn-assistant { padding: 6px 9px; }
+  /* Open, the button grows a state dot. At this width it has already traded
+     its label for a ✦ and the bar has no 13px to spare, so the dot goes --
+     aria-pressed still carries the state, and the frame still deepens. */
+  #btn-assistant[aria-pressed="true"]::before { display: none; }
   .topbar { gap: 8px; padding: 0 8px; }
   .btn kbd { display: none; }
 }
@@ -1368,9 +1480,12 @@ body.sandbox .hints { display: none; }
   }
   body::before, body::after { display: none; }
   .tile, .topbar, .boot-card, .tbl-card, .tile-bar, table.grid th,
-  .editor-gutter, .chat-insert, #dock-drop, #dock-ghost {
+  .editor-gutter, .chat-insert, #btn-assistant, #dock-drop, #dock-ghost {
     -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
   }
+  /* A sweep is a highlight travelling over glass. With the glass switched off
+     it is just a white bar crossing a button, so it goes too. */
+  #btn-assistant::after { display: none; }
 }
 
 /* ---------- reduced motion ----------
@@ -1380,6 +1495,7 @@ body.sandbox .hints { display: none; }
   body::before { animation: none; }
   .boot-card, .tbl-card, .verdict { animation: none; }
   #btn-sandbox[aria-pressed="true"]::before { animation: none; }
+  #btn-assistant::after { animation: none; opacity: 0; }
   .btn:hover { transform: none; }
   *, *::before, *::after {
     transition-duration: .01ms !important;

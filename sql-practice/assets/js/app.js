@@ -3,15 +3,15 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js?v=20260919-column-names';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260919-column-names';
-import * as activity from './activity.js?v=20260919-column-names';
-import * as beacon from './beacon.js?v=20260919-column-names';
-import * as layout from './layout.js?v=20260919-column-names';
-import * as win from './float.js?v=20260919-column-names';
-import * as assistant from './assistant.js?v=20260919-column-names';
-import * as tabletip from './tabletip.js?v=20260919-column-names';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260919-column-names';
+import * as engine from './engine.js?v=20260919-chat-history';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260919-chat-history';
+import * as activity from './activity.js?v=20260919-chat-history';
+import * as beacon from './beacon.js?v=20260919-chat-history';
+import * as layout from './layout.js?v=20260919-chat-history';
+import * as win from './float.js?v=20260919-chat-history';
+import * as assistant from './assistant.js?v=20260919-chat-history';
+import * as tabletip from './tabletip.js?v=20260919-chat-history';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260919-chat-history';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -1202,7 +1202,14 @@ function setAssistantOpen(open) {
   state.assistantOpen = !!open;
   saveState();
   layout.setHidden('assistant', !open);
-  $('#btn-assistant').classList.toggle('btn-primary', !!open);
+  // aria-pressed, not a fill: the button carries a standing glass highlight of
+  // its own (see app.css) and lighting it up in accent when the panel is open
+  // made the busiest control in the bar the loudest thing on the page.
+  const btn = $('#btn-assistant');
+  btn.setAttribute('aria-pressed', String(!!open));
+  btn.title = open
+    ? 'Ask Claude is open — click to close it (⌘\\)'
+    : 'Ask Claude about the exercise, the schema, or your query (⌘\\)';
   if (open) {
     assistant.refresh();
     $('#chat-input')?.focus();
