@@ -318,6 +318,98 @@ export function statementAt(script, cursor = 0) {
 // --- grading ----------------------------------------------------------------
 const rowKey = (r) => JSON.stringify(r);
 
+/** Reorder one row so that perm[j] -- a candidate column -- lands in slot j. */
+const permuteRow = (row, perm) => perm.map(i => row[i]);
+
+/**
+ * Do the candidate's rows equal the expected ones once `perm` is applied?
+ * Row order only matters when the exercise pins it.
+ */
+function rowsAgree(gotRows, wantRows, perm, ordered) {
+  const a = gotRows.map(r => rowKey(permuteRow(r, perm)));
+  const b = wantRows.map(rowKey);
+  if (!ordered) { a.sort(); b.sort(); }
+  for (let i = 0; i < b.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+// A ten-column answer has 3.6M orderings, so the search is both pruned (a
+// candidate column can only fill a slot whose values it actually holds) and
+// budgeted. Both numbers are far above anything the curriculum asks for.
+const PERM_MAX_COLUMNS = 10;
+const PERM_MAX_TRIES = 512;
+
+/**
+ * Is the candidate the right answer with its SELECT list in a different order?
+ *
+ * Grading compares rows position by position, so swapping two columns turns a
+ * correct query into "wrong values" -- which is true but useless as feedback.
+ * This looks for a reordering of the candidate's columns that reproduces the
+ * expected result exactly, and returns it (perm[j] = the candidate column that
+ * belongs in expected slot j), or null when no reordering works.
+ *
+ * The identity permutation is never returned: that case has already passed.
+ */
+export function findColumnPermutation(got, want, ordered = false) {
+  const n = want.columns.length;
+  if (n < 2 || n !== got.columns.length || n > PERM_MAX_COLUMNS) return null;
+  if (got.rows.length !== want.rows.length) return null;
+
+  // Per-column signature: the values that column holds, as a sequence when the
+  // row order is fixed and as a multiset otherwise. A column can only fill a
+  // slot with the same signature, which collapses the search in practice.
+  const sig = (rows, i) => {
+    const vals = rows.map(r => JSON.stringify(r[i]));
+    if (!ordered) vals.sort();
+    return vals.join('\u0000');
+  };
+  const gotSig = got.columns.map((_, i) => sig(got.rows, i));
+  const wantSig = want.columns.map((_, j) => sig(want.rows, j));
+
+  const perm = new Array(n).fill(-1);
+  const used = new Array(n).fill(false);
+  let tries = 0;
+
+  const solve = (j) => {
+    if (j === n) return ++tries <= PERM_MAX_TRIES
+      && rowsAgree(got.rows, want.rows, perm, ordered);
+    for (let i = 0; i < n; i++) {
+      if (used[i] || gotSig[i] !== wantSig[j]) continue;
+      used[i] = true; perm[j] = i;
+      if (solve(j + 1)) return true;
+      used[i] = false; perm[j] = -1;
+    }
+    return false;
+  };
+
+  if (!solve(0)) return null;
+  return perm.every((i, j) => i === j) ? null : perm;
+}
+
+/**
+ * The advisory a column-order match carries: right answer, wrong SELECT list
+ * order. Graded as a pass, because the rows are the rows.
+ */
+function columnOrderVerdict(got, want, perm) {
+  const mapped = perm.map(i => got.columns[i]);
+  return {
+    pass: true,
+    reason: 'column-order',
+    got, want,
+    columnOrder: { expected: want.columns, got: got.columns, permutation: perm },
+    detail:
+      'Your rows are right -- your columns just come back in a different order, '
+      + 'so this counts as solved.\n\n'
+      + `  the brief asks for:  ${want.columns.join(', ')}\n`
+      + `  your query returns:  ${got.columns.join(', ')}\n\n`
+      + `Reordering your SELECT list to ${mapped.join(', ')} matches the brief exactly. `
+      + 'Worth doing anyway: the column order is part of the output contract, '
+      + 'and any grader that compares column by column -- an interview '
+      + 'rubric, a dbt test, a downstream INSERT -- reads a reordered SELECT '
+      + 'list as a wrong answer.',
+  };
+}
+
 /**
  * Compare a candidate query's result against the reference solution.
  * Returns { pass, reason, detail, got, want }.
@@ -362,12 +454,25 @@ export async function grade(userSql, exercise) {
   const gotKeys = got.rows.map(rowKey);
   const wantKeys = want.rows.map(rowKey);
 
-  if (exercise.ordered) {
+  // Rows are compared position by position, so a correct answer whose SELECT
+  // list is in a different order looks like wrong values. Before calling
+  // anything wrong, check for that -- it grades as a pass with a note.
+  const orderedCmp = !!exercise.ordered;
+  const asColumnOrder = () => {
+    const perm = findColumnPermutation(got, want, orderedCmp);
+    return perm ? columnOrderVerdict(got, want, perm) : null;
+  };
+
+  if (orderedCmp) {
     for (let i = 0; i < wantKeys.length; i++) {
       if (gotKeys[i] === wantKeys[i]) continue;
       const sameMultiset =
         [...gotKeys].sort().join('') === [...wantKeys].sort().join('');
       const fmt = (r) => r.map(v => v === null ? 'NULL' : v).join(' | ');
+      if (!sameMultiset) {
+        const swapped = asColumnOrder();
+        if (swapped) return swapped;
+      }
       return {
         pass: false, reason: sameMultiset ? 'order' : 'values', got, want, firstBadRow: i,
         detail: sameMultiset
@@ -380,6 +485,8 @@ export async function grade(userSql, exercise) {
     const b = [...wantKeys].sort();
     for (let i = 0; i < b.length; i++) {
       if (a[i] === b[i]) continue;
+      const swapped = asColumnOrder();
+      if (swapped) return swapped;
       const missing = JSON.parse(b[i]).map(v => v === null ? 'NULL' : v).join(' | ');
       return {
         pass: false, reason: 'values', got, want,

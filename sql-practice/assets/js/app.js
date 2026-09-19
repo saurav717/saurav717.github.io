@@ -3,15 +3,15 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js?v=20260918-window-move';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260918-window-move';
-import * as activity from './activity.js?v=20260918-window-move';
-import * as beacon from './beacon.js?v=20260918-window-move';
-import * as layout from './layout.js?v=20260918-window-move';
-import * as win from './float.js?v=20260918-window-move';
-import * as assistant from './assistant.js?v=20260918-window-move';
-import * as tabletip from './tabletip.js?v=20260918-window-move';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260918-window-move';
+import * as engine from './engine.js?v=20260919-column-order';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260919-column-order';
+import * as activity from './activity.js?v=20260919-column-order';
+import * as beacon from './beacon.js?v=20260919-column-order';
+import * as layout from './layout.js?v=20260919-column-order';
+import * as win from './float.js?v=20260919-column-order';
+import * as assistant from './assistant.js?v=20260919-column-order';
+import * as tabletip from './tabletip.js?v=20260919-column-order';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260919-column-order';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -417,6 +417,7 @@ function renderSidebar() {
       const st = exerciseStatus(ex.id);
       const btn = document.createElement('button');
       btn.className = 'ex-item' + (ex.id === state.current && !sandbox ? ' ex-item-on' : '');
+      btn.dataset.id = ex.id;          // so the list is addressable, in tests and in the DOM
       btn.innerHTML =
         `<span class="ex-state ex-state-${st}">${STATE_GLYPH[st]}</span>` +
         `<span class="ex-name">${esc(ex.title)}</span>` +
@@ -434,9 +435,28 @@ function renderSidebar() {
 // ---------------------------------------------------------------------------
 // Rendering: exercise
 // ---------------------------------------------------------------------------
+/**
+ * Turn Sandbox mode on or off, and make every surface that advertises it agree:
+ * the body class the layout and the CSS key off, and the toolbar button itself.
+ *
+ * It lives in one function because the button used to be lit from the click
+ * handler alone -- so picking an exercise dropped you out of the sandbox but
+ * left the button looking like you were still in it.
+ */
+function setSandbox(on) {
+  sandbox = on;
+  document.body.classList.toggle('sandbox', on);
+  const btn = $('#btn-sandbox');
+  btn.classList.toggle('btn-primary', on);
+  btn.classList.toggle('btn-ghost', !on);
+  btn.setAttribute('aria-pressed', String(on));
+  btn.title = on
+    ? 'Sandbox is ON — any SQL runs, including DDL and DML. Click to go back to the exercise.'
+    : 'Free-form query editor';
+}
+
 function selectExercise(id) {
-  sandbox = false;
-  document.body.classList.remove('sandbox');
+  setSandbox(false);
   state.current = id;
   saveState();
   renderExercise();
@@ -693,7 +713,9 @@ async function doCheck() {
   noteRun({
     what: 'Check answer',
     sql,
-    outcome: verdict.pass ? 'Correct.' : `Not correct (${verdict.reason}): ${verdict.detail}`,
+    outcome: verdict.pass
+      ? (verdict.reason === 'column-order' ? `Correct, with a note: ${verdict.detail}` : 'Correct.')
+      : `Not correct (${verdict.reason}): ${verdict.detail}`,
   });
 
   // verdict.got is only set when the user's query executed. A query that
@@ -707,20 +729,28 @@ async function doCheck() {
 
   const dot = $('#feedback-dot');
   dot.hidden = false;
-  dot.className = 'dot' + (verdict.pass ? ' dot-good' : '');
+  dot.className = 'dot'
+    + (verdict.pass ? (verdict.reason === 'column-order' ? ' dot-warn' : ' dot-good') : '');
 
   if (verdict.pass) {
     if (!state.solved[ex.id]) state.solved[ex.id] = new Date().toISOString();
     saveState();
     const next = nextUnsolved();
+    // A pass can still carry something worth reading -- right rows, columns in
+    // a different order. That gets the amber card, not the green one, so the
+    // note is not mistaken for the usual "Correct." line.
+    const noted = verdict.reason === 'column-order';
     $('#tab-feedback').innerHTML =
-      `<div class="verdict verdict-good"><h3>Correct</h3><div>${esc(verdict.detail)}</div></div>` +
+      `<div class="verdict ${noted ? 'verdict-warn' : 'verdict-good'}">`
+      + `<h3>${noted ? 'Correct — but check the column order' : 'Correct'}</h3>`
+      + `${noted ? `<pre>${esc(verdict.detail)}</pre>` : `<div>${esc(verdict.detail)}</div>`}</div>` +
       (next
         ? `<p class="placeholder">Next unsolved: <button type="button" id="btn-next-unsolved" class="btn btn-ghost">${esc(next.title)}</button></p>`
         : '<p class="placeholder">That was the last one. All exercises solved.</p>');
     if (next) $('#btn-next-unsolved').addEventListener('click', () => selectExercise(next.id));
     if (verdict.got) { renderGrid(verdict.got); }
-    setStatus('Correct', `${verdict.got.rowCount.toLocaleString()} rows`);
+    setStatus(noted ? 'Correct · column order differs' : 'Correct',
+              `${verdict.got.rowCount.toLocaleString()} rows`);
   } else {
     const title = {
       error: 'Query error', shape: 'Wrong number of columns', rowcount: 'Wrong number of rows',
@@ -1311,9 +1341,7 @@ function wire() {
   });
 
   $('#btn-sandbox').addEventListener('click', () => {
-    sandbox = !sandbox;
-    document.body.classList.toggle('sandbox', sandbox);
-    $('#btn-sandbox').classList.toggle('btn-primary', sandbox);
+    setSandbox(!sandbox);
     if (sandbox) {
       setEditor(state.drafts.__sandbox ?? '-- Sandbox: any SQL, including DDL and DML.\n-- "Reset data" restores the dataset.\n\nSELECT table_name, estimated_size\nFROM duckdb_tables()\nORDER BY table_name;');
     } else {

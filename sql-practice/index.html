@@ -13,8 +13,8 @@
      api.anthropic.com and no API key is kept in the browser. Empty here so a
      local checkout reaches nobody. See proxy/README.md. -->
 <meta name="claude-endpoint" content="">
-<meta name="build" content="20260918-window-move">
-<link rel="stylesheet" href="assets/css/app.css?v=20260918-window-move">
+<meta name="build" content="20260919-column-order">
+<link rel="stylesheet" href="assets/css/app.css?v=20260919-column-order">
 </head>
 <body>
 
@@ -47,7 +47,8 @@
     <button id="btn-assistant" class="btn btn-ghost" aria-label="Ask Claude"
             title="Ask Claude about the exercise, the schema, or your query (⌘\)"><span
             class="btn-wide">Ask Claude</span><span class="btn-narrow" aria-hidden="true">✦</span></button>
-    <button id="btn-sandbox" class="btn btn-ghost" title="Free-form query editor">Sandbox</button>
+    <button id="btn-sandbox" class="btn btn-ghost" aria-pressed="false"
+            title="Free-form query editor">Sandbox</button>
     <button id="btn-reset-db" class="btn btn-ghost" title="Reload the dataset from scratch">Reset data</button>
     <button id="btn-reset-layout" class="btn btn-icon"
             title="Put the panels and tabs back where they started">⊞</button>
@@ -302,6 +303,6 @@
 
 </main>
 
-<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260918-window-move"></script>
+<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260919-column-order"></script>
 </body>
 </html>
