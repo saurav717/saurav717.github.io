@@ -3,15 +3,15 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js?v=20260919-column-order';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260919-column-order';
-import * as activity from './activity.js?v=20260919-column-order';
-import * as beacon from './beacon.js?v=20260919-column-order';
-import * as layout from './layout.js?v=20260919-column-order';
-import * as win from './float.js?v=20260919-column-order';
-import * as assistant from './assistant.js?v=20260919-column-order';
-import * as tabletip from './tabletip.js?v=20260919-column-order';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260919-column-order';
+import * as engine from './engine.js?v=20260919-column-names';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260919-column-names';
+import * as activity from './activity.js?v=20260919-column-names';
+import * as beacon from './beacon.js?v=20260919-column-names';
+import * as layout from './layout.js?v=20260919-column-names';
+import * as win from './float.js?v=20260919-column-names';
+import * as assistant from './assistant.js?v=20260919-column-names';
+import * as tabletip from './tabletip.js?v=20260919-column-names';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260919-column-names';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -756,6 +756,10 @@ async function doCheck() {
       error: 'Query error', shape: 'Wrong number of columns', rowcount: 'Wrong number of rows',
       order: 'Wrong order', values: 'Wrong values', empty: 'Nothing to check',
       'not-a-query': 'Not a query',
+      // Named-column diagnoses: the heading already says where to look.
+      'column-values': 'Wrong values in a named column',
+      'column-labels': 'Right values, wrong column names',
+      'row-pairing': 'Right columns, wrong rows',
     }[verdict.reason] || 'Not correct yet';
     $('#tab-feedback').innerHTML =
       `<div class="verdict verdict-bad"><h3>${esc(title)}</h3><pre>${esc(verdict.detail)}</pre></div>` +
