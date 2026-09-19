@@ -13,8 +13,8 @@
      api.anthropic.com and no API key is kept in the browser. Empty here so a
      local checkout reaches nobody. See proxy/README.md. -->
 <meta name="claude-endpoint" content="">
-<meta name="build" content="20260919-chat-history">
-<link rel="stylesheet" href="assets/css/app.css?v=20260919-chat-history">
+<meta name="build" content="20260919-word-wrap">
+<link rel="stylesheet" href="assets/css/app.css?v=20260919-word-wrap">
 </head>
 <body>
 
@@ -174,6 +174,9 @@
       <button id="btn-clear"    class="btn btn-ghost" title="Clear the editor">Clear</button>
       <button id="btn-lines"    class="btn btn-ghost btn-icon" aria-pressed="false"
               title="Show or hide line numbers">#</button>
+      <button id="btn-wrap"     class="btn btn-ghost btn-icon" aria-pressed="false"
+              title="Wrap long lines instead of scrolling sideways"
+              aria-label="Wrap long lines instead of scrolling sideways">↩</button>
     </div>
 
     <div class="editor-wrap">
@@ -306,6 +309,6 @@
 
 </main>
 
-<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260919-chat-history"></script>
+<script type="module" data-engine-source="cdn" src="assets/js/app.js?v=20260919-word-wrap"></script>
 </body>
 </html>

@@ -689,6 +689,28 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 .editor-wrap.with-gutter .editor-layer {
   padding-left: calc(var(--gutter-digits, 2) * 1ch + 32px);
 }
+
+/* Word wrap. Both text layers have to break in exactly the same places, or
+   the coloured text slides out from under the caret typing it -- so the rule
+   is set on the layer, never on one of them. `break-spaces` rather than
+   `pre-wrap`: a run of trailing spaces stays measurable in both layers, which
+   is what keeps indented SQL lined up after a wrap. The sideways scrollbar
+   goes with it; there is nothing left off the right edge to scroll to. */
+.editor-wrap.wrapped .editor-layer {
+  white-space: break-spaces; overflow-wrap: break-word; overflow-x: hidden;
+}
+
+/* A hidden twin of the text layers, asked one question: how many rows does
+   each line take once it has wrapped? Only the browser knows -- the answer
+   depends on the font it actually loaded and on the width left over beside
+   the gutter -- and a number half a row out is worse than no number at all.
+   Width, font and tab size are copied from the editor at measuring time. */
+.editor-measure {
+  position: absolute; top: 0; left: 0; z-index: -1;
+  margin: 0; padding: 0; border: 0;
+  visibility: hidden; pointer-events: none;
+  white-space: break-spaces; overflow-wrap: break-word;
+}
 /* Transparent, not the page colour: this layer is the visible text, and an
    opaque fill here would punch an opaque rectangle through the glass. */
 #editor-highlight { pointer-events: none; color: var(--text); background: transparent; z-index: 1; }

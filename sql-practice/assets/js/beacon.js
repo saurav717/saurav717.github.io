@@ -15,7 +15,7 @@
 //  -- so `npm run serve` and a plain checkout never phone anywhere.
 // ===========================================================================
 
-import { deviceId } from './activity.js?v=20260919-chat-history';
+import { deviceId } from './activity.js?v=20260919-word-wrap';
 
 /** Endpoint from <meta name="collector-endpoint">, or '' when unconfigured. */
 function endpoint() {
