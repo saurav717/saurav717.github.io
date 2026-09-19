@@ -30,6 +30,16 @@
  *  key with it and exporting progress never carries the key out. */
 const KEY_STORE = 'sqlpractice.anthropic-key';
 const PREFS_STORE = 'sqlpractice.assistant.v1';
+/** Past conversations. Its own key again, for the same reason: clearing
+ *  progress must not take the chats, and the key must never ride along. */
+const HISTORY_STORE = 'sqlpractice.assistant.history.v1';
+
+/** How much history to keep. localStorage is a few megabytes for the whole
+ *  origin and the seed data is already in it, so the cap is deliberately
+ *  modest -- and a write that still does not fit drops the oldest chats
+ *  rather than throwing the newest one away. */
+const HISTORY_MAX_CHATS = 40;
+const HISTORY_MAX_CHARS = 20000;   // per message, stored; the thread on screen is untouched
 
 /** Models offered in the picker. `adaptive` is false for the ones that do not
  *  take adaptive thinking or an effort level -- sending either is a 400. */
@@ -123,6 +133,155 @@ function loadPrefs() {
 }
 function savePrefs() {
   try { localStorage.setItem(PREFS_STORE, JSON.stringify(prefs)); } catch { /* private mode */ }
+}
+
+// ---------------------------------------------------------------------------
+// History
+// ---------------------------------------------------------------------------
+//
+// Every conversation is filed in this browser as it happens, so closing the
+// panel -- or the tab -- no longer throws the answer away. There is no server
+// here and there is not going to be one, so "your chats" means localStorage:
+// this browser, this machine, nobody else's, and gone when the browser's site
+// data is cleared. The History button says as much, because a list titled
+// "previous chats" otherwise implies an account that does not exist.
+//
+// What is stored is the text of the turns, not the <screen> block that rode
+// along with them: that block is rebuilt from the live page every time a
+// message is sent, and a stale copy of somebody's editor is exactly the thing
+// not worth keeping on disk. The reasoning summaries go the same way -- they
+// are the longest part of a thread and the least useful to reread.
+
+/** [{ id, title, created, updated, turns: [{ role, content }] }], newest first. */
+let history = loadHistory();
+/** Which stored chat the thread on screen is. Null until it has been filed. */
+let threadId = null;
+
+function loadHistory() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(HISTORY_STORE) || '[]');
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter(c => c && typeof c.id === 'string' && Array.isArray(c.turns) && c.turns.length)
+      .map(c => ({
+        id: c.id,
+        title: String(c.title || '').slice(0, 120),
+        created: Number(c.created) || Date.now(),
+        updated: Number(c.updated) || Number(c.created) || Date.now(),
+        turns: c.turns
+          .filter(t => t && (t.role === 'user' || t.role === 'assistant'))
+          .map(t => ({ role: t.role, content: String(t.content ?? '') })),
+      }))
+      .filter(c => c.turns.length)
+      .slice(0, HISTORY_MAX_CHATS);
+  } catch { return []; }
+}
+
+/**
+ * Write the list back, shedding the oldest chats until it fits.
+ *
+ * A quota error here must not lose the conversation the learner is in the
+ * middle of, so the newest entry is the last thing given up -- and if even one
+ * chat will not fit, the panel carries on with the in-memory list and simply
+ * stops persisting.
+ */
+function saveHistory() {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    try {
+      localStorage.setItem(HISTORY_STORE, JSON.stringify(history));
+      return true;
+    } catch {
+      if (history.length <= 1) break;
+      history = history.slice(0, Math.max(1, Math.floor(history.length / 2)));
+    }
+  }
+  try { localStorage.removeItem(HISTORY_STORE); } catch { /* private mode */ }
+  return false;
+}
+
+const chatId = () => `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+/** A chat is named after the question that started it. */
+function titleFor(turns) {
+  const first = turns.find(t => t.role === 'user' && t.content.trim());
+  const line = (first?.content ?? '').replace(/\s+/g, ' ').trim();
+  if (!line) return 'Untitled chat';
+  return line.length > 70 ? `${line.slice(0, 69)}…` : line;
+}
+
+/** The turns as they are stored: text only, capped, and nothing half-written. */
+function storableTurns() {
+  return turns
+    .filter(t => t.content && t.content.trim() && !t.streaming)
+    .map(t => ({ role: t.role, content: t.content.slice(0, HISTORY_MAX_CHARS) }));
+}
+
+/**
+ * File the thread on screen. Called after every completed answer, so a chat is
+ * in the list the moment it has one -- there is no Save button to forget.
+ */
+function rememberThread() {
+  const stored = storableTurns();
+  if (!stored.length) return;
+  const now = Date.now();
+  const at = history.findIndex(c => c.id === threadId);
+  const entry = {
+    id: threadId ?? (threadId = chatId()),
+    title: at >= 0 ? history[at].title : titleFor(stored),
+    created: at >= 0 ? history[at].created : now,
+    updated: now,
+    turns: stored,
+  };
+  if (at >= 0) history.splice(at, 1);
+  history.unshift(entry);                       // newest first, and a reply promotes it
+  if (history.length > HISTORY_MAX_CHATS) history.length = HISTORY_MAX_CHATS;
+  saveHistory();
+  updateHistoryCount();
+}
+
+/** Put the current thread away and start an empty one. */
+function startNewChat() {
+  rememberThread();
+  turns = [];
+  threadId = null;
+  renderThread();
+  if (!el.history.hidden) renderHistory();
+}
+
+/** Reopen a stored chat. The one on screen is filed first, never dropped. */
+function openChat(id) {
+  if (live) return;
+  const chat = history.find(c => c.id === id);
+  if (!chat) return;
+  if (threadId !== id) rememberThread();
+  threadId = chat.id;
+  // A copy: editing the live thread must not rewrite the stored one until
+  // rememberThread says so.
+  turns = chat.turns.map(t => ({ ...t }));
+  renderThread();
+  renderHistory();
+  el.body.scrollTop = 0;
+  el.input.focus();
+}
+
+function deleteChat(id) {
+  history = history.filter(c => c.id !== id);
+  saveHistory();
+  if (threadId === id) threadId = null;         // the thread stays on screen, unfiled
+  updateHistoryCount();
+  renderHistory();
+}
+
+function clearHistory() {
+  if (!history.length) return;
+  if (!confirm(`Delete all ${history.length} saved chat${history.length === 1 ? '' : 's'} from this browser? This cannot be undone.`)) return;
+  history = [];
+  threadId = null;
+  // Removed, not written back as an empty list: "delete all" should leave
+  // nothing of the chats behind, not a tidy record that there were some.
+  try { localStorage.removeItem(HISTORY_STORE); } catch { /* private mode */ }
+  updateHistoryCount();
+  renderHistory();
 }
 
 // ---------------------------------------------------------------------------
@@ -284,6 +443,9 @@ export function init(options = {}) {
     reset:    $('#chat-reset'),
     settings: $('#chat-settings'),
     gear:     $('#chat-gear'),
+    history:  $('#chat-history'),
+    histBtn:  $('#chat-history-btn'),
+    histCount:$('#chat-history-count'),
   };
   if (!el.pane) return;
 
@@ -291,17 +453,23 @@ export function init(options = {}) {
     `<option value="${esc(m.id)}"${m.id === prefs.model ? ' selected' : ''}>${esc(m.label)} — ${esc(m.note)}</option>`).join('');
   el.model.addEventListener('change', () => { prefs.model = el.model.value; savePrefs(); });
 
-  el.gear.addEventListener('click', () => {
-    const open = el.settings.hidden;
-    el.settings.hidden = !open;
-    el.gear.classList.toggle('btn-primary', open);
-    if (open) renderSettings();
-  });
+  // The two drawers share the top of the panel, so opening one closes the
+  // other -- both at once leaves the thread itself a two-line slot.
+  el.gear.addEventListener('click', () => { showDrawer(el.settings.hidden ? 'settings' : null); });
+  el.histBtn.addEventListener('click', () => { showDrawer(el.history.hidden ? 'history' : null); });
 
   el.reset.addEventListener('click', () => {
     if (live) return;
-    turns = [];
-    renderThread();
+    startNewChat();
+  });
+
+  // One handler for the whole list, however long it grows.
+  el.history.addEventListener('click', (e) => {
+    const del = e.target.closest('[data-del]');
+    if (del) { e.stopPropagation(); deleteChat(del.dataset.del); return; }
+    if (e.target.closest('#chat-history-clear')) { clearHistory(); return; }
+    const open = e.target.closest('[data-chat]');
+    if (open) openChat(open.dataset.chat);
   });
 
   el.form.addEventListener('submit', (e) => { e.preventDefault(); void send(); });
@@ -331,7 +499,19 @@ export function init(options = {}) {
     if (e.key === 'Enter' && e.target.id === 'chat-key-input') { e.preventDefault(); saveKeyFromCard(); }
   });
 
+  updateHistoryCount();
   renderThread();
+}
+
+/** Show one of the two drawers above the thread, or neither. */
+function showDrawer(which) {
+  el.settings.hidden = which !== 'settings';
+  el.history.hidden = which !== 'history';
+  el.gear.classList.toggle('btn-primary', which === 'settings');
+  el.histBtn.classList.toggle('btn-on', which === 'history');
+  el.histBtn.setAttribute('aria-pressed', String(which === 'history'));
+  if (which === 'settings') renderSettings();
+  if (which === 'history') renderHistory();
 }
 
 function growInput() {
@@ -347,6 +527,59 @@ export function refresh() {
 // ---------------------------------------------------------------------------
 // Rendering
 // ---------------------------------------------------------------------------
+
+/** "just now" / "14 min ago" / "3 days ago" -- enough to find a chat by. */
+function ago(ts) {
+  const secs = Math.max(0, (Date.now() - ts) / 1000);
+  if (secs < 90) return 'just now';
+  const units = [[60, 'min'], [60, 'hour'], [24, 'day'], [7, 'week']];
+  let n = secs, label = 'sec';
+  for (const [size, name] of units) {
+    if (n < size) break;
+    n /= size; label = name;
+  }
+  const whole = Math.floor(n);
+  return `${whole} ${label}${whole === 1 ? '' : 's'} ago`;
+}
+
+/** The drawer behind the History button: every chat this browser has kept. */
+function renderHistory() {
+  if (!el.history) return;
+  const rows = history.map(chat => {
+    const replies = chat.turns.filter(t => t.role === 'assistant').length;
+    const asks = chat.turns.length - replies;
+    const current = chat.id === threadId;
+    return `
+      <div class="chat-hist-row${current ? ' chat-hist-on' : ''}">
+        <button type="button" class="chat-hist-open" data-chat="${esc(chat.id)}"
+                title="${esc(chat.title)}"${current ? ' aria-current="true"' : ''}>
+          <span class="chat-hist-title">${esc(chat.title)}</span>
+          <span class="chat-hist-meta">${asks} question${asks === 1 ? '' : 's'} · ${esc(ago(chat.updated))}${current ? ' · open' : ''}</span>
+        </button>
+        <button type="button" class="chat-hist-del" data-del="${esc(chat.id)}"
+                title="Delete this chat" aria-label="Delete this chat">✕</button>
+      </div>`;
+  }).join('');
+
+  el.history.innerHTML =
+    `<div class="chat-set-title">Previous chats</div>` +
+    (history.length
+      ? `${rows}
+         <div class="chat-hist-foot">
+           <p class="chat-set-note">Kept in this browser only — no account, nothing uploaded.
+              The screen that went with each question is not stored.</p>
+           <button type="button" class="btn btn-ghost btn-mini" id="chat-history-clear">Delete all</button>
+         </div>`
+      : `<p class="chat-set-note chat-set-lede">No chats yet. Every conversation is filed here
+           as soon as Claude answers, and stays in this browser until you delete it.</p>`);
+}
+
+/** The count on the History button, so the drawer advertises itself. */
+function updateHistoryCount() {
+  if (!el.histCount) return;
+  el.histCount.textContent = String(history.length);
+  el.histCount.hidden = history.length === 0;
+}
 
 function renderSettings() {
   const mode = authMode();
@@ -596,5 +829,9 @@ async function send() {
     live = null;
     reply.streaming = false;
     renderThread({ keepScroll: true });
+    // Filed the moment there is something worth keeping -- no Save button to
+    // forget, and a closed tab costs nothing.
+    rememberThread();
+    if (!el.history.hidden) renderHistory();
   }
 }
