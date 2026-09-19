@@ -3,15 +3,15 @@
 //  Keeps no SQL knowledge of its own -- everything about correctness and
 //  portability lives in engine.js, everything about content in curriculum.js.
 // ===========================================================================
-import * as engine from './engine.js?v=20260919-chat-history';
-import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260919-chat-history';
-import * as activity from './activity.js?v=20260919-chat-history';
-import * as beacon from './beacon.js?v=20260919-chat-history';
-import * as layout from './layout.js?v=20260919-chat-history';
-import * as win from './float.js?v=20260919-chat-history';
-import * as assistant from './assistant.js?v=20260919-chat-history';
-import * as tabletip from './tabletip.js?v=20260919-chat-history';
-import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260919-chat-history';
+import * as engine from './engine.js?v=20260919-word-wrap';
+import { EXERCISES, TRACKS, ENGINES, ENGINE_LABELS } from './curriculum.js?v=20260919-word-wrap';
+import * as activity from './activity.js?v=20260919-word-wrap';
+import * as beacon from './beacon.js?v=20260919-word-wrap';
+import * as layout from './layout.js?v=20260919-word-wrap';
+import * as win from './float.js?v=20260919-word-wrap';
+import * as assistant from './assistant.js?v=20260919-word-wrap';
+import * as tabletip from './tabletip.js?v=20260919-word-wrap';
+import { PURPOSE, LINKS, parseSchemaSql, tablesFor } from './schema-doc.js?v=20260919-word-wrap';
 
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -35,7 +35,7 @@ function loadState() {
   const base = {
     solved: {}, attempted: {}, revealed: {}, drafts: {},
     hintsShown: {}, hintsHidden: {}, solutionHidden: {},
-    engine: 'redshift', theme: 'dark', lineNumbers: false,
+    engine: 'redshift', theme: 'dark', lineNumbers: false, wordWrap: false,
     current: EXERCISES[0].id, layout: {}, tabOrder: [], assistantOpen: false,
     // The Claude panel remembers whether it was a window, where that window
     // sat and how far you could see through it.
@@ -174,18 +174,69 @@ function syncScroll() {
   gutterLines.style.transform = `translateY(${-editor.scrollTop}px)`;
 }
 
+/** The hidden twin the wrapped gutter measures against, built on first use. */
+let measurer = null;
+
+/**
+ * How many rows each logical line takes once it has wrapped.
+ *
+ * Measured, not computed: where a line breaks depends on the font the browser
+ * actually loaded and on the width left over beside the gutter, and a guess at
+ * either one puts every number below it half a row out. One layout pass for
+ * the whole document, and only while both wrapping and numbers are on.
+ */
+function measureRows(lines) {
+  if (!measurer) {
+    measurer = document.createElement('div');
+    measurer.className = 'editor-measure';
+    measurer.setAttribute('aria-hidden', 'true');
+    editorWrap.appendChild(measurer);
+  }
+  const cs = getComputedStyle(editor);
+  const inner = editor.clientWidth
+    - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  measurer.style.width = `${Math.max(inner, 1)}px`;
+  measurer.style.fontFamily = cs.fontFamily;
+  measurer.style.fontSize   = cs.fontSize;
+  measurer.style.lineHeight = cs.lineHeight;
+  measurer.style.tabSize    = cs.tabSize;
+
+  const frag = document.createDocumentFragment();
+  for (const line of lines) {
+    const row = document.createElement('div');
+    // A blank line still owns a row, and an empty <div> owns none -- the
+    // zero-width space gives it its height back without widening anything.
+    row.textContent = line || '\u200b';
+    frag.appendChild(row);
+  }
+  measurer.textContent = '';
+  measurer.appendChild(frag);
+
+  const lh = parseFloat(cs.lineHeight) || 21;
+  return [...measurer.children].map(el => Math.max(1, Math.round(el.offsetHeight / lh)));
+}
+
 /**
  * Redraw the line-number gutter. Its width is in `ch` of the same mono font,
  * so passing 100 lines widens the column by exactly one digit.
+ *
+ * Wrapped, a line can occupy several rows, so each number is followed by a
+ * blank row for every extra row its line took. Numbering the rows instead
+ * would be the easier code and the wrong answer: `⌘↵`, the errors the engine
+ * reports and the lint all count lines, not rows.
  */
 function paintGutter() {
   if (!state.lineNumbers) return;
-  const n = editor.value.split('\n').length;
+  const lines = editor.value.split('\n');
+  const rows = state.wordWrap ? measureRows(lines) : null;
   let out = '';
-  for (let i = 1; i <= n; i++) out += `${i}\n`;
+  for (let i = 0; i < lines.length; i++) {
+    out += `${i + 1}\n`;
+    if (rows) out += '\n'.repeat(rows[i] - 1);
+  }
   gutterLines.textContent = out;
   // On the wrap, because the text layers pad themselves clear of it too.
-  editorWrap.style.setProperty('--gutter-digits', String(n).length);
+  editorWrap.style.setProperty('--gutter-digits', String(lines.length).length);
 }
 
 /** Show or hide the gutter, and put the toolbar toggle in the matching state. */
@@ -196,6 +247,31 @@ function applyLineNumbers() {
   btn.classList.toggle('btn-on', state.lineNumbers);
   btn.setAttribute('aria-pressed', String(state.lineNumbers));
   if (state.lineNumbers) { paintGutter(); syncScroll(); }
+}
+
+/**
+ * Wrap long lines, or let them run off the right edge. The class carries it:
+ * the textarea and the highlighted <pre> under it must break identically, so
+ * the rule lands on both layers at once rather than on either one.
+ */
+function applyWordWrap() {
+  editorWrap.classList.toggle('wrapped', state.wordWrap);
+  const btn = $('#btn-wrap');
+  btn.classList.toggle('btn-on', state.wordWrap);
+  btn.setAttribute('aria-pressed', String(state.wordWrap));
+  // Unwrapping can leave the layers scrolled to where wrapped text never
+  // went, and wrapping changes what each number in the gutter sits beside.
+  paintGutter();
+  syncScroll();
+}
+
+// Dragging the editor pane wider re-wraps the text, which moves every number
+// in the gutter -- so it is redrawn when the editor changes size, not only
+// when its text does.
+if (window.ResizeObserver) {
+  new ResizeObserver(() => {
+    if (state.wordWrap && state.lineNumbers) { paintGutter(); syncScroll(); }
+  }).observe(editorWrap);
 }
 
 /** Signature of the marked range, so we only repaint when it actually moves. */
@@ -1329,6 +1405,14 @@ function wire() {
     applyLineNumbers();
   });
   applyLineNumbers();
+
+  $('#btn-wrap').addEventListener('click', () => {
+    state.wordWrap = !state.wordWrap;
+    saveState();
+    applyWordWrap();
+    editor.focus();
+  });
+  applyWordWrap();
 
   $('#btn-assistant').addEventListener('click', () => {
     setAssistantOpen(!state.assistantOpen);
