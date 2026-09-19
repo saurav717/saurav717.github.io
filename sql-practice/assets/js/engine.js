@@ -318,6 +318,275 @@ export function statementAt(script, cursor = 0) {
 // --- grading ----------------------------------------------------------------
 const rowKey = (r) => JSON.stringify(r);
 
+/** Reorder one row so that perm[j] -- a candidate column -- lands in slot j. */
+const permuteRow = (row, perm) => perm.map(i => row[i]);
+
+/**
+ * Do the candidate's rows equal the expected ones once `perm` is applied?
+ * Row order only matters when the exercise pins it.
+ */
+function rowsAgree(gotRows, wantRows, perm, ordered) {
+  const a = gotRows.map(r => rowKey(permuteRow(r, perm)));
+  const b = wantRows.map(rowKey);
+  if (!ordered) { a.sort(); b.sort(); }
+  for (let i = 0; i < b.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+// A ten-column answer has 3.6M orderings, so the search is both pruned (a
+// candidate column can only fill a slot whose values it actually holds) and
+// budgeted. Both numbers are far above anything the curriculum asks for.
+const PERM_MAX_COLUMNS = 10;
+const PERM_MAX_TRIES = 512;
+
+/**
+ * Is the candidate the right answer with its SELECT list in a different order?
+ *
+ * Grading compares rows position by position, so swapping two columns turns a
+ * correct query into "wrong values" -- which is true but useless as feedback.
+ * This looks for a reordering of the candidate's columns that reproduces the
+ * expected result exactly, and returns it (perm[j] = the candidate column that
+ * belongs in expected slot j), or null when no reordering works.
+ *
+ * The identity permutation is never returned: that case has already passed.
+ */
+export function findColumnPermutation(got, want, ordered = false) {
+  const n = want.columns.length;
+  if (n < 2 || n !== got.columns.length || n > PERM_MAX_COLUMNS) return null;
+  if (got.rows.length !== want.rows.length) return null;
+
+  // Per-column signature: the values that column holds, as a sequence when the
+  // row order is fixed and as a multiset otherwise. A column can only fill a
+  // slot with the same signature, which collapses the search in practice.
+  const sig = (rows, i) => {
+    const vals = rows.map(r => JSON.stringify(r[i]));
+    if (!ordered) vals.sort();
+    return vals.join('\u0000');
+  };
+  const gotSig = got.columns.map((_, i) => sig(got.rows, i));
+  const wantSig = want.columns.map((_, j) => sig(want.rows, j));
+
+  const perm = new Array(n).fill(-1);
+  const used = new Array(n).fill(false);
+  let tries = 0;
+
+  const solve = (j) => {
+    if (j === n) return ++tries <= PERM_MAX_TRIES
+      && rowsAgree(got.rows, want.rows, perm, ordered);
+    for (let i = 0; i < n; i++) {
+      if (used[i] || gotSig[i] !== wantSig[j]) continue;
+      used[i] = true; perm[j] = i;
+      if (solve(j + 1)) return true;
+      used[i] = false; perm[j] = -1;
+    }
+    return false;
+  };
+
+  if (!solve(0)) return null;
+  return perm.every((i, j) => i === j) ? null : perm;
+}
+
+/**
+ * The advisory a column-order match carries: right answer, wrong SELECT list
+ * order. Graded as a pass, because the rows are the rows.
+ *
+ * `namesNote` is appended when the columns are in the wrong order AND carry
+ * names the brief did not ask for -- two separate remarks about one answer.
+ */
+function columnOrderVerdict(got, want, perm, namesNote = '') {
+  const mapped = perm.map(i => got.columns[i]);
+  return {
+    pass: true,
+    reason: 'column-order',
+    got, want,
+    columnOrder: { expected: want.columns, got: got.columns, permutation: perm },
+    detail:
+      'Your rows are right -- your columns just come back in a different order, '
+      + 'so this counts as solved.\n\n'
+      + `  the brief asks for:  ${want.columns.join(', ')}\n`
+      + `  your query returns:  ${got.columns.join(', ')}\n\n`
+      + `Reordering your SELECT list to ${mapped.join(', ')} matches the brief exactly. `
+      + 'Worth doing anyway: the column order is part of the output contract, '
+      + 'and any grader that compares column by column -- an interview '
+      + 'rubric, a dbt test, a downstream INSERT -- reads a reordered SELECT '
+      + 'list as a wrong answer.'
+      + (namesNote ? `\n\n${namesNote}` : ''),
+  };
+}
+
+// --- checking by column name ------------------------------------------------
+//
+//  Comparing whole rows position by position answers "is this the right
+//  result?" and nothing else: every failure reads as a wall of row text, and a
+//  query that put the right labels on the wrong values passed outright.
+//
+//  So when your column names ARE the brief's names -- same set, each once, in
+//  any order -- the pairing between your columns and the expected ones is
+//  unambiguous, and the answer is checked NAME BY NAME: the values under
+//  `revenue` are compared with the values the brief wants under `revenue`,
+//  whichever position either sits in. Then order is a separate remark rather
+//  than the thing that decides right from wrong.
+//
+//  Names stay advisory. Rename a column and the pairing is gone, so the answer
+//  falls back to the positional comparison below and still passes with a note.
+//  Nothing that passed before this fails now.
+
+const normName = (c) => String(c).trim().toLowerCase();
+const hasDuplicates = (names) => new Set(names).size !== names.length;
+
+/**
+ * Pair the candidate's columns to the brief's by name.
+ *
+ * @returns { pinned, perm, missing, extra }
+ *   pinned  -- the names are the brief's names, each exactly once on both
+ *              sides, so values can be checked under each name
+ *   perm    -- perm[j] = the candidate column carrying want.columns[j]
+ *   missing -- expected names your result does not have
+ *   extra   -- names in your result the brief did not ask for
+ */
+export function pairColumnsByName(gotCols, wantCols) {
+  const g = gotCols.map(normName);
+  const w = wantCols.map(normName);
+  const missing = wantCols.filter((_, j) => !g.includes(w[j]));
+  const extra = gotCols.filter((_, i) => !w.includes(g[i]));
+  const pinned = g.length === w.length && !missing.length && !extra.length
+    && !hasDuplicates(g) && !hasDuplicates(w);
+  return { pinned, perm: pinned ? w.map((n) => g.indexOf(n)) : null, missing, extra };
+}
+
+/** Do two columns hold the same values -- in order, or as a bag? */
+function columnAgrees(gotRows, gi, wantRows, wi, ordered) {
+  const a = gotRows.map((r) => JSON.stringify(r[gi]));
+  const b = wantRows.map((r) => JSON.stringify(r[wi]));
+  if (!ordered) { a.sort(); b.sort(); }
+  for (let i = 0; i < b.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+/** One concrete difference inside a single column, for the message. */
+function columnDiff(gotRows, gi, wantRows, wi, ordered) {
+  const show = (v) => v === null ? 'NULL' : String(v);
+  const a = gotRows.map((r) => r[gi]);
+  const b = wantRows.map((r) => r[wi]);
+  if (ordered) {
+    for (let i = 0; i < b.length; i++) {
+      if (JSON.stringify(a[i]) !== JSON.stringify(b[i])) {
+        return `row ${i + 1}: expected ${show(b[i])}, got ${show(a[i])}`;
+      }
+    }
+    return '';
+  }
+  // Unordered: name a value the brief expects that your column never produces
+  // the right number of, which survives the rows being in any order.
+  const tally = (vals) => {
+    const m = new Map();
+    for (const v of vals) { const k = JSON.stringify(v); m.set(k, (m.get(k) ?? 0) + 1); }
+    return m;
+  };
+  const ta = tally(a), tb = tally(b);
+  for (const [k, n] of tb) {
+    const mine = ta.get(k) ?? 0;
+    if (mine !== n) {
+      const v = show(JSON.parse(k));
+      return mine === 0
+        ? `never produces ${v}, which the brief expects ${n}\u00d7`
+        : `produces ${v} ${mine}\u00d7, the brief expects it ${n}\u00d7`;
+    }
+  }
+  return '';
+}
+
+/**
+ * Grade an answer whose column names are the brief's, checking the values
+ * under each name and treating position as a remark rather than a verdict.
+ */
+function gradeByName(got, want, ordered, perm) {
+  if (rowsAgree(got.rows, want.rows, perm, ordered)) {
+    return perm.every((i, j) => i === j)
+      ? { pass: true, got, want, detail: 'Correct.' }
+      : columnOrderVerdict(got, want, perm);
+  }
+
+  // A missing or wrong ORDER BY comes first, because it is the common mistake
+  // and it decomposes badly: shifting the rows makes EVERY column look wrong,
+  // so the per-column diagnosis below would bury the one thing to fix.
+  if (ordered) {
+    const mine = got.rows.map(r => rowKey(permuteRow(r, perm)));
+    const theirs = want.rows.map(rowKey);
+    if ([...mine].sort().join('') === [...theirs].sort().join('')) {
+      const i = mine.findIndex((k, n) => k !== theirs[n]);
+      const alsoReordered = !perm.every((g, j) => g === j);
+      return {
+        pass: false, reason: 'order', got, want, firstBadRow: i,
+        detail: `Right rows, wrong order. First difference at row ${i + 1}. `
+          + 'This exercise specifies an ordering, so add or fix the ORDER BY.'
+          + (alsoReordered
+            ? `\n\nYour columns are in a different order too (the brief asks for `
+              + `${want.columns.join(', ')}); they were matched up by name to check the rows.`
+            : ''),
+      };
+    }
+  }
+
+  // Something under at least one name is wrong. Say which name.
+  const bad = [];
+  for (let j = 0; j < want.columns.length; j++) {
+    if (!columnAgrees(got.rows, perm[j], want.rows, j, ordered)) bad.push(j);
+  }
+
+  if (!bad.length) {
+    // Every column holds exactly the right values on its own, yet the rows do
+    // not match -- so the values are paired into rows differently. That is a
+    // join or grouping key, not a column.
+    return {
+      pass: false, reason: 'row-pairing', got, want,
+      detail:
+        'Every column on its own holds exactly the values the brief expects -- '
+        + 'but they are not paired into the same rows.\n\n'
+        + '  Each of your columns is right; which value sits beside which is not.\n\n'
+        + 'That is a join or grouping problem rather than a column problem: '
+        + 'check what you are joining on, and what you are grouping by.',
+    };
+  }
+
+  // Right data, wrong labels: the values the brief wants are all present, just
+  // not under the names carrying them. Position-only grading passed this.
+  const byValue = findColumnPermutation(got, want, ordered);
+  if (byValue) {
+    const lines = byValue
+      .map((i, j) => [got.columns[i], want.columns[j]])
+      .filter(([mine, asked]) => normName(mine) !== normName(asked))
+      .map(([mine, asked]) => `  your ${mine} holds the values the brief wants under ${asked}`);
+    return {
+      pass: false, reason: 'column-labels', got, want,
+      detail:
+        'The right values are all there, but they are under the wrong names -- '
+        + 'your labels and your expressions do not line up.\n\n'
+        + lines.join('\n') + '\n\n'
+        + 'Check the aliases in your SELECT list: something is named for a value '
+        + 'it does not hold.',
+    };
+  }
+
+  const names = bad.map((j) => want.columns[j]);
+  const lines = bad.map((j) => {
+    const d = columnDiff(got.rows, perm[j], want.rows, j, ordered);
+    return `  ${want.columns[j]} -- ${d || 'differs'}`;
+  });
+  const rightOnes = want.columns.filter((_, j) => !bad.includes(j));
+  return {
+    pass: false, reason: 'column-values', got, want, badColumns: names,
+    detail:
+      `${names.length === 1 ? 'One column holds' : `${names.length} columns hold`} `
+      + `the wrong values: ${names.join(', ')}.\n\n`
+      + lines.join('\n')
+      + (rightOnes.length ? `\n\n  correct: ${rightOnes.join(', ')}` : '')
+      + '\n\nYour column names and row count are right, so the shape of the query '
+      + 'is fine -- it is the expression behind '
+      + `${names.length === 1 ? 'that column' : 'those columns'} to look at.`,
+  };
+}
+
 /**
  * Compare a candidate query's result against the reference solution.
  * Returns { pass, reason, detail, got, want }.
@@ -342,10 +611,19 @@ export async function grade(userSql, exercise) {
 
   const want = await run(exercise.solution, { limit: 1e9 });
 
+  const ordered = !!exercise.ordered;
+  const byName = pairColumnsByName(got.columns, want.columns);
+
   if (got.columns.length !== want.columns.length) {
+    // Name the columns rather than only counting them: "got 3, expected 2" does
+    // not tell you which one to drop.
+    const bits = [];
+    if (byName.missing.length) bits.push(`missing: ${byName.missing.join(', ')}`);
+    if (byName.extra.length) bits.push(`not asked for: ${byName.extra.join(', ')}`);
     return {
       pass: false, reason: 'shape', got, want,
-      detail: `Expected ${want.columns.length} columns (${want.columns.join(', ')}), got ${got.columns.length} (${got.columns.join(', ')}).`,
+      detail: `Expected ${want.columns.length} columns (${want.columns.join(', ')}), got ${got.columns.length} (${got.columns.join(', ')}).`
+        + (bits.length ? `\n\n  ${bits.join('\n  ')}` : ''),
     };
   }
 
@@ -359,15 +637,45 @@ export async function grade(userSql, exercise) {
     };
   }
 
+  // Your column names are the brief's names, so the pairing between your
+  // columns and the expected ones is unambiguous: check the values under each
+  // name, and treat position as a remark rather than the verdict.
+  if (byName.pinned) return gradeByName(got, want, ordered, byName.perm);
+
+  // Otherwise the names give nothing to pin to -- you renamed something, or an
+  // expression came back unnamed -- so fall back to comparing by position.
+  // Names are advisory, so this path still passes a correct answer.
   const gotKeys = got.rows.map(rowKey);
   const wantKeys = want.rows.map(rowKey);
 
-  if (exercise.ordered) {
+  // Rows are compared position by position, so a correct answer whose SELECT
+  // list is in a different order looks like wrong values. Before calling
+  // anything wrong, check for that -- it grades as a pass with a note.
+  const orderedCmp = ordered;
+  const asColumnOrder = () => {
+    const perm = findColumnPermutation(got, want, orderedCmp);
+    if (!perm) return null;
+    // Reordered AND renamed: two separate things to say about one answer.
+    // Duplicate names also land here, and those can still be the brief's, so
+    // only say the names differ when they actually do.
+    const sameNames = got.columns.map(normName).sort().join(',')
+                   === want.columns.map(normName).sort().join(',');
+    const note = sameNames ? '' :
+      `Your column names differ from the brief too (expected: ${want.columns.join(', ')}). `
+      + 'Names are advisory here, but they are part of the contract in production.';
+    return columnOrderVerdict(got, want, perm, note);
+  };
+
+  if (orderedCmp) {
     for (let i = 0; i < wantKeys.length; i++) {
       if (gotKeys[i] === wantKeys[i]) continue;
       const sameMultiset =
         [...gotKeys].sort().join('') === [...wantKeys].sort().join('');
       const fmt = (r) => r.map(v => v === null ? 'NULL' : v).join(' | ');
+      if (!sameMultiset) {
+        const swapped = asColumnOrder();
+        if (swapped) return swapped;
+      }
       return {
         pass: false, reason: sameMultiset ? 'order' : 'values', got, want, firstBadRow: i,
         detail: sameMultiset
@@ -380,6 +688,8 @@ export async function grade(userSql, exercise) {
     const b = [...wantKeys].sort();
     for (let i = 0; i < b.length; i++) {
       if (a[i] === b[i]) continue;
+      const swapped = asColumnOrder();
+      if (swapped) return swapped;
       const missing = JSON.parse(b[i]).map(v => v === null ? 'NULL' : v).join(' | ');
       return {
         pass: false, reason: 'values', got, want,

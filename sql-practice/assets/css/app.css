@@ -774,6 +774,7 @@ body.resizing-row, body.resizing-row * { cursor: row-resize !important; }
 .dot { width: 7px; height: 7px; border-radius: var(--pill); background: var(--bad); display: inline-block;
   box-shadow: 0 0 8px var(--bad-dim); }
 .dot-good { background: var(--good); box-shadow: 0 0 8px var(--good-dim); }
+.dot-warn { background: var(--warn); box-shadow: 0 0 8px var(--warn-dim); }
 .pill {
   font: 10px var(--mono); background: var(--warn-dim); color: var(--warn);
   border-radius: var(--pill); padding: 2px 7px;
@@ -815,6 +816,9 @@ table.grid td.is-num { text-align: right; }
 }
 .verdict-good { background: var(--good-dim); border-color: var(--good); color: var(--good); }
 .verdict-bad  { background: var(--bad-dim);  border-color: var(--bad);  color: var(--bad); }
+/* A pass that still has something to say -- right rows, columns in a different
+   order. Amber, so it is read rather than skimmed past as the usual green. */
+.verdict-warn { background: var(--warn-dim); border-color: var(--warn); color: var(--warn); }
 .verdict h3 { margin: 0 0 5px; font-size: 14px; }
 .verdict pre {
   margin: 6px 0 0; white-space: pre-wrap; font: 12px var(--mono);
@@ -1234,6 +1238,22 @@ body.sandbox #btn-solution,
 body.sandbox .solution,
 body.sandbox .hints { display: none; }
 
+/* Sandbox is a mode, not an action, so its button has to look switched on for
+   as long as you are in it. .btn-primary already fills it with the accent;
+   this adds the two things a fill alone does not give you -- a ring that
+   separates it from the rest of the toolbar, and a live dot, so the state does
+   not rest on colour alone for anyone who cannot see the fill. */
+#btn-sandbox[aria-pressed="true"] {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 4px 14px var(--accent-dim),
+              0 0 0 2px var(--ring);
+}
+#btn-sandbox[aria-pressed="true"]::before {
+  content: ''; width: 7px; height: 7px; border-radius: var(--pill);
+  background: currentColor; flex: none;
+  animation: sandbox-live 1.9s var(--ease) infinite;
+}
+@keyframes sandbox-live { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
 /* ---------- responsive ---------- */
 @media (max-width: 1000px) {
   /* Stacked: every split runs top to bottom whatever the stored tree says, the
@@ -1359,6 +1379,7 @@ body.sandbox .hints { display: none; }
 @media (prefers-reduced-motion: reduce) {
   body::before { animation: none; }
   .boot-card, .tbl-card, .verdict { animation: none; }
+  #btn-sandbox[aria-pressed="true"]::before { animation: none; }
   .btn:hover { transform: none; }
   *, *::before, *::after {
     transition-duration: .01ms !important;
