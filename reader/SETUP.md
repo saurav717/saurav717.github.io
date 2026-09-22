@@ -163,6 +163,24 @@ work.
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
 
+## Removing a paper moves it to Junk in Drive
+
+The bin on a collection row asks first. A notice names the paper, says it
+leaves every collection with its highlights, and says what happens in Drive
+before it happens: with Drive connected, the paper's folder is **moved to
+`My Drive/Papers_collection/Junk/`** — PDF and sidecar inside it — not deleted,
+so getting it back is dragging the folder up one level in Drive. Saving the
+same paper again later makes a fresh folder and leaves the junked one alone.
+
+If Drive refuses the move the paper stays in the library and the notice says
+why, offering to remove the entry anyway and leave the copy in Drive where it
+is. With Drive not connected the notice says the copy stays put and offers to
+connect first; a paper that was never saved to Drive says so, and only the
+entry goes.
+
+It used to remove the paper at once, with no question asked, and leave its
+folder in Drive behind with nothing in the library pointing at it any more.
+
 ## Every copy of a paper, and what Add to collection does
 
 Opening a search result lists **everywhere that paper can be read** — the
