@@ -27,6 +27,20 @@ the files it creates and nothing else in your Drive. Its consent screen is in
 in; everyone else gets "Access blocked", which is the intended behaviour for a
 personal reading tool.
 
+That block page is worth reading closely when it appears for an account that
+should work:
+
+> **Access blocked: saurav717.github.io has not completed the Google
+> verification process.** The app is currently being tested and can only be
+> accessed by developer-approved testers. Error 403: `access_denied`
+
+It names, at the bottom, the account it refused. Add *that* address under
+**Google Auth Platform → Audience → Test users** in the Cloud project this
+client ID belongs to and sign in again. The verification wording is a red
+herring: `drive.file` is not a sensitive scope, so **Publish app** is available
+there too and removes both the test-user list and the seven-day expiry of a
+testing app's grant.
+
 **The proxy is not set**, and has to be, in the app itself — **Settings → Paper
 proxy**, kept in your browser, no rebuild of this site needed.
 
