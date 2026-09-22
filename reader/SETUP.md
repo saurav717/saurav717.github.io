@@ -118,10 +118,19 @@ file.
 
 arXiv and the publishers send no CORS headers, so a browser
 cannot fetch a paper from them directly and a static site has no server to do
-it. Deploy the Cloudflare Worker in the app repository's `worker/` —
-`npx wrangler deploy`, free tier, with `https://saurav717.github.io` in its
-`ALLOWED_ORIGINS` — and paste the Worker's URL into **Settings → Paper proxy**.
-**Test it** says whether it answers.
+it. Deploy the Cloudflare Worker in the app repository's `worker/`, on the free
+tier — `npm run deploy:worker`, which prints
+`https://reader-arxiv-proxy.<subdomain>.workers.dev`. Its `ALLOWED_ORIGINS`
+already lists `https://saurav717.github.io`, the origin alone, since the
+`/reader/` path is not part of one. Paste that URL into **Settings → Paper
+proxy**; **Test it** says whether it answers, and
+
+```bash
+curl -H 'Origin: https://saurav717.github.io' https://<that>/health
+```
+
+says the same thing from a terminal: `{"ok":true}`, with
+`Access-Control-Allow-Origin` echoing this site back.
 
 Without the proxy the site still runs: search works through OpenAlex, Crossref
 and Semantic Scholar, and the reader shows abstracts. But no PDF can be fetched,
@@ -160,9 +169,17 @@ carries a link to their Scholar page instead.
 
 **Save to Drive** on a result then does the whole chain in one press: try each
 copy until one hands over a PDF, upload that file, and open the paper on the
-copy that was just saved, read back out of Drive. The button only appears once
-Drive is connected *and* a proxy is set, because both are needed to get the
-bytes in the first place.
+copy that was just saved, read back out of Drive.
+
+Both Drive and a proxy are needed for that, and until they are there the button
+sits on the result greyed out, with a line underneath naming which half is
+missing and where it is set. It used to be absent instead, which read as a
+feature this build did not have — and the list of copies right above it made
+that look like an oversight, since those links do open on a click. They open
+because that is a *navigation*, which a browser allows across origins; reading
+the same URL from script is a *fetch*, which it refuses. So the page never
+holds the file, and there is nothing to upload until the proxy fetches it. Drive
+cannot stand in: its API takes bytes, not a URL to go and collect.
 
 The full walkthrough, including what lands in Drive and what to check when
 nothing does, is in the app repository's README.
