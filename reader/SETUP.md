@@ -44,7 +44,8 @@ moment that browser meets the PDF — or you press **Fetch the PDF from this
 page** — the paper opens on it and goes to Drive.
 
 That takes the Worker redeployed from the current app repository, since the
-browser binding is in its `wrangler.toml`:
+browser binding — and the Durable Object that keeps the session open, which
+is what makes the pane quick — are in its `wrangler.toml`:
 
 ```bash
 git clone https://github.com/saurav717/reader.git && cd reader
