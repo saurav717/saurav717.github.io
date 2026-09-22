@@ -4,11 +4,12 @@ A built copy of [saurav717/reader](https://github.com/saurav717/reader). Nothing
 here is written by hand: the whole directory is the output of
 
 ```bash
-npm run build:pages       # VITE_BASE=/reader/ VITE_API_BASE=none
+VITE_API_BASE=https://reader-arxiv-proxy.es16btech11007.workers.dev npm run build:pages
 ```
 
 run in that repository, copied over `reader/`. Rebuild it the same way whenever
-the app changes.
+the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
+build has no proxy, and every browser has to be told one in Settings.
 
 ## What is already set, and what is not
 
@@ -111,33 +112,37 @@ with the tab, and a paper added before you reconnect is one Drive never hears
 about. After the first time the asking is quiet: the grant you already gave is
 reused, and Google's window opens and closes without a question.
 
-**The proxy is not set**, and has to be, in the app itself — **Settings → Paper
-proxy**, kept in your browser, no rebuild of this site needed. Until it is, the
-connect screen says so: Drive would receive each paper's details without its
-file.
+**The proxy is compiled in.** arXiv and the publishers send no CORS headers,
+so a browser cannot fetch a paper from them directly and a static site has no
+server to do it. The Cloudflare Worker in the app repository's `worker/` does
+it instead, deployed on the free tier with `npm run deploy:worker` to
 
-arXiv and the publishers send no CORS headers, so a browser
-cannot fetch a paper from them directly and a static site has no server to do
-it. Deploy the Cloudflare Worker in the app repository's `worker/`, on the free
-tier — `npm run deploy:worker`, which prints
-`https://reader-arxiv-proxy.<subdomain>.workers.dev`. Its `ALLOWED_ORIGINS`
-already lists `https://saurav717.github.io`, the origin alone, since the
-`/reader/` path is not part of one. Paste that URL into **Settings → Paper
-proxy**; **Test it** says whether it answers, and
-
-```bash
-curl -H 'Origin: https://saurav717.github.io' https://<that>/health
+```
+https://reader-arxiv-proxy.es16btech11007.workers.dev
 ```
 
-says the same thing from a terminal: `{"ok":true}`, with
-`Access-Control-Allow-Origin` echoing this site back.
+and that address is baked into this build, so nothing needs pasting into
+Settings. Its `ALLOWED_ORIGINS` lists `https://saurav717.github.io`, the
+origin alone, since the `/reader/` path is not part of one. Check it from a
+terminal:
 
-Without the proxy the site still runs: search works through OpenAlex, Crossref
-and Semantic Scholar, and the reader shows abstracts. But no PDF can be fetched,
-so none can be read here or saved to Drive either — Drive gets the metadata
-sidecar alone. With it, opening a paper shows the PDF and puts that same copy in
+```bash
+curl -H 'Origin: https://saurav717.github.io' https://reader-arxiv-proxy.es16btech11007.workers.dev/health
+```
+
+says `{"ok":true}`, with `Access-Control-Allow-Origin` echoing this site back.
+**Settings → Paper proxy** still overrides the compiled-in address in one
+browser, for pointing at a different proxy without a rebuild.
+
+If the Worker is ever redeployed under another account, its subdomain
+changes; rebuild with the new address, or paste it into Settings.
+
+With the proxy, opening a paper shows the PDF and puts that same copy in
 `My Drive/Papers_collection/<paper>/` — a folder of its own for every paper,
-which the Drive button beside it in a collection opens.
+which the Drive button beside it in a collection opens. Without one the site
+still runs: search works through OpenAlex, Crossref and Semantic Scholar, and
+the reader shows abstracts, but no PDF can be fetched, so none can be read
+here or saved to Drive either — Drive gets the metadata sidecar alone.
 
 ## Google Scholar
 
@@ -158,7 +163,7 @@ work.
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
 
-## Every copy of a paper, and Save to Drive
+## Every copy of a paper, and what Add to collection does
 
 Opening a search result lists **everywhere that paper can be read** — the
 publisher's copy, the preprint, each repository deposit — which is what Google
@@ -167,19 +172,33 @@ Semantic Scholar and Crossref, because Scholar itself publishes no API and
 blocks the datacentre IPs a proxy runs from; every result and every person
 carries a link to their Scholar page instead.
 
-**Save to Drive** on a result then does the whole chain in one press: try each
-copy until one hands over a PDF, upload that file, and open the paper on the
-copy that was just saved, read back out of Drive.
+**Add to collection** on a result then does the whole chain in one press: put
+the paper in the collection, try each copy until one hands over a PDF, upload
+that file to `My Drive/Papers_collection/<paper>/`, and open the paper here on
+the copy that was just saved, read back out of Drive. The button says which
+step it is on, and the reader opens once the file is in Drive.
 
-Both Drive and a proxy are needed for that, and until they are there the button
-sits on the result greyed out, with a line underneath naming which half is
-missing and where it is set. It used to be absent instead, which read as a
-feature this build did not have — and the list of copies right above it made
-that look like an oversight, since those links do open on a click. They open
-because that is a *navigation*, which a browser allows across origins; reading
-the same URL from script is a *fetch*, which it refuses. So the page never
-holds the file, and there is nothing to upload until the proxy fetches it. Drive
-cannot stand in: its API takes bytes, not a URL to go and collect.
+It used to stop at the first step. Adding only put the paper in the collection
+and handed Drive a background job; nothing opened, and the outcome — the PDF
+saved, or only the metadata because there was no proxy, or nothing because
+Drive refused — went into the sync log behind Settings and nowhere else. A
+separate **Save to Drive** button did the whole chain, but it was the second
+button on the result rather than the one that reads as "add this". That
+button is gone; adding is the chain now, and what did not happen is said on
+the result itself: *Added, but the file is not in Drive* with the copies that
+were tried, or *Added, but Drive would not take it* with Google's own reason.
+The paper is added and opened either way. **Read** beside it is the same add
+without the wait.
+
+Both Drive and a proxy are needed for the file to reach Drive, and until they
+are there a line under the button says so, naming which half is missing and
+where it is set. The list of copies right
+above it can make that look like an oversight, since those links do open on a
+click. They open because that is a *navigation*, which a browser allows across
+origins; reading the same URL from script is a *fetch*, which it refuses. So
+the page never holds the file, and there is nothing to upload until the proxy
+fetches it. Drive cannot stand in: its API takes bytes, not a URL to go and
+collect.
 
 The full walkthrough, including what lands in Drive and what to check when
 nothing does, is in the app repository's README.
