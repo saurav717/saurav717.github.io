@@ -41,8 +41,22 @@ herring: `drive.file` is not a sensitive scope, so **Publish app** is available
 there too and removes both the test-user list and the seven-day expiry of a
 testing app's grant.
 
+## What opening the site does
+
+With the client ID compiled in, the site opens on the connect screen and stays
+there until Drive is connected — one button, one consent covering your name and
+the `drive.file` scope, and then the app. **Not now** goes past it with
+everything kept in this browser.
+
+It asks every visit. Nothing here can hold a refresh token, so the token dies
+with the tab, and a paper added before you reconnect is one Drive never hears
+about. After the first time the asking is quiet: the grant you already gave is
+reused, and Google's window opens and closes without a question.
+
 **The proxy is not set**, and has to be, in the app itself — **Settings → Paper
-proxy**, kept in your browser, no rebuild of this site needed.
+proxy**, kept in your browser, no rebuild of this site needed. Until it is, the
+connect screen says so: Drive would receive each paper's details without its
+file.
 
 arXiv and the publishers send no CORS headers, so a browser
 cannot fetch a paper from them directly and a static site has no server to do
