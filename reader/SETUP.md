@@ -56,9 +56,12 @@ number is the first field of the ID, `308274983351`, and the page is
    the account the browser is actually signed into, which is often a different
    one. Up to 100 addresses, and it keeps the app private.
 2. **Press Publish app**, which moves the audience to *In production* and
-   retires the test-user list entirely. Available immediately, because of the
-   scopes above; the console may ask for the branding fields (app name, support
-   email, developer contact) first. Nothing is submitted to Google for review.
+   retires the test-user list entirely. No review is involved, because of the
+   scopes above — but the button stays greyed out until the **Branding** page
+   is complete, which is the next section. Publishing lists the app nowhere and
+   gives nobody access to anything of yours: each person who signs in grants
+   the app the same `drive.file` access to *their own* Drive, and to nothing
+   else.
 
 Testing costs something either way: a grant from an app in testing expires
 after seven days, so even a listed test user is asked to consent again about
@@ -68,6 +71,28 @@ Nothing of this reaches the app while it is happening: the block page ends the
 window it opened in without answering, so all the app sees is a window that
 closed. The build here says so — its message for a closed window carries the
 same advice — but the setting is only changeable in the console.
+
+### What Publish app is waiting for
+
+**Google Auth Platform → Branding**, where the app name and support email are
+set but the three link fields below them are empty. Production wants them
+filled, and the pages exist on this site for exactly that:
+
+| Field | Value |
+| --- | --- |
+| Application home page | `https://saurav717.github.io/reader/` |
+| Application privacy policy link | `https://saurav717.github.io/reader/privacy/` |
+| Application Terms of Service link | `https://saurav717.github.io/reader/terms/` |
+
+Those three fill **Authorised domains** with `saurav717.github.io` on their own
+— add it by hand if the console does not. Save the Branding page, go back to
+**Audience**, and **Publish app** is clickable.
+
+The policy pages are [`_pages/reader-privacy.md`](../_pages/reader-privacy.md)
+and [`_pages/reader-terms.md`](../_pages/reader-terms.md) in this repository,
+Jekyll pages like any other. They describe the app as it is — browser-only
+storage, `drive.file` and nothing wider, no analytics, no data reaching anyone
+who runs the site — so they need editing whenever that stops being true.
 
 If sign-in fails with something else — a window that closes at once, or
 `redirect_uri_mismatch` — it is the other setting: `https://saurav717.github.io`
