@@ -127,7 +127,8 @@ Without the proxy the site still runs: search works through OpenAlex, Crossref
 and Semantic Scholar, and the reader shows abstracts. But no PDF can be fetched,
 so none can be read here or saved to Drive either — Drive gets the metadata
 sidecar alone. With it, opening a paper shows the PDF and puts that same copy in
-`My Drive/Paper Reader/<collection>/`.
+`My Drive/Papers_collection/<paper>/` — a folder of its own for every paper,
+which the Drive button beside it in a collection opens.
 
 The full walkthrough, including what lands in Drive and what to check when
 nothing does, is in the app repository's README.
