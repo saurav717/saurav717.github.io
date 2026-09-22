@@ -130,5 +130,20 @@ sidecar alone. With it, opening a paper shows the PDF and puts that same copy in
 `My Drive/Papers_collection/<paper>/` — a folder of its own for every paper,
 which the Drive button beside it in a collection opens.
 
+## Every copy of a paper, and Save to Drive
+
+Opening a search result lists **everywhere that paper can be read** — the
+publisher's copy, the preprint, each repository deposit — which is what Google
+Scholar shows as "All 14 versions". The list comes from Unpaywall, OpenAlex,
+Semantic Scholar and Crossref, because Scholar itself publishes no API and
+blocks the datacentre IPs a proxy runs from; every result and every person
+carries a link to their Scholar page instead.
+
+**Save to Drive** on a result then does the whole chain in one press: try each
+copy until one hands over a PDF, upload that file, and open the paper on the
+copy that was just saved, read back out of Drive. The button only appears once
+Drive is connected *and* a proxy is set, because both are needed to get the
+bytes in the first place.
+
 The full walkthrough, including what lands in Drive and what to check when
 nothing does, is in the app repository's README.
