@@ -33,6 +33,17 @@ session is kept in `~/.reader/browser-profile`; **Settings → Institutional
 access → Forget sign-ins** deletes it. The app repository's README has the
 whole story under *Papers behind a login*.
 
+**Or browse to it inside the reader, from a proxy anywhere.** The same offer
+has a second form that needs no screen: **Browse to ieeexplore.ieee.org and
+sign in here** opens a browser *in the PDF pane* — the proxy's own Chromium,
+headless, streamed into the page and driven from it. It asks which site to
+go to (the one that asked for the sign-in, the other copies, Google Scholar,
+or any address), you sign in there as anywhere, and the moment that browser
+meets the PDF the paper opens on it and goes to Drive. So the proxy can be on
+any machine with Node and a Chromium — a server, a container — not only the
+one in front of you; the Worker still cannot, having no browser. *A browser
+inside the reader* in the app repository's README has the details.
+
 **With only the Worker**, the same result offers the route that needs no proxy
 at all: open the paper at the publisher in a tab of your own, where your
 institution's sign-in already holds, download the PDF, and drop it on the
