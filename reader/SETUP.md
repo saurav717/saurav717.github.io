@@ -158,7 +158,7 @@ work.
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
 
-## Every copy of a paper, and Save to Drive
+## Every copy of a paper, and what Add to collection does
 
 Opening a search result lists **everywhere that paper can be read** — the
 publisher's copy, the preprint, each repository deposit — which is what Google
@@ -167,19 +167,34 @@ Semantic Scholar and Crossref, because Scholar itself publishes no API and
 blocks the datacentre IPs a proxy runs from; every result and every person
 carries a link to their Scholar page instead.
 
-**Save to Drive** on a result then does the whole chain in one press: try each
-copy until one hands over a PDF, upload that file, and open the paper on the
-copy that was just saved, read back out of Drive.
+**Add to collection** on a result then does the whole chain in one press: put
+the paper in the collection, try each copy until one hands over a PDF, upload
+that file to `My Drive/Papers_collection/<paper>/`, and open the paper here on
+the copy that was just saved, read back out of Drive. The button says which
+step it is on, and the reader opens once the file is in Drive.
 
-Both Drive and a proxy are needed for that, and until they are there the button
-sits on the result greyed out, with a line underneath naming which half is
-missing and where it is set. It used to be absent instead, which read as a
-feature this build did not have — and the list of copies right above it made
-that look like an oversight, since those links do open on a click. They open
-because that is a *navigation*, which a browser allows across origins; reading
-the same URL from script is a *fetch*, which it refuses. So the page never
-holds the file, and there is nothing to upload until the proxy fetches it. Drive
-cannot stand in: its API takes bytes, not a URL to go and collect.
+It used to stop at the first step. Adding only put the paper in the collection
+and handed Drive a background job; nothing opened, and the outcome — the PDF
+saved, or only the metadata because there was no proxy, or nothing because
+Drive refused — went into the sync log behind Settings and nowhere else. A
+separate **Save to Drive** button did the whole chain, but it was the second
+button on the result rather than the one that reads as "add this". That
+button is gone; adding is the chain now, and what did not happen is said on
+the result itself: *Added, but the file is not in Drive* with the copies that
+were tried, or *Added, but Drive would not take it* with Google's own reason.
+The paper is added and opened either way. **Read** beside it is the same add
+without the wait.
+
+Both Drive and a proxy are needed for the file to reach Drive, and until they
+are there a line under the button says so, naming which half is missing and
+where it is set. On this site that line will name the proxy until one is
+pasted into **Settings → Paper proxy** — see above. The list of copies right
+above it can make that look like an oversight, since those links do open on a
+click. They open because that is a *navigation*, which a browser allows across
+origins; reading the same URL from script is a *fetch*, which it refuses. So
+the page never holds the file, and there is nothing to upload until the proxy
+fetches it. Drive cannot stand in: its API takes bytes, not a URL to go and
+collect.
 
 The full walkthrough, including what lands in Drive and what to check when
 nothing does, is in the app repository's README.
