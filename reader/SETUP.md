@@ -188,6 +188,18 @@ Scholar's captcha is for. Running the proxy on a laptop or a home machine, with
 `SCHOLAR_BROWSER=1 npm start` so it drives a real Chromium, is what makes it
 work.
 
+**When it refuses with a captcha, you can be shown it.** The warning in the
+panel ends with **Show me the captcha**. With the proxy running on your own
+machine (the `npm start` above, `http://localhost:8080` in Settings), pressing
+it opens the refused Scholar page in a Chromium window on your machine, captcha
+and all. Solve it there; the moment Scholar accepts the answer the window closes
+on its own and the search runs again, this time through that browser. From then
+on the proxy asks Scholar through that browser, whose profile is kept in
+`~/.reader/scholar-profile` — delete it to go back to plain requests. The window
+has to be the proxy's rather than a tab of your own, because it is the proxy
+Scholar is refusing, not you. The Worker cannot show the captcha — no browser,
+no screen — and the panel says so in place of the button.
+
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
 
