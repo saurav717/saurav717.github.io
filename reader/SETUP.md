@@ -4,11 +4,12 @@ A built copy of [saurav717/reader](https://github.com/saurav717/reader). Nothing
 here is written by hand: the whole directory is the output of
 
 ```bash
-npm run build:pages       # VITE_BASE=/reader/ VITE_API_BASE=none
+VITE_API_BASE=https://reader-arxiv-proxy.es16btech11007.workers.dev npm run build:pages
 ```
 
 run in that repository, copied over `reader/`. Rebuild it the same way whenever
-the app changes.
+the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
+build has no proxy, and every browser has to be told one in Settings.
 
 ## What is already set, and what is not
 
@@ -111,33 +112,37 @@ with the tab, and a paper added before you reconnect is one Drive never hears
 about. After the first time the asking is quiet: the grant you already gave is
 reused, and Google's window opens and closes without a question.
 
-**The proxy is not set**, and has to be, in the app itself — **Settings → Paper
-proxy**, kept in your browser, no rebuild of this site needed. Until it is, the
-connect screen says so: Drive would receive each paper's details without its
-file.
+**The proxy is compiled in.** arXiv and the publishers send no CORS headers,
+so a browser cannot fetch a paper from them directly and a static site has no
+server to do it. The Cloudflare Worker in the app repository's `worker/` does
+it instead, deployed on the free tier with `npm run deploy:worker` to
 
-arXiv and the publishers send no CORS headers, so a browser
-cannot fetch a paper from them directly and a static site has no server to do
-it. Deploy the Cloudflare Worker in the app repository's `worker/`, on the free
-tier — `npm run deploy:worker`, which prints
-`https://reader-arxiv-proxy.<subdomain>.workers.dev`. Its `ALLOWED_ORIGINS`
-already lists `https://saurav717.github.io`, the origin alone, since the
-`/reader/` path is not part of one. Paste that URL into **Settings → Paper
-proxy**; **Test it** says whether it answers, and
-
-```bash
-curl -H 'Origin: https://saurav717.github.io' https://<that>/health
+```
+https://reader-arxiv-proxy.es16btech11007.workers.dev
 ```
 
-says the same thing from a terminal: `{"ok":true}`, with
-`Access-Control-Allow-Origin` echoing this site back.
+and that address is baked into this build, so nothing needs pasting into
+Settings. Its `ALLOWED_ORIGINS` lists `https://saurav717.github.io`, the
+origin alone, since the `/reader/` path is not part of one. Check it from a
+terminal:
 
-Without the proxy the site still runs: search works through OpenAlex, Crossref
-and Semantic Scholar, and the reader shows abstracts. But no PDF can be fetched,
-so none can be read here or saved to Drive either — Drive gets the metadata
-sidecar alone. With it, opening a paper shows the PDF and puts that same copy in
+```bash
+curl -H 'Origin: https://saurav717.github.io' https://reader-arxiv-proxy.es16btech11007.workers.dev/health
+```
+
+says `{"ok":true}`, with `Access-Control-Allow-Origin` echoing this site back.
+**Settings → Paper proxy** still overrides the compiled-in address in one
+browser, for pointing at a different proxy without a rebuild.
+
+If the Worker is ever redeployed under another account, its subdomain
+changes; rebuild with the new address, or paste it into Settings.
+
+With the proxy, opening a paper shows the PDF and puts that same copy in
 `My Drive/Papers_collection/<paper>/` — a folder of its own for every paper,
-which the Drive button beside it in a collection opens.
+which the Drive button beside it in a collection opens. Without one the site
+still runs: search works through OpenAlex, Crossref and Semantic Scholar, and
+the reader shows abstracts, but no PDF can be fetched, so none can be read
+here or saved to Drive either — Drive gets the metadata sidecar alone.
 
 ## Google Scholar
 
@@ -187,8 +192,7 @@ without the wait.
 
 Both Drive and a proxy are needed for the file to reach Drive, and until they
 are there a line under the button says so, naming which half is missing and
-where it is set. On this site that line will name the proxy until one is
-pasted into **Settings → Paper proxy** — see above. The list of copies right
+where it is set. The list of copies right
 above it can make that look like an oversight, since those links do open on a
 click. They open because that is a *navigation*, which a browser allows across
 origins; reading the same URL from script is a *fetch*, which it refuses. So
