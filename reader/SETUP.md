@@ -10,22 +10,27 @@ npm run build:pages       # VITE_BASE=/reader/ VITE_API_BASE=none
 run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes.
 
-## Two things to set in the app, not here
+## What is already set, and what is not
 
-GitHub Pages is a static host, so the app is compiled with no proxy of its own
-(`VITE_API_BASE=none`). Both of the settings that make Google Drive and PDFs
-work are entered in the running app — **Settings**, top left — and kept in your
-browser, so neither needs a rebuild of this site.
+**The Google OAuth client ID is compiled in**, from `.env.production` in the app
+repository, so the site does not ask for one. It is a Web application client on
+a project with the Drive API enabled, and `https://saurav717.github.io` is in
+its **Authorised JavaScript origins** — the origin only, since
+`https://saurav717.github.io/reader/` is a path and would not match. A client ID
+is not a secret: every browser-side OAuth flow puts it in the page source, and
+Google only honours it on that client's own listed origins.
 
-**Google OAuth client ID.** A Web application client from the Google Cloud
-Console, on a project with the Drive API enabled, with
-`https://saurav717.github.io` in **Authorised JavaScript origins** — the origin
-only: `https://saurav717.github.io/reader/` is a path, and pasting that is why
-sign-in fails. Then **Sign in with Google**, then **Connect Drive**, which is a
-separate consent for the `drive.file` scope: the app can see the files it
-creates and nothing else in your Drive.
+So all that is left in the app is **Sign in with Google**, then **Connect
+Drive** — a separate consent for the `drive.file` scope, which lets the app see
+the files it creates and nothing else in your Drive. Its consent screen is in
+**Testing**, so only accounts added as test users in the Cloud Console can sign
+in; everyone else gets "Access blocked", which is the intended behaviour for a
+personal reading tool.
 
-**Paper proxy.** arXiv and the publishers send no CORS headers, so a browser
+**The proxy is not set**, and has to be, in the app itself — **Settings → Paper
+proxy**, kept in your browser, no rebuild of this site needed.
+
+arXiv and the publishers send no CORS headers, so a browser
 cannot fetch a paper from them directly and a static site has no server to do
 it. Deploy the Cloudflare Worker in the app repository's `worker/` —
 `npx wrangler deploy`, free tier, with `https://saurav717.github.io` in its
