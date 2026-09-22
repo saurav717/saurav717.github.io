@@ -33,6 +33,12 @@ session is kept in `~/.reader/browser-profile`; **Settings → Institutional
 access → Forget sign-ins** deletes it. The app repository's README has the
 whole story under *Papers behind a login*.
 
+**With only the Worker**, the same result offers the route that needs no proxy
+at all: open the paper at the publisher in a tab of your own, where your
+institution's sign-in already holds, download the PDF, and drop it on the
+result (or choose the file). It goes to the paper's folder in Drive and opens
+here, with *PDF from your file* under the title.
+
 ## What is already set, and what is not
 
 **The Google OAuth client ID is compiled in**, from `.env.production` in the app
