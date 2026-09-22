@@ -11,6 +11,28 @@ run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
 build has no proxy, and every browser has to be told one in Settings.
 
+## Papers behind a login (IEEE and the like)
+
+The Worker fetches every paper anonymously, and a publisher that wants an
+institutional sign-in answers it with a page, not a PDF — the result says
+*IEEE asks for a sign-in*. The Worker cannot sign in: it has no browser and no
+screen. The reader can, when its proxy runs on your own machine:
+
+```bash
+git clone https://github.com/saurav717/reader.git && cd reader
+npm install && npm run build && npm start      # http://localhost:8080
+```
+
+Then, on this site, **Settings → Paper proxy → `http://localhost:8080` → Test
+it**. The build here already answers that proxy's origin, and the proxy answers
+this site's. From then on the offer under a walled result — **Sign in at
+ieeexplore.ieee.org with your institution** — opens a Chromium window on your
+machine at the publisher, you sign in through your institution there, close it,
+and the paper is fetched again through that browser and saved to Drive. The
+session is kept in `~/.reader/browser-profile`; **Settings → Institutional
+access → Forget sign-ins** deletes it. The app repository's README has the
+whole story under *Papers behind a login*.
+
 ## What is already set, and what is not
 
 **The Google OAuth client ID is compiled in**, from `.env.production` in the app
