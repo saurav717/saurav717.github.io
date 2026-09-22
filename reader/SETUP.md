@@ -11,27 +11,46 @@ run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
 build has no proxy, and every browser has to be told one in Settings.
 
-## Papers behind a login (IEEE and the like)
+## Papers behind a login (IEEE, AIP and the like)
 
 The Worker fetches every paper anonymously, and a publisher that wants an
 institutional sign-in answers it with a page, not a PDF — the result says
 *IEEE asks for a sign-in*. The Worker cannot sign in: it has no browser and no
-screen. The reader can, when its proxy runs on your own machine:
+screen. The reader can, when its proxy runs somewhere with a screen. Two ways:
+
+**A GitHub Codespace of the app repository — nothing on your machine.** On
+[saurav717/reader](https://github.com/saurav717/reader): **Code → Codespaces →
+Create codespace on main**. Its `.devcontainer/` gives the proxy a Chromium
+and a small virtual desktop and starts it; the terminal prints an address
+with a key of its own, `https://<codespace>-8080.app.github.dev/api/k/<key>`.
+Paste it into **Settings → Paper proxy → Test it** on this site, and in the
+Codespace's Ports panel make 8080 **Public** (leave 6080, the screen,
+private). From then on the offer under a walled result — **Sign in at
+pubs.aip.org with your institution** — opens the proxy's Chromium at the
+publisher *and* opens the proxy's screen as a pop-up beside this page, so you
+sign in there, two-factor prompt and all; press **I have signed in** and the
+paper is fetched through that browser and saved to Drive. The same pop-up
+shows you a Google Scholar captcha to solve. The Codespace is free on a
+personal account (120 core-hours a month, 60 hours on its two-core machine),
+sleeps when idle and keeps the sign-ins for next time; the address does not
+change. *Signing in from the cloud* in the app repository's README has the
+rest.
+
+**Your own machine:**
 
 ```bash
 git clone https://github.com/saurav717/reader.git && cd reader
 npm install && npm run build && npm start      # http://localhost:8080
 ```
 
-Then, on this site, **Settings → Paper proxy → `http://localhost:8080` → Test
-it**. The build here already answers that proxy's origin, and the proxy answers
-this site's. From then on the offer under a walled result — **Sign in at
-ieeexplore.ieee.org with your institution** — opens a Chromium window on your
-machine at the publisher, you sign in through your institution there, close it,
-and the paper is fetched again through that browser and saved to Drive. The
-session is kept in `~/.reader/browser-profile`; **Settings → Institutional
-access → Forget sign-ins** deletes it. The app repository's README has the
-whole story under *Papers behind a login*.
+Then, on this site, **Settings → Paper proxy → `http://localhost:8080/api` →
+Test it**. The build here already answers that proxy's origin, and the proxy
+answers this site's. The offer under a walled result then opens a Chromium
+window on your machine at the publisher, you sign in through your institution
+there, close it, and the paper is fetched again through that browser and saved
+to Drive. The session is kept in `~/.reader/browser-profile`; **Settings →
+Institutional access → Forget sign-ins** deletes it. The app repository's
+README has the whole story under *Papers behind a login*.
 
 **With only the Worker**, the same result offers the route that needs no proxy
 at all: open the paper at the publisher in a tab of your own, where your
