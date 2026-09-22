@@ -33,16 +33,33 @@ session is kept in `~/.reader/browser-profile`; **Settings → Institutional
 access → Forget sign-ins** deletes it. The app repository's README has the
 whole story under *Papers behind a login*.
 
-**Or browse to it inside the reader, from a proxy anywhere.** The same offer
-has a second form that needs no screen: **Browse to ieeexplore.ieee.org and
-sign in here** opens a browser *in the PDF pane* — the proxy's own Chromium,
-headless, streamed into the page and driven from it. It asks which site to
-go to (the one that asked for the sign-in, the other copies, Google Scholar,
-or any address), you sign in there as anywhere, and the moment that browser
-meets the PDF the paper opens on it and goes to Drive. So the proxy can be on
-any machine with Node and a Chromium — a server, a container — not only the
-one in front of you; the Worker still cannot, having no browser. *A browser
-inside the reader* in the app repository's README has the details.
+**Or browse to it inside the reader, with nothing running of your own.** The
+same offer has a second form that needs no screen and, from this site, no
+proxy but the Worker: **Browse to ieeexplore.ieee.org and sign in here**
+opens a browser *in the PDF pane* — a headless Chrome the Worker drives
+through Cloudflare's Browser Rendering, streamed into the page and driven from
+it. It asks which site to go to (the one that asked for the sign-in, the other
+copies, Google Scholar, or any address), you sign in there as anywhere, and the
+moment that browser meets the PDF — or you press **Fetch the PDF from this
+page** — the paper opens on it and goes to Drive.
+
+That takes the Worker redeployed from the current app repository, since the
+browser binding is in its `wrangler.toml`:
+
+```bash
+git clone https://github.com/saurav717/reader.git && cd reader
+PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
+npm run deploy:worker        # the SERPAPI_KEY secret already set stays set
+```
+
+Browser Rendering is on Cloudflare's free plan, with a daily allowance of
+browser minutes. To make a sign-in last for the next paper too, give the
+Worker somewhere to keep the cookies — `npx wrangler kv namespace create
+SESSIONS`, its id into the commented block in `wrangler.toml`, deploy again —
+and the offer under a walled result gains **Signed in — try the copies
+again**. The Node proxy on your own machine, or on any server with a
+Chromium, does the same thing with a profile of its own. *A browser inside
+the reader* in the app repository's README has the details.
 
 **With only the Worker**, the same result offers the route that needs no proxy
 at all: open the paper at the publisher in a tab of your own, where your
