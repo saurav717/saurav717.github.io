@@ -130,6 +130,25 @@ sidecar alone. With it, opening a paper shows the PDF and puts that same copy in
 `My Drive/Papers_collection/<paper>/` — a folder of its own for every paper,
 which the Drive button beside it in a collection opens.
 
+## Google Scholar
+
+Scholar is a source here, with a chip of its own in the Discover panel. It
+publishes no API, so the proxy opens the same pages you would — the results,
+a profile, an "all versions" cluster — and reads them. That is how the app
+finds a thesis, a technical report or a person who has no record in OpenAlex.
+
+**It is off by default and it will often refuse.** Scholar blocks servers far
+more readily than people, and a proxy is a server. When it answers with a
+captcha the panel says exactly that and the other four sources carry on; a
+refusal is never shown as "no results". A proxy on Cloudflare Workers will see
+captchas most of the time — Workers run in datacentres, which is precisely what
+Scholar's captcha is for. Running the proxy on a laptop or a home machine, with
+`SCHOLAR_BROWSER=1 npm start` so it drives a real Chromium, is what makes it
+work.
+
+`node scripts/scholar-live.mjs` in the app repository says which is happening
+from a given machine: Scholar refusing, or the request never reaching it.
+
 ## Every copy of a paper, and Save to Drive
 
 Opening a search result lists **everywhere that paper can be read** — the
