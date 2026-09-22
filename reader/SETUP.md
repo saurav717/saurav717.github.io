@@ -174,12 +174,14 @@ here or saved to Drive either — Drive gets the metadata sidecar alone.
 
 ## Google Scholar
 
-Scholar is a source here, with a chip of its own in the Discover panel. It
-publishes no API, so the proxy opens the same pages you would — the results,
-a profile, an "all versions" cluster — and reads them. That is how the app
-finds a thesis, a technical report or a person who has no record in OpenAlex.
+Scholar is the source a fresh search asks here, with a chip of its own in the
+Discover panel; arXiv, OpenAlex, Semantic Scholar and Crossref are the chips
+beside it, on when pressed. It publishes no API, so the proxy opens the same
+pages you would — the results, a profile, an "all versions" cluster — and reads
+them. That is how the app finds a thesis, a technical report or a person who
+has no record in OpenAlex.
 
-**It is off by default and it will often refuse.** Scholar blocks servers far
+**It is on by default and it will often refuse.** Scholar blocks servers far
 more readily than people, and a proxy is a server. When it answers with a
 captcha the panel says exactly that and the other four sources carry on; a
 refusal is never shown as "no results". A proxy on Cloudflare Workers will see
