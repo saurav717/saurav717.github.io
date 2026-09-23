@@ -11,6 +11,18 @@ run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
 build has no proxy, and every browser has to be told one in Settings.
 
+## OpenReview papers come from OpenReview's API
+
+openreview.net sends every fetch of a paper to a check of its own
+(`/challenge?redirect=…`, *Verifying your browser*), which has Cloudflare's box
+inside. From the Worker's browser that box never passes: it ticks, retries, and
+comes back. The Worker now asks OpenReview's API for the file instead
+(`api2.openreview.net`, then `api.openreview.net`), which has no check. The pane,
+if it lands on the check anyway, asks the same API on its own and says there is
+nothing to tick. **The Worker has to be redeployed for this**
+(`npm run deploy:worker` in the app repository). Until it is, the pages here ask
+a Worker that does not know the API, and the check loops as before.
+
 ## Reflow reads the PDF
 
 **Reflow** — the reading mode you can highlight in — is made from the PDF
