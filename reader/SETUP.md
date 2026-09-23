@@ -208,6 +208,15 @@ institution's sign-in already holds, download the PDF, and drop it on the
 result (or choose the file). It goes to the paper's folder in Drive and opens
 here, with *PDF from your file* under the title.
 
+**Or skip the drop: watch my Downloads folder.** In Chrome and Edge the same
+place offers to take the file from the folder it lands in: press it, point
+the dialog at your Downloads folder (read-only, for the tab), open the paper
+at the publisher in a tab of your own, save the PDF as you would anyway, and
+the reader opens the paper on it the moment the download finishes. This is
+the route to reach for whenever a site's check for a person, or Google
+Scholar, refuses the Worker — which, being Cloudflare's network, they do
+by design: your own browser passes all of them without noticing.
+
 ## What is already set, and what is not
 
 **The Google OAuth client ID is compiled in**, from `.env.production` in the app
