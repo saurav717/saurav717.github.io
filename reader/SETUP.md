@@ -16,7 +16,9 @@ build has no proxy, and every browser has to be told one in Settings.
 **Reflow** — the reading mode you can highlight in — is made from the PDF
 itself wherever there is one: the file is opened in the browser with pdf.js
 (the `pdfReflow-*.js` chunk and `pdf.worker.min-*.mjs` here, loaded the first
-time it is needed) and every page is read out — the text set as paragraphs
+time it is needed — `pdfWorkerMain-*.js` is the same code as a module of the
+app, for a browser that will not start the worker, which then reads on the
+main thread) and every page is read out — the text set as paragraphs
 and headings, the figures and display equations painted from the page and
 shown in their place, the tables read into tables. arXiv's HTML rendering
 and the abstract are what it falls back to when no copy of the PDF will come
