@@ -208,6 +208,31 @@ institution's sign-in already holds, download the PDF, and drop it on the
 result (or choose the file). It goes to the paper's folder in Drive and opens
 here, with *PDF from your file* under the title.
 
+**Or run the proxy at home, and reach it from here: `npm run home`.** The
+Worker cannot pass a site's check for a person, and Google Scholar refuses
+it too, because it runs on Cloudflare's network, which Cloudflare itself
+marks as a bot to every site it protects; nothing in your own Cloudflare
+account changes the sites' rules. Your own machine is refused by neither.
+In the reader repository, `npm install` (with the Chromium) and then
+
+```bash
+npm run home
+```
+
+starts the proxy on that machine — its own Chromium, your own connection,
+Scholar through a real browser — and opens a Cloudflare Tunnel to it
+(`cloudflared` has to be installed), then prints an address to paste into
+**Settings → Paper proxy** here and **Test it**. From then on this site
+fetches through your machine, from anywhere: the browser in the PDF pane
+is your Chromium, so a box to tick there is yours to tick and the tick
+counts; the sign-in window opens on your screen; Scholar answers. It
+works while the machine is on and awake. Without anything set it is a
+quick tunnel with a random address, new each start; with a domain on your
+Cloudflare account, a named tunnel at a fixed address, which can carry
+Cloudflare Access in front. The proxy started this way answers this site
+alone. The app repository's README has the whole of it under *The proxy at
+home, reachable from anywhere*.
+
 **Or skip the drop: watch my Downloads folder.** In Chrome and Edge the same
 place offers to take the file from the folder it lands in: press it, point
 the dialog at your Downloads folder (read-only, for the tab), open the paper
