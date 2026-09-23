@@ -95,6 +95,33 @@ will start until its day rolls over* — with no countdown, since no wait short
 of tomorrow cures it. Under a countdown the pane now also shows the reason
 the Worker gave, Cloudflare's own words included.
 
+Cloudflare's words do not always differ, though: with the day spent it
+has said only *Rate limit exceeded*, the same as for a minute. So a
+refusal its limits contradict — a start allowed, nothing to wait for, room
+for one more, and refused all the same — is looked at once more and then
+said to be most likely the day's time, with no countdown. Whether it is,
+the Cloudflare dashboard settles: **Compute → Browser Run** shows the
+month's browser hours and, under **Runs**, every session with how long it
+lived. The free plan allows ten minutes of browser time a day, and one
+session left running to Cloudflare's ten-minute cap spends the whole of it
+— which is what a session whose Chrome stopped answering used to do, held
+by a socket nobody closed; the Worker now closes that socket the moment
+its first ask over it fails, and gives up on any ask after thirty seconds
+rather than Puppeteer's three minutes.
+
+**On the free plan or the paid one.** Everything here runs on Workers Free,
+and the one thing that does not fit in it is browsing: ten minutes a day
+is one sign-in and a couple of pages, and a day of trying things spends it
+before lunch. The Workers Paid plan (**Compute → Workers plans** in the
+dashboard) includes hours of browser time a month instead, more browsers
+alive at once, and more starts a minute; check the plan page for the
+current numbers, since they change. Nothing in the reader needs changing
+to use it — the same Worker, redeployed or not, simply stops being
+refused. The alternative that costs nothing is the Node proxy on your own
+machine (`npm start`, pointed at from Settings → Paper proxy), which has
+no browser-time limit and can show captchas, but only works while that
+machine is on.
+
 When it keeps refusing or hangs, `/browse/status` on the Worker —
 `https://reader-arxiv-proxy.es16btech11007.workers.dev/browse/status` —
 says what the Worker holds and what Cloudflare last said its limits were:
