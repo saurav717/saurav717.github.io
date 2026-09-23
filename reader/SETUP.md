@@ -80,10 +80,21 @@ which limit it was and how long until another try, then Cloudflare's own
 words — and counts that wait down and tries again on its own, twice,
 before leaving it to you with **Try again**.
 
-When it keeps refusing, `/browse/status` on the Worker —
+Every step of opening has a deadline, and so does the whole open (a minute
+and a half): a session Cloudflare lists as free but whose Chrome has
+stopped answering, or a held browser whose socket went quietly, used to
+leave *Opening the proxy's browser…* spinning for minutes, with every click
+after queued behind it. Now the step that ran out is named in the pane, the
+session is left alone for a few minutes, and the next click starts afresh;
+the site gives up on its side after two minutes with a sentence.
+
+When it keeps refusing or hangs, `/browse/status` on the Worker —
 `https://reader-arxiv-proxy.es16btech11007.workers.dev/browse/status` —
-shows what Cloudflare last said its limits were, under `browsers`: `alive`
-against `max`, `allowed` this minute, and `nextInMs`. Three alive and none
+says what the Worker holds and what Cloudflare last said its limits were:
+`held` and `page` (a browser held, with a page), `opening` (how long an
+open has been in flight), `avoiding` (sessions that would not answer
+lately), `lastError` (what last went wrong, and when), and `browsers` —
+`alive` against `max`, `allowed` this minute, and `nextInMs`. Three alive and none
 free means something is still connected to each (the pane open in another
 tab, or the last connection not yet let go — each is freed a minute and a
 half after whatever drove it disconnects), so a minute and a half of
