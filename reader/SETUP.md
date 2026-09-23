@@ -20,7 +20,11 @@ comes back. OpenReview's API (`api2.openreview.net`, then `api.openreview.net`)
 now asks anonymous requests for the same check, but a signed-in request skips
 it. So the Worker signs in with an OpenReview account and fetches the file from
 the API. The pane, if it lands on the check anyway, has the Worker do the same
-and says there is nothing to tick. Give the Worker the account once, in the app
+and says there is nothing to tick. It no longer watches the check go round
+(*Success!*, *Verifying…*, back to the check). It closes the Worker's browser
+there, and if the API fails too it offers the file from a tab of your own.
+Each API ask has a 30 s deadline, so a silent API shows as that, not as
+Safari's bare *Load failed*. Give the Worker the account once, in the app
 repository:
 
 ```bash
