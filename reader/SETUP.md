@@ -225,9 +225,14 @@ Browserless page when the check meets it, which passes the checks that need
 no box and hands the file back on its own; one that needs a person is said,
 under the failure, to have been met at Browserless, and **Browse to a copy**
 opens the pane there with the box ready. Browserless's free plan has some
-thousand units a month (a session is a unit per half minute), and the
-browser is closed the moment the pane closes, so ordinary reading stays well
-inside it. If a box keeps coming back after a tick, `BROWSERLESS_PROXY =
+thousand units a month (a session is a unit per half minute) and allows a
+session two minutes, which is what the Worker asks for: enough to tick a
+box and have the file follow, and the pane simply closes when it is up, to
+be opened again (`BROWSERLESS_SESSION_MS` under `[vars]` raises it on a paid
+plan). The browser is closed the moment the pane closes, so ordinary reading
+stays well inside the month. When Browserless gives no browser — a bad token,
+the plan's browsers all in use — the line under the page says so in
+Browserless's own words, and the check stays on Cloudflare's browser. If a box keeps coming back after a tick, `BROWSERLESS_PROXY =
 "residential"` under `[vars]` in the Worker's `wrangler.toml` makes the
 browser leave from a home address, at extra units per megabyte. The app
 repository's README, under *Through Browserless, from the Worker*, has the
