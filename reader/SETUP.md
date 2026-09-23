@@ -53,14 +53,36 @@ PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
 npm run deploy:worker        # the SERPAPI_KEY secret already set stays set
 ```
 
-Browser Rendering is on Cloudflare's free plan, with a daily allowance of
-browser minutes. To make a sign-in last for the next paper too, give the
-Worker somewhere to keep the cookies — `npx wrangler kv namespace create
-SESSIONS`, its id into the commented block in `wrangler.toml`, deploy again —
-and the offer under a walled result gains **Signed in — try the copies
-again**. The Node proxy on your own machine, or on any server with a
-Chromium, does the same thing with a profile of its own. *A browser inside
-the reader* in the app repository's README has the details.
+Browser Rendering is on Cloudflare's free plan, which rations browsers
+rather than requests: a few new browsers a minute, three alive at once, and
+ten minutes of browser time a day (the Workers Paid plan has hours a month).
+Every time the pane opens a browser and closes it again — a PDF collected, a
+site card pressed after a close, **Retry** — is a new browser, so a sign-in
+and a couple more tries inside one minute can hit the limit. The Worker
+deployed from the current app repository spends those sparingly: a browser
+already open is pointed at the next site rather than started again, a
+session left behind is adopted, a refusal is asked again every few seconds
+for most of a minute before it is shown, and the pane says *Cloudflare
+would not start another browser just now* when it is. The bare
+*Unable to create new browser: code: 429: message: Rate limit exceeded* is
+the same refusal from a Worker deployed before that, and the
+`npm run deploy:worker` above is the fix. When it does happen: wait a
+minute; keep the pane open and pick another site card rather than closing
+and reopening; or run the Node proxy on your own machine, which has no
+such limit.
+
+A sign-in lasts for the next paper too — which is also what stops the
+browser being needed again for a publisher already signed in to — because
+the Worker has somewhere to keep the cookies: a KV namespace bound as
+`SESSIONS` in the `[[kv_namespaces]]` block of `wrangler.toml`, whose id is
+the one `npx wrangler kv namespace create SESSIONS` printed on this account.
+With it bound the offer under a walled result gains **Signed in — try the
+copies again**. A Worker deployed to another account needs a namespace of
+its own there; without one a sign-in lasts only as long as the browser
+session.
+The Node proxy on your own machine, or on any server with a Chromium, does
+the same thing with a profile of its own. *A browser inside the reader* in
+the app repository's README has the details.
 
 Some sites put a check for a person in front of the file — academia.edu's
 downloads sit behind Cloudflare's *Performing security verification* page,
