@@ -608,3 +608,12 @@ A bad token shows up in Browserless's words in the line under the page, and in
 `lastError` on the Worker's `/browse/status`. If the new account is in a
 different Browserless region, set `BROWSERLESS_URL` in `wrangler.toml` (for
 example `wss://production-lon.browserless.io`) and run `npm run deploy:worker`.
+
+## Ask Claude needs no setup here
+
+**⌘\\** opens a Claude window over the paper. Each visitor pastes their own
+Anthropic API key the first time; it stays in their browser and goes straight to
+`api.anthropic.com`, so nothing is deployed for it and nobody but the visitor pays.
+The Anthropic SDK is its own chunk here (the second `index-*.js`), fetched only
+when a question is first sent. The app repository's README says more, under
+*Ask Claude*.
