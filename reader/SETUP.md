@@ -202,6 +202,38 @@ for through NCBI's OA Web Service and Europe PMC's REST API — interfaces
 meant for programs, with no check on them — and the PDF comes from
 NCBI's own file host, for any article in the open-access subset.
 
+**And now for every such site, with a browser that is neither Cloudflare's
+nor yours.** The Worker redeployed from the current app repository can hand
+such a check to a browser at [Browserless](https://www.browserless.io) —
+Chromiums on addresses of their own, driven over the same protocol — once it
+has a token for one:
+
+```bash
+npx --yes wrangler@4 secret put BROWSERLESS_TOKEN    # paste the key from the Browserless dashboard
+npm run deploy:worker
+```
+
+With the token set nothing changes for the sites that serve no check:
+Cloudflare's free browser opens first, as before. When a page comes back as
+Cloudflare's check, the line under the pane says the session is being handed
+to a browser at Browserless, the same page opens again there a few seconds
+later, and a box that appears then is yours to tick — and the tick counts,
+since that browser is nobody's bot. The site is remembered for a week, so the
+next paper from academia.edu opens at Browserless straight away. A file asked
+for plainly — the way **Add to collection** asks — is asked again from a
+Browserless page when the check meets it, which passes the checks that need
+no box and hands the file back on its own; one that needs a person is said,
+under the failure, to have been met at Browserless, and **Browse to a copy**
+opens the pane there with the box ready. Browserless's free plan has some
+thousand units a month (a session is a unit per half minute), and the
+browser is closed the moment the pane closes, so ordinary reading stays well
+inside it. If a box keeps coming back after a tick, `BROWSERLESS_PROXY =
+"residential"` under `[vars]` in the Worker's `wrangler.toml` makes the
+browser leave from a home address, at extra units per megabyte. The app
+repository's README, under *Through Browserless, from the Worker*, has the
+rest. This build carries the wording for it; the Worker has to be redeployed
+with the token for it to happen.
+
 **With only the Worker**, the same result offers the route that needs no proxy
 at all: open the paper at the publisher in a tab of your own, where your
 institution's sign-in already holds, download the PDF, and drop it on the
