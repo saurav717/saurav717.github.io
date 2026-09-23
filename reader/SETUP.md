@@ -165,10 +165,28 @@ presents itself as what it is (a typed-in user-agent string used to leave it
 with no client hints at all, which is the mismatch such a check looks for,
 and the box never came), and the file is fetched by the page that was let
 in, since the clearance is bound to the browser that earned it. Whether the
-check passes is the site's call, and a headless browser on Cloudflare's
-network is not its most trusted visitor: if it refuses, the Node proxy on
-your own machine, or the drop-in below, still gets the paper. This too takes
-the Worker redeployed from the current app repository.
+check passes is the site's call — and from the Worker, Cloudflare's check
+never passes, by Cloudflare's own design: the browser the Worker drives is
+Cloudflare's, and Cloudflare tells every site it protects that requests
+from its rendering browsers are bots, whoever is behind them (its Browser
+Rendering documentation says so, and offers a WAF skip rule to a site that
+wants to let them in). So the box ticks, the widget verifies, the page
+reloads, and the box is back — a refused visitor, not a failed solve, and
+no number of ticks changes it. The pane now says so instead of letting
+anyone find out by ticking: the Worker notices the check from the
+`cf-mitigated: challenge` header Cloudflare puts on every challenge page,
+counts how many times it has come and how many of those after you did
+something to the page, and the line under the page says, from the Worker,
+that the check is Cloudflare's and so is the browser and is not expected
+to pass from here — or, once it has come back after a tick, that it will
+keep coming back — with **Open it in a tab of your own** on the end, where
+your own browser passes such a check without noticing, and the file
+dropped on the paper. The same line from the Node proxy on your own machine,
+whose browser is its own, says the box is yours to tick, and that the site
+is refusing the browser if it comes back after a tick. This too takes the
+Worker redeployed from the current app repository; until then this build
+still tells the Worker's browser from the proxy's by the session id only
+the Worker hands out, and words the line from the page's title.
 
 **With only the Worker**, the same result offers the route that needs no proxy
 at all: open the paper at the publisher in a tab of your own, where your
