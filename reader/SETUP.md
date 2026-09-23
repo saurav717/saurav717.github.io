@@ -88,12 +88,21 @@ after queued behind it. Now the step that ran out is named in the pane, the
 session is left alone for a few minutes, and the next click starts afresh;
 the site gives up on its side after two minutes with a sentence.
 
+The day's browser time being spent is told apart from a minute's: Cloudflare
+refuses both with the same code, but its words differ, and when they say the
+day is spent the pane says so at once — *today's are spent, so no browser
+will start until its day rolls over* — with no countdown, since no wait short
+of tomorrow cures it. Under a countdown the pane now also shows the reason
+the Worker gave, Cloudflare's own words included.
+
 When it keeps refusing or hangs, `/browse/status` on the Worker —
 `https://reader-arxiv-proxy.es16btech11007.workers.dev/browse/status` —
 says what the Worker holds and what Cloudflare last said its limits were:
 `held` and `page` (a browser held, with a page), `opening` (how long an
 open has been in flight), `avoiding` (sessions that would not answer
-lately), `lastError` (what last went wrong, and when), and `browsers` —
+lately), `lastError` (what last went wrong, and when), `log` (the last twenty
+things that happened, with when — kept in the Worker's storage, so an
+instance started after an eviction still has them), and `browsers` —
 `alive` against `max`, `allowed` this minute, and `nextInMs`. Three alive and none
 free means something is still connected to each (the pane open in another
 tab, or the last connection not yet let go — each is freed a minute and a
