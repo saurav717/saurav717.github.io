@@ -64,16 +64,36 @@ sparingly: a browser already open is pointed at the next site rather than
 started again; closing the pane keeps its browser for most of a minute,
 blank, so a site card pressed after a close points that same browser
 somewhere else rather than asking for another (it is closed for good when
-nobody comes back, since browser time is counted by the day too); a session
-left behind is adopted; and a refusal is asked again every few seconds for
-most of a minute before it is shown. When it is shown, the pane says
-*Cloudflare would not start another browser just now* with Cloudflare's own
-reason on the end, which is how the minute's allowance and the day's ten
-minutes tell apart. The bare *Unable to create new browser: code: 429* on
+nobody comes back, since browser time is counted by the day too); a page
+the site closed is replaced by a new page in the same browser; and a
+session left behind, or any of the account's that nothing is connected to,
+is adopted. Before it asks Cloudflare for a browser it asks what Cloudflare
+will allow — how many are alive against how many may be, and whether
+another may be started this minute, and if not, in how long — and waits
+out exactly the time named, once, rather than asking for a browser every
+few seconds (a refused ask may count against the minute the way an
+answered one does, which is how the old way could keep the minute spent on
+its own). When every browser it allows is alive and held it looks again
+every few seconds for one come free. After most of a minute of that the
+pane says *Cloudflare would not start another browser just now*, then
+which limit it was and how long until another try, then Cloudflare's own
+words — and counts that wait down and tries again on its own, twice,
+before leaving it to you with **Try again**.
+
+When it keeps refusing, `/browse/status` on the Worker —
+`https://reader-arxiv-proxy.es16btech11007.workers.dev/browse/status` —
+shows what Cloudflare last said its limits were, under `browsers`: `alive`
+against `max`, `allowed` this minute, and `nextInMs`. Three alive and none
+free means something is still connected to each (the pane open in another
+tab, or the last connection not yet let go — each is freed a minute and a
+half after whatever drove it disconnects), so a minute and a half of
+leaving it alone clears it. No new browsers allowed and no time named, for
+longer than a minute, means the day's ten minutes are spent: the Node
+proxy on your own machine has no such limit, and the Workers Paid plan
+has hours a month. The bare *Unable to create new browser: code: 429* on
 its own is the same refusal from a Worker deployed before all this, and the
-`npm run deploy:worker` above is the fix. When it does happen: wait a
-minute and try again, or run the Node proxy on your own machine, which has
-no such limit.
+`npm run deploy:worker` above is the fix — and it is the fix for this
+build too, which expects the Worker to say how long to wait.
 
 A sign-in lasts for the next paper too — which is also what stops the
 browser being needed again for a publisher already signed in to — because
