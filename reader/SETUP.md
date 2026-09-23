@@ -41,7 +41,11 @@ through Cloudflare's Browser Rendering, streamed into the page and driven from
 it. It asks which site to go to (the one that asked for the sign-in, the other
 copies, Google Scholar, or any address), you sign in there as anywhere, and the
 moment that browser meets the PDF — or you press **Fetch the PDF from this
-page** — the paper opens on it and goes to Drive.
+page**, or **Signed in — try the copies again** — the paper opens on it and
+goes to Drive. From then on the paper opens on that copy: Drive is asked
+before any publisher, by the id the library recorded or, failing that, by
+name, so the sign-in is for the first open only, and a copy saved from
+another browser counts too.
 
 That takes the Worker redeployed from the current app repository, since the
 browser binding — and the Durable Object that keeps the session open, which
