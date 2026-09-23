@@ -45,7 +45,17 @@ page**, or **Signed in — try the copies again** — the paper opens on it and
 goes to Drive. From then on the paper opens on that copy: Drive is asked
 before any publisher, by the id the library recorded or, failing that, by
 name, so the sign-in is for the first open only, and a copy saved from
-another browser counts too.
+another browser counts too. Drive is asked the moment the paper opens, and
+the copies — when Drive has nothing — three at a time, first to answer wins,
+with **Browse to a copy and sign in here** offered while they are still being
+asked rather than only once every one has refused.
+
+A Worker deployed before this answered every open of the pane with *putting
+the sign-in back took longer than 10 seconds*: the kept sign-in's cookies
+went back one at a time, two round trips each, and the open's deadline went
+before the page was asked for. Now they go back in one call, and a restore
+that runs long costs the sign-in, not the open. `npm run deploy:worker` from
+the current app repository brings the Worker up to date.
 
 That takes the Worker redeployed from the current app repository, since the
 browser binding — and the Durable Object that keeps the session open, which
