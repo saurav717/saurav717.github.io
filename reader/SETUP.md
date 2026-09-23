@@ -11,17 +11,28 @@ run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
 build has no proxy, and every browser has to be told one in Settings.
 
-## OpenReview papers come from OpenReview's API
+## OpenReview papers come from OpenReview's API, signed in
 
 openreview.net sends every fetch of a paper to a check of its own
 (`/challenge?redirect=…`, *Verifying your browser*), which has Cloudflare's box
 inside. From the Worker's browser that box never passes: it ticks, retries, and
-comes back. The Worker now asks OpenReview's API for the file instead
-(`api2.openreview.net`, then `api.openreview.net`), which has no check. The pane,
-if it lands on the check anyway, asks the same API on its own and says there is
-nothing to tick. **The Worker has to be redeployed for this**
-(`npm run deploy:worker` in the app repository). Until it is, the pages here ask
-a Worker that does not know the API, and the check loops as before.
+comes back. OpenReview's API (`api2.openreview.net`, then `api.openreview.net`)
+now asks anonymous requests for the same check, but a signed-in request skips
+it. So the Worker signs in with an OpenReview account and fetches the file from
+the API. The pane, if it lands on the check anyway, has the Worker do the same
+and says there is nothing to tick. Give the Worker the account once, in the app
+repository:
+
+```bash
+npx --yes wrangler@4 secret put OPENREVIEW_USERNAME   # the account's email
+npx --yes wrangler@4 secret put OPENREVIEW_PASSWORD
+npm run deploy:worker
+```
+
+Without them an OpenReview paper fails with what the API answered
+(`ChallengeRequiredError`) and names the two secrets. Anyone who can reach the
+Worker's `/pdf` then reads OpenReview papers as that account, so a spare account
+is the tidy choice.
 
 ## Reflow reads the PDF
 
