@@ -56,20 +56,24 @@ npm run deploy:worker        # the SERPAPI_KEY secret already set stays set
 Browser Rendering is on Cloudflare's free plan, which rations browsers
 rather than requests: a few new browsers a minute, three alive at once, and
 ten minutes of browser time a day (the Workers Paid plan has hours a month).
-Every time the pane opens a browser and closes it again — a PDF collected, a
-site card pressed after a close, **Retry** — is a new browser, so a sign-in
-and a couple more tries inside one minute can hit the limit. The Worker
-deployed from the current app repository spends those sparingly: a browser
-already open is pointed at the next site rather than started again, a
-session left behind is adopted, a refusal is asked again every few seconds
-for most of a minute before it is shown, and the pane says *Cloudflare
-would not start another browser just now* when it is. The bare
-*Unable to create new browser: code: 429: message: Rate limit exceeded* is
-the same refusal from a Worker deployed before that, and the
+A sign-in and a couple more tries inside one minute used to hit the limit,
+because every time the pane closed — a PDF collected, **Retry**, the X —
+its browser was closed with it, and the next site card pressed started a
+new one. The Worker deployed from the current app repository spends those
+sparingly: a browser already open is pointed at the next site rather than
+started again; closing the pane keeps its browser for most of a minute,
+blank, so a site card pressed after a close points that same browser
+somewhere else rather than asking for another (it is closed for good when
+nobody comes back, since browser time is counted by the day too); a session
+left behind is adopted; and a refusal is asked again every few seconds for
+most of a minute before it is shown. When it is shown, the pane says
+*Cloudflare would not start another browser just now* with Cloudflare's own
+reason on the end, which is how the minute's allowance and the day's ten
+minutes tell apart. The bare *Unable to create new browser: code: 429* on
+its own is the same refusal from a Worker deployed before all this, and the
 `npm run deploy:worker` above is the fix. When it does happen: wait a
-minute; keep the pane open and pick another site card rather than closing
-and reopening; or run the Node proxy on your own machine, which has no
-such limit.
+minute and try again, or run the Node proxy on your own machine, which has
+no such limit.
 
 A sign-in lasts for the next paper too — which is also what stops the
 browser being needed again for a publisher already signed in to — because
