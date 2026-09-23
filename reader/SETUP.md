@@ -617,3 +617,14 @@ Anthropic API key the first time; it stays in their browser and goes straight to
 The Anthropic SDK is its own chunk here (the second `index-*.js`), fetched only
 when a question is first sent. The app repository's README says more, under
 *Ask Claude*.
+
+## The cards over a name or a citation need no setup here
+
+Resting the pointer on an author's name, a citation or a bibliography entry
+in Reflow opens a card about the person or the cited paper. It asks
+OpenAlex and Crossref straight from the page — they send CORS headers — and
+asks Google Scholar for the person's profile through the Worker's
+`/scholar/authors`, the same route Discover's people search uses, so there
+is nothing to deploy. When Scholar will not answer, the card links to
+Scholar's own search for the name instead. The app repository's README says
+how the cards find their answers, under *Who wrote it, and what it cites*.
