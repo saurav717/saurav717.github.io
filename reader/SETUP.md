@@ -228,8 +228,12 @@ opens the pane there with the box ready. Browserless's free plan has some
 thousand units a month (a session is a unit per half minute) and allows a
 session two minutes, which is what the Worker asks for: enough to tick a
 box and have the file follow, and the pane simply closes when it is up, to
-be opened again (`BROWSERLESS_SESSION_MS` under `[vars]` raises it on a paid
-plan). The browser is closed the moment the pane closes, so ordinary reading
+be opened again, saying why it closed (`BROWSERLESS_SESSION_MS` under
+`[vars]` raises it on a paid plan). A check passed in a session that ended
+does not carry over to the next, so the box may come again. A click split
+across the hand-over — pressed on Cloudflare's page, released on
+Browserless's — used to fail the whole batch of input and leave *'left' is
+not pressed* under the page; it is let pass now, and the next click is whole. The browser is closed the moment the pane closes, so ordinary reading
 stays well inside the month. When Browserless gives no browser — a bad token,
 the plan's browsers all in use — the line under the page says so in
 Browserless's own words, and the check stays on Cloudflare's browser. If a box keeps coming back after a tick, `BROWSERLESS_PROXY =
