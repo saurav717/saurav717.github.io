@@ -530,3 +530,27 @@ collect.
 
 The full walkthrough, including what lands in Drive and what to check when
 nothing does, is in the app repository's README.
+
+## Reading a different copy
+
+The first copy to hand over a PDF is not always the paper. A conference's
+link is often the poster that was shown there, and a repository's can be the
+slides. So each file a copy hands over is measured before it is shown. One
+that looks like a poster (one or two enormous pages), slides (landscape
+pages) or an abstract (a page or two) is held back while the other copies
+are asked. It is shown only when none of them has anything better, with a
+line saying why it may not be the paper. **Add to collection** makes the
+same check, so a poster is not what gets saved to Drive.
+
+The bar under the title says which copy is on screen. **Reading the copy at
+… ▾** opens the list of every copy, each with what it answered when it was
+asked. Pick one and it is fetched on its own, and the file on screen stays
+until it arrives. If the copy you picked refuses, the bar says why and
+offers the way round. For a sign-in, that is the browser in the pane. For
+Cloudflare's "Verify you are human", which the Worker never passes, it is a
+link to the copy: open it in a tab of your own (your browser passes the
+check), download the PDF, and drop it on the bar.
+
+The pick is remembered for that paper and asked first on the next open. It
+also replaces the file in Drive, so a paper saved as its poster is fixed by
+picking the right copy once. **Forget my pick** goes back to the ranked order.
