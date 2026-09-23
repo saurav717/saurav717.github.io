@@ -201,10 +201,13 @@ there until Drive is connected — one button, one consent covering your name an
 the `drive.file` scope, and then the app. **Not now** goes past it with
 everything kept in this browser.
 
-It asks every visit. Nothing here can hold a refresh token, so the token dies
-with the tab, and a paper added before you reconnect is one Drive never hears
-about. After the first time the asking is quiet: the grant you already gave is
-reused, and Google's window opens and closes without a question.
+It asks once an hour at most. The sign-in is kept in this browser for as long
+as the token Google issued lasts — about an hour — so a reload, or a tab closed
+and reopened, comes back signed in and connected with no window at all. Nothing
+here can hold a refresh token, so once that hour is up the visit starts
+disconnected, and a paper added before you reconnect is one Drive never hears
+about. The asking is quiet then: the grant you already gave is reused, and
+Google's window opens and closes without a question.
 
 **The proxy is compiled in.** arXiv and the publishers send no CORS headers,
 so a browser cannot fetch a paper from them directly and a static site has no
