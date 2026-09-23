@@ -249,6 +249,28 @@ institution's sign-in already holds, download the PDF, and drop it on the
 result (or choose the file). It goes to the paper's folder in Drive and opens
 here, with *PDF from your file* under the title.
 
+## The pane, made quick
+
+The pane from the Worker used to be slow to do anything in — a scroll,
+a keystroke, a click each waited most of a second — for two reasons in the
+Worker's session object. It applied each event and waited for the browser
+to take it before the next, a round trip to the browser per event, from an
+object far from its browser; and a frame came one a round trip, by a
+poll. The Worker redeployed from the current app repository sends every
+event in a batch down the wire at once and answers at once, and this build
+takes the frames over one WebSocket the object pushes on the moment
+something is newer, with input going back over the same socket (a Worker
+deployed before that refuses the upgrade, and this build polls as before).
+A scroll up, which the old bound on its size floored at nothing, scrolls
+up. The object itself lives where the pane was first opened from — near
+you, and far from a browser at Browserless; `BROWSER_SESSION_LOCATION =
+"wnam"` under `[vars]` in the Worker's `wrangler.toml` (for Browserless's
+San Francisco; `weur` for London or Amsterdam) makes a new one next to
+the browser, so the only long hop left is yours. And a site that refuses
+Cloudflare's browser in its own words — ResearchGate's *unusual activity
+from your network* — is handed to the browser at Browserless the way
+Cloudflare's check is.
+
 ## What is already set, and what is not
 
 **The Google OAuth client ID is compiled in**, from `.env.production` in the app
