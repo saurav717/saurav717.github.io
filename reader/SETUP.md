@@ -188,6 +188,20 @@ Worker redeployed from the current app repository; until then this build
 still tells the Worker's browser from the proxy's by the session id only
 the Worker hands out, and words the line from the page's title.
 
+It is not one site's quirk: every site that puts Cloudflare's check in
+front of its files — academia.edu, Europe PMC, more each month — loops
+the same way from the Worker's browser, and the Worker's plain fetch of
+the file meets the same check first. So the redeployed Worker now answers
+such a check as a check rather than as a sign-in wall, and the failure
+under the paper says so: that the check is Cloudflare's and the Worker's
+requests never pass it, with the file's own address on the drop-in for a
+tab of your own. And for one family of such sites there is a way round
+that needs no person: a paper in PubMed Central whose page on
+ncbi.nlm.nih.gov or europepmc.org will not hand over the file is asked
+for through NCBI's OA Web Service and Europe PMC's REST API — interfaces
+meant for programs, with no check on them — and the PDF comes from
+NCBI's own file host, for any article in the open-access subset.
+
 **With only the Worker**, the same result offers the route that needs no proxy
 at all: open the paper at the publisher in a tab of your own, where your
 institution's sign-in already holds, download the PDF, and drop it on the
