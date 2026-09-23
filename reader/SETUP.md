@@ -11,6 +11,18 @@ run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
 build has no proxy, and every browser has to be told one in Settings.
 
+## Reflow reads the PDF
+
+**Reflow** — the reading mode you can highlight in — is made from the PDF
+itself wherever there is one: the file is opened in the browser with pdf.js
+(the `pdfReflow-*.js` chunk and `pdf.worker.min-*.mjs` here, loaded the first
+time it is needed) and every page is read out — the text set as paragraphs
+and headings, the figures and display equations painted from the page and
+shown in their place, the tables read into tables. arXiv's HTML rendering
+and the abstract are what it falls back to when no copy of the PDF will come
+here, or the file is a scan with no text to read. The app repository's
+README says how the reading is done, under *Getting the PDF*.
+
 ## Papers behind a login (IEEE and the like)
 
 The Worker fetches every paper anonymously, and a publisher that wants an
