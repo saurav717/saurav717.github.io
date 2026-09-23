@@ -57,6 +57,13 @@ before the page was asked for. Now they go back in one call, and a restore
 that runs long costs the sign-in, not the open. `npm run deploy:worker` from
 the current app repository brings the Worker up to date.
 
+*Browserless would not open a browser: code: 429* is Browserless's one
+browser on the free plan being in use — by the last pane, closed a moment
+ago, or by a copy of the paper being fetched through it. The Worker now
+hands that up as a wait, and the pane counts twenty seconds down and tries
+again on its own; the reader asks one copy per site at a time and stops the
+copies when the pane opens, so they do not hold the slot the pane needs.
+
 That takes the Worker redeployed from the current app repository, since the
 browser binding — and the Durable Object that keeps the session open, which
 is what makes the pane quick — are in its `wrangler.toml`:
