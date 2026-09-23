@@ -62,6 +62,21 @@ again**. The Node proxy on your own machine, or on any server with a
 Chromium, does the same thing with a profile of its own. *A browser inside
 the reader* in the app repository's README has the details.
 
+Some sites put a check for a person in front of the file — academia.edu's
+downloads sit behind Cloudflare's *Performing security verification* page,
+which shows a box to tick when it is not sure. In the pane that page is the
+site's page like any other: the line under it names the site and says the
+box, if one appears, is yours to click, and once the check passes the page
+follows on to the file by itself. For that to work the Worker's browser now
+presents itself as what it is (a typed-in user-agent string used to leave it
+with no client hints at all, which is the mismatch such a check looks for,
+and the box never came), and the file is fetched by the page that was let
+in, since the clearance is bound to the browser that earned it. Whether the
+check passes is the site's call, and a headless browser on Cloudflare's
+network is not its most trusted visitor: if it refuses, the Node proxy on
+your own machine, or the drop-in below, still gets the paper. This too takes
+the Worker redeployed from the current app repository.
+
 **With only the Worker**, the same result offers the route that needs no proxy
 at all: open the paper at the publisher in a tab of your own, where your
 institution's sign-in already holds, download the PDF, and drop it on the
