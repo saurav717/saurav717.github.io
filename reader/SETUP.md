@@ -74,7 +74,9 @@ such limit.
 To make a sign-in last for the next paper too — which is also what stops
 the browser being needed again for a publisher already signed in to — give
 the Worker somewhere to keep the cookies: `npx wrangler kv namespace create
-SESSIONS`, its id into the commented block in `wrangler.toml`, deploy again,
+SESSIONS`, its id in place of the placeholder in the `[[kv_namespaces]]`
+block of `wrangler.toml` (the block is live, and `wrangler deploy` refuses
+the placeholder until the id is in), deploy again,
 and the offer under a walled result gains **Signed in — try the copies
 again**. Without it a sign-in lasts only as long as the browser session.
 The Node proxy on your own machine, or on any server with a Chromium, does
