@@ -583,3 +583,28 @@ check), download the PDF, and drop it on the bar.
 The pick is remembered for that paper and asked first on the next open. It
 also replaces the file in Drive, so a paper saved as its poster is fixed by
 picking the right copy once. **Forget my pick** goes back to the ranked order.
+
+## Changing the Browserless token
+
+The Browserless API token is not in this site. It lives on the Worker as the
+secret `BROWSERLESS_TOKEN`, and nothing here needs rebuilding when it changes.
+To move the Worker to a new Browserless account, from a clone of
+[saurav717/reader](https://github.com/saurav717/reader), logged in to the
+Cloudflare account the Worker deploys to (`npx --yes wrangler@4 login`):
+
+```bash
+npx --yes wrangler@4 secret put BROWSERLESS_TOKEN   # paste the new token when asked
+npx --yes wrangler@4 secret list                    # BROWSERLESS_TOKEN is listed; its value never is
+```
+
+`secret put` replaces the old value and the Worker picks it up at once; no
+`npm run deploy:worker` is needed. To check the token on its own first:
+
+```bash
+BROWSERLESS_TOKEN=<new token> node scripts/browserless-live.mjs https://www.academia.edu/download/78156473/10.pdf
+```
+
+A bad token shows up in Browserless's words in the line under the page, and in
+`lastError` on the Worker's `/browse/status`. If the new account is in a
+different Browserless region, set `BROWSERLESS_URL` in `wrangler.toml` (for
+example `wss://production-lon.browserless.io`) and run `npm run deploy:worker`.
