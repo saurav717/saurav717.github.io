@@ -637,3 +637,6 @@ on what has aged since. It uses the same API key as Ask Claude, entered in the
 browser, and calls `api.anthropic.com` directly, so the Worker plays no part in
 it. **Run in Colab** is shown but switched off until the Colab connection is
 built; **Notebook ↓** downloads the cells as an `.ipynb` for Colab meanwhile.
+The bar across the top of the page takes a question or a change ("simpler",
+"use PyTorch") and Claude edits just the sections concerned, with Undo — also
+straight to Anthropic with that key.
