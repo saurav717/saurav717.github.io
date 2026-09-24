@@ -645,3 +645,9 @@ With Drive connected, each explanation is also kept in the paper's own folder,
 as `<paper> — explained by Claude.md`, and fetched from there when Explain is
 opened in another browser, so it is not paid for twice. Nothing to set up:
 it uses the same Drive grant as the PDFs and sidecars.
+
+## Ask Claude can show you where
+
+Ask *"show me where the paper talks about …"* and the paper scrolls to the
+passage and marks it for a few seconds, with a caption saying what it is.
+Nothing to set up: it runs in the page, with the same key.
