@@ -628,3 +628,12 @@ asks Google Scholar for the person's profile through the Worker's
 is nothing to deploy. When Scholar will not answer, the card links to
 Scholar's own search for the name instead. The app repository's README says
 how the cards find their answers, under *Who wrote it, and what it cites*.
+
+## Explain needs only the Claude key
+
+**Explain** (E, or the button in the top bar) has Claude write the whole paper
+out as a lesson: figures, Python cells with their expected output, and caveats
+on what has aged since. It uses the same API key as Ask Claude, entered in the
+browser, and calls `api.anthropic.com` directly, so the Worker plays no part in
+it. **Run in Colab** is shown but switched off until the Colab connection is
+built; **Notebook ↓** downloads the cells as an `.ipynb` for Colab meanwhile.
