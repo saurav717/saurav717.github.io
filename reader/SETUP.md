@@ -640,3 +640,8 @@ built; **Notebook ↓** downloads the cells as an `.ipynb` for Colab meanwhile.
 The bar across the top of the page takes a question or a change ("simpler",
 "use PyTorch") and Claude edits just the sections concerned, with Undo — also
 straight to Anthropic with that key.
+
+With Drive connected, each explanation is also kept in the paper's own folder,
+as `<paper> — explained by Claude.md`, and fetched from there when Explain is
+opened in another browser, so it is not paid for twice. Nothing to set up:
+it uses the same Drive grant as the PDFs and sidecars.
