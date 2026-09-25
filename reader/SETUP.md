@@ -15,9 +15,11 @@ build has no proxy, and every browser has to be told one in Settings.
 
 Explain has a second page, **Implementation**: the paper as a project — what
 to build, the datasets, the repository and its starter files, and a compute
-budget worked out for the machine picked on the page. **Colab** in its bar
-commits the scaffold to the Git mirror and opens it in Colab, or downloads
-the notebook or a zip; that part works from this static copy. **Local** — the
+budget worked out for the machine picked on the page. **Colab** in its bar,
+with Drive connected, writes the notebook into the paper's Drive folder and
+opens Colab on it; the notebook reports back through Drive, and the page
+shows the run — the GPU, the loss, the log, each cell's output. That works
+from this static copy: it needs only the Drive grant. **Local** — the
 scaffold written onto your own disk, your GPU detected, commands run there
 with the output on the page — needs the reader's own proxy on your machine,
 which the Worker cannot stand in for:
