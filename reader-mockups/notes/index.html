@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reader notes mock-ups</title>
+<meta name="description" content="Mock-ups of a notes panel for the reader: clipping text, figures and tables across Reflow, PDF, Explain and zen mode.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+  :root {
+    --paper: #fbfaf6; --surface: #fffdf7; --border: #e2ddce;
+    --ink: #1a1a17; --ink-2: #55524a; --muted: #6f6c63;
+    --accent: #1f5e52; --accent-soft: #e4efe7; --accent-ink: #14403a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+      --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+      --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+    --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+    --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 'IBM Plex Sans', system-ui, sans-serif; }
+  main { max-width: 1120px; margin: 0 auto; padding: 48px 16px 80px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  h1 { font: 500 clamp(30px, 5vw, 44px)/1.15 'Newsreader', Georgia, serif; margin: 0 0 14px; }
+  .lede { color: var(--ink-2); max-width: 68ch; margin: 0 0 12px; }
+  .note { font-size: 14px; color: var(--muted); max-width: 68ch; margin: 0 0 40px; }
+  .note a { color: var(--accent); }
+  figure { margin: 0 0 56px; }
+  figure img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 18px 50px -24px rgba(0,0,0,.35); background: var(--surface); }
+  figcaption { margin-top: 16px; display: grid; grid-template-columns: 40px 1fr; gap: 0 12px; }
+  .num { font: 500 13px 'IBM Plex Sans', sans-serif; color: var(--accent-ink); background: var(--accent-soft); border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; }
+  figcaption h2 { font-size: 17px; font-weight: 600; margin: 3px 0 4px; }
+  figcaption p { margin: 0; color: var(--ink-2); max-width: 75ch; }
+  kbd { font: 500 12px ui-monospace, monospace; border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; background: var(--surface); }
+  .questions { border-top: 1px solid var(--border); padding-top: 32px; }
+  .questions h2 { font: 500 26px 'Newsreader', Georgia, serif; margin: 0 0 12px; }
+  .questions li { margin-bottom: 8px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Reader · design mock-ups</p>
+  <h1>Taking notes while you read</h1>
+  <p class="lede">A notes panel that stays open while you move between the paper, its reflowed text and Claude's explanation. You can clip text, figures and tables into it, and every clip links back to where it came from.</p>
+  <p class="note">These are screenshots of the real <a href="../../reader/">reader</a> on a sample paper. The notes panel, clip buttons, snip box and view switcher are mocked into the page; the feature isn't built yet.</p>
+
+  <figure>
+    <img src="notes-1-reflow-notebook.png" alt="Reflow view with a notes panel on the right holding a quote, a clipped figure and a table; a Clip to notebook button over a figure in the paper" loading="lazy">
+    <figcaption><span class="num">1</span><div>
+      <h2>Clip a figure from Reflow</h2>
+      <p>Hovering a figure offers <b>Clip to notebook</b>. The clipped image is the one the reader already cuts out of the PDF, with its caption. Each clip says where it came from, like “Reflow · p. 2”, and <b>jump back</b> returns you to it.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="notes-2-reflow-select.png" alt="A selected paragraph with the selection toolbar showing highlight colours, Look up, Note, Ask and a new Add to notes button" loading="lazy">
+    <figcaption><span class="num">2</span><div>
+      <h2>Add a selection</h2>
+      <p>The toolbar that already appears over a selection gets one more button, <b>Add to notes</b> (key <kbd>C</kbd>). The quote keeps enough surrounding text to find its place again.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="notes-3-pdf-snip.png" alt="A PDF page in snip mode with a box snapped around Table 1, labelled 5 rows by 4 columns, and buttons to clip it as a table or an image" loading="lazy">
+    <figcaption><span class="num">3</span><div>
+      <h2>Snip a table from the PDF</h2>
+      <p>In snip mode you drag a box, or hover and it snaps to the figure or table the reader has already found on the page. A table can be clipped as a real table with rows and columns, as an image, or copied as CSV.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="notes-4-explain-notebook.png" alt="Claude's explanation of the paper with a floating notes window holding a diagram clipped from the explanation, and a view switcher at the bottom" loading="lazy">
+    <figcaption><span class="num">4</span><div>
+      <h2>Keep notes over Explain</h2>
+      <p>Over Claude's explanation the notes float as a window. Diagrams, code cells and equations clip straight from the explanation. The switcher at the bottom shows the notes staying open as you move between PDF, Reflow and Explain.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="notes-5-zen-dark-notebook.png" alt="Zen mode in dark theme with the paper filling the screen and the notes panel slid in from the right edge" loading="lazy">
+    <figcaption><span class="num">5</span><div>
+      <h2>Zen mode</h2>
+      <p>With everything else hidden, the notes slide in from the right edge like the other panels, and away again when you go back to the page.</p>
+    </div></figcaption>
+  </figure>
+
+  <section class="questions">
+    <h2>Still to decide</h2>
+    <ul>
+      <li>One set of notes per paper, or per collection?</li>
+      <li>Simple blocks (text between clip cards), or a rich editor?</li>
+      <li>Should clipped images be saved to the Git mirror, or only to Drive?</li>
+      <li>A name other than “Notebook”, which Explain already uses for one of its layouts.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
