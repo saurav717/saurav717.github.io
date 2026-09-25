@@ -11,6 +11,23 @@ run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
 build has no proxy, and every browser has to be told one in Settings.
 
+## The Implementation tab, and running things on your own machine
+
+Explain has a second page, **Implementation**: the paper as a project — what
+to build, the datasets, the repository and its starter files, and a compute
+budget worked out for the machine picked on the page. **Colab** in its bar
+commits the scaffold to the Git mirror and opens it in Colab, or downloads
+the notebook or a zip; that part works from this static copy. **Local** — the
+scaffold written onto your own disk, your GPU detected, commands run there
+with the output on the page — needs the reader's own proxy on your machine,
+which the Worker cannot stand in for:
+
+```bash
+READER_WORKSPACE=~/reader-workspace npm start     # in the app repository
+```
+
+and its address in Settings → Paper proxy. Without it the Local menu says so.
+
 ## OpenReview papers come from OpenReview's API, signed in
 
 openreview.net sends every fetch of a paper to a check of its own
