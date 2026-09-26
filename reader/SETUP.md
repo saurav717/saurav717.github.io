@@ -441,10 +441,12 @@ alone. The app repository's README has the rest.
 
 ## What opening the site does
 
-With the client ID compiled in, the site opens on the connect screen and stays
-there until Drive is connected — one button, one consent covering your name and
-the `drive.file` scope, and then the app. **Not now** goes past it with
-everything kept in this browser.
+With the client ID compiled in, the site opens on the connect screen, and
+signing in with Google is the only way past it — one button, one consent
+covering your name and the `drive.file` scope, and then the app. There is no
+**Not now** until someone is signed in (this build is made with
+`VITE_REQUIRE_SIGN_IN=true`, which `npm run build:pages` sets); signed in,
+Drive can still be put off for later.
 
 It asks once an hour at most. The sign-in is kept in this browser for as long
 as the token Google issued lasts — about an hour — so a reload, or a tab closed
@@ -498,6 +500,32 @@ addresses or `@domain`s) names who; one person may ask Scholar thirty times a
 minute. Changing `READER_TOKEN` ends every pass. The token still works pasted,
 unlimited, for the owner. Name your own Google email in `READER_OWNERS` (a Worker
 secret) and, signed in, you see who uses it and how much from the chart button on the left rail.
+
+## Keeping bots out of the sign-in
+
+The gate on the page is only a courtesy — anyone can read a static site's
+JavaScript. What stops a bot is at the Worker, where a Google sign-in is
+swapped for a pass (`/auth/google`):
+
+- **Five sign-ins a minute per IP address** (`LOGIN_LIMIT` in the app
+  repository's `wrangler.toml`). The sixth gets a 429 before Google is even
+  asked, and the page goes back to the sign-in screen saying to wait a minute.
+- **A captcha, optional** — Cloudflare Turnstile, free. In the Cloudflare
+  dashboard, **Turnstile → Add widget**, hostnames `saurav717.github.io` and
+  `localhost`, mode *Managed*. Put the site key in `wrangler.toml` as
+  `TURNSTILE_SITE_KEY`, then, in the app repository:
+
+  ```bash
+  npx --yes wrangler@4 secret put TURNSTILE_SECRET   # the widget's secret key
+  npm run deploy:worker
+  ```
+
+  The sign-in screen then shows Turnstile's box, and the Google button waits
+  until it is ticked. No rebuild of this site is needed to turn it on or off.
+
+Both need the Worker redeployed (`npm run deploy:worker`) with the app
+repository's current `wrangler.toml`; until then the Worker takes sign-ins
+without either.
 
 ## Google Scholar
 
