@@ -129,7 +129,7 @@ is what makes the pane quick — are in its `wrangler.toml`:
 ```bash
 git clone https://github.com/saurav717/reader.git && cd reader
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
-npm run deploy:worker        # the SERPAPI_KEY secret already set stays set
+npm run deploy:worker        # the SERPLY_KEY and SERPAPI_KEY secrets already set stay set
 ```
 
 Browser Rendering is on Cloudflare's free plan, which rations browsers
@@ -516,8 +516,31 @@ has to be the proxy's rather than a tab of your own, because it is the proxy
 Scholar is refusing, not you. The Worker cannot show the captcha — no browser,
 no screen — and the panel says so in place of the button.
 
+**On the Worker, a Serply key is what gets Scholar through.** With
+`SERPLY_KEY` set on the Worker, every Scholar page — a search, the profile
+search, a profile's works, one of those works opened, a paper's versions — is
+fetched by [Serply](https://serply.io)'s page fetch on Serply's own machines,
+and read by the same parsers as a page the proxy fetched itself. A person is
+found in one request, with their affiliation and verified email. It costs a
+credit per page (2,500 free a month), and the five-minute cache means a page
+already fetched costs nothing more. With a `SERPAPI_KEY` set as well, Serply
+is asked first and SerpApi only when Serply refuses. Either key is spent only
+for the `READER_TOKEN` pasted into Settings.
+
+```bash
+cd reader                                        # the app repository
+npx --yes wrangler@4 secret put SERPLY_KEY       # paste the key from app.serply.io
+npm run deploy:worker
+curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "scholar": "serply"
+```
+
+A refusal of Serply's — a bad key, a spent allowance, Scholar showing Serply's
+machine a captcha — is reported as Serply's, so the panel does not offer a
+captcha window that could not help.
+
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
+`SERPLY_KEY=… node scripts/scholar-live.mjs` asks the same pages through Serply.
 
 ## Removing a paper moves it to Junk in Drive
 
