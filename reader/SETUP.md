@@ -129,7 +129,7 @@ is what makes the pane quick — are in its `wrangler.toml`:
 ```bash
 git clone https://github.com/saurav717/reader.git && cd reader
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install
-npm run deploy:worker        # the SERPAPI_KEY secret already set stays set
+npm run deploy:worker        # the SERPLY_KEY and SERPAPI_KEY secrets already set stay set
 ```
 
 Browser Rendering is on Cloudflare's free plan, which rations browsers
@@ -486,6 +486,18 @@ still runs: search works through OpenAlex, Crossref and Semantic Scholar, and
 the reader shows abstracts, but no PDF can be fetched, so none can be read
 here or saved to Drive either — Drive gets the metadata sidecar alone.
 
+## Nobody pastes a token: signing in with Google is enough
+
+Scholar and the browser inside the reader run on the Worker's paid accounts,
+so they need to know who is asking. They used to want the Worker's
+`READER_TOKEN` pasted into Settings → Paper proxy. Now signing in with Google in
+the reader is enough: the app swaps the sign-in for a thirty-day pass from the
+Worker and fills it in by itself. A labmate opens the site, signs in, and it
+works. Anyone signed in may use it unless `READER_EMAILS` (a Worker secret:
+addresses or `@domain`s) names who; one person may ask Scholar thirty times a
+minute. Changing `READER_TOKEN` ends every pass. The token still works pasted,
+unlimited, for the owner.
+
 ## Google Scholar
 
 Scholar is the source a fresh search asks here, with a chip of its own in the
@@ -516,8 +528,39 @@ has to be the proxy's rather than a tab of your own, because it is the proxy
 Scholar is refusing, not you. The Worker cannot show the captcha — no browser,
 no screen — and the panel says so in place of the button.
 
+**On the Worker, a Serply key gets Scholar through.** With `SERPLY_KEY` set
+on the Worker, every Scholar ask goes through [Serply](https://serply.io),
+whose Scholar and Google endpoints Scholar answers: a search comes from its Scholar results, and a paper's versions from the
+same asked with the paper's title beside the cluster (the app sends it); people from Google's listing of
+Scholar's profile pages (full name, affiliation, citations, interests) and
+the bylines of their papers; a profile's works from a search for the
+person's papers, kept to those linked to that profile. An entry of a profile
+cannot be opened by id, so the app finds the paper by its title, as it does
+when that page is refused. The h-index and i10-index are on the profile page
+alone, which Scholar refuses Serply, so the hover card leaves them out. A
+credit per request (2,500 free a month), cached five minutes.
+
+Keep a `SERPAPI_KEY` beside it and each ask goes to the one that answers it
+better, then to the other when that one refuses: searches, people and
+versions to Serply first, a profile, a person and an entry opened to SerpApi
+first (it reads the profile page exactly, h-index and all). A service out of
+credits is asked last for ten minutes, so a spent SerpApi account does not
+slow every ask; `/health` says `"scholar": "serply+serpapi"`. Either key is
+spent only for the `READER_TOKEN` pasted into Settings.
+
+```bash
+cd reader                                        # the app repository
+npx --yes wrangler@4 secret put SERPLY_KEY       # paste the key from app.serply.io
+npm run deploy:worker
+curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "scholar": "serply+serpapi"
+```
+
+A refusal of Serply's — a bad key, a spent allowance — is reported as
+Serply's, so the panel does not offer a captcha window that could not help.
+
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
+`SERPLY_KEY=… node scripts/scholar-live.mjs --raw` asks the same through Serply.
 
 ## Removing a paper moves it to Junk in Drive
 
