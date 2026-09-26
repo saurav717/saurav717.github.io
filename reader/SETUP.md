@@ -516,17 +516,22 @@ has to be the proxy's rather than a tab of your own, because it is the proxy
 Scholar is refusing, not you. The Worker cannot show the captcha — no browser,
 no screen — and the panel says so in place of the button.
 
-**On the Worker, a Serply key gets Scholar searches through.** With
-`SERPLY_KEY` set on the Worker, every Scholar results page — a search, people
-(found in the bylines of a search for their papers, with their profile ids),
-and a paper's versions — comes from [Serply](https://serply.io)'s Scholar
-endpoint, which Scholar answers. A credit per request (2,500 free a month),
-and the five-minute cache means an answer already given costs nothing more.
+**On the Worker, a Serply key gets Scholar through.** With `SERPLY_KEY` set
+on the Worker, every Scholar ask goes through [Serply](https://serply.io),
+whose Scholar and Google endpoints Scholar answers: a search and a paper's
+versions come from its Scholar results; people from Google's listing of
+Scholar's profile pages (full name, affiliation, citations, interests) and
+the bylines of their papers; a profile's works from a search for the
+person's papers, kept to those linked to that profile. An entry of a profile
+cannot be opened by id, so the app finds the paper by its title, as it does
+when that page is refused. The h-index and i10-index are on the profile page
+alone, which Scholar refuses Serply, so the hover card leaves them out. A
+credit per request (2,500 free a month), cached five minutes.
 
-That endpoint gives no profile and no single entry opened, so keep the
-`SERPAPI_KEY` too: those go to SerpApi, and so does anything Serply refuses.
-Without it they go to Serply's page fetch, which Scholar mostly refuses.
-Either key is spent only for the `READER_TOKEN` pasted into Settings.
+With a `SERPAPI_KEY` too, SerpApi takes a profile, a person and an entry
+opened — it reads the profile page exactly, h-index and all — and anything
+Serply refuses, while Serply takes the searches. Either key is spent only for
+the `READER_TOKEN` pasted into Settings.
 
 ```bash
 cd reader                                        # the app repository
@@ -540,7 +545,7 @@ Serply's, so the panel does not offer a captcha window that could not help.
 
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
-`SERPLY_KEY=… node scripts/scholar-live.mjs` asks the same through Serply.
+`SERPLY_KEY=… node scripts/scholar-live.mjs --raw` asks the same through Serply.
 
 ## Removing a paper moves it to Junk in Drive
 
