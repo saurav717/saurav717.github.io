@@ -486,6 +486,18 @@ still runs: search works through OpenAlex, Crossref and Semantic Scholar, and
 the reader shows abstracts, but no PDF can be fetched, so none can be read
 here or saved to Drive either — Drive gets the metadata sidecar alone.
 
+## Nobody pastes a token: signing in with Google is enough
+
+Scholar and the browser inside the reader run on the Worker's paid accounts,
+so they need to know who is asking. They used to want the Worker's
+`READER_TOKEN` pasted into Settings → Paper proxy. Now signing in with Google in
+the reader is enough: the app swaps the sign-in for a thirty-day pass from the
+Worker and fills it in by itself. A labmate opens the site, signs in, and it
+works. Anyone signed in may use it unless `READER_EMAILS` (a Worker secret:
+addresses or `@domain`s) names who; one person may ask Scholar thirty times a
+minute. Changing `READER_TOKEN` ends every pass. The token still works pasted,
+unlimited, for the owner.
+
 ## Google Scholar
 
 Scholar is the source a fresh search asks here, with a chip of its own in the
