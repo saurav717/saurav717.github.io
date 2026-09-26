@@ -518,8 +518,8 @@ no screen — and the panel says so in place of the button.
 
 **On the Worker, a Serply key gets Scholar through.** With `SERPLY_KEY` set
 on the Worker, every Scholar ask goes through [Serply](https://serply.io),
-whose Scholar and Google endpoints Scholar answers: a search and a paper's
-versions come from its Scholar results; people from Google's listing of
+whose Scholar and Google endpoints Scholar answers: a search comes from its Scholar results, and a paper's versions from the
+same asked with the paper's title beside the cluster (the app sends it); people from Google's listing of
 Scholar's profile pages (full name, affiliation, citations, interests) and
 the bylines of their papers; a profile's works from a search for the
 person's papers, kept to those linked to that profile. An entry of a profile
