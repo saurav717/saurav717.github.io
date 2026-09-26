@@ -607,7 +607,10 @@ where the person is: one request per person, thinking off, about 500–800
 tokens in and 50–150 out, a few hundredths of a cent, tallied on the usage
 page. It does not browse; its answer is kept only where the snippet bears it
 out. A person is still asked of SerpApi first; this is the stand-in once its
-credits run out.
+credits run out. Through Serply the h-index and i10-index, printed only on the
+profile page it cannot open, are counted from Scholar's own count for each of
+the person's papers (up to sixty, three credits), and the card says how many
+papers that was — for a long career they are a floor.
 
 ```bash
 cd reader                                        # the app repository
