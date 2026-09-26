@@ -516,16 +516,17 @@ has to be the proxy's rather than a tab of your own, because it is the proxy
 Scholar is refusing, not you. The Worker cannot show the captcha — no browser,
 no screen — and the panel says so in place of the button.
 
-**On the Worker, a Serply key is what gets Scholar through.** With
-`SERPLY_KEY` set on the Worker, every Scholar page — a search, the profile
-search, a profile's works, one of those works opened, a paper's versions — is
-fetched by [Serply](https://serply.io)'s page fetch on Serply's own machines,
-and read by the same parsers as a page the proxy fetched itself. A person is
-found in one request, with their affiliation and verified email. It costs a
-credit per page (2,500 free a month), and the five-minute cache means a page
-already fetched costs nothing more. With a `SERPAPI_KEY` set as well, Serply
-is asked first and SerpApi only when Serply refuses. Either key is spent only
-for the `READER_TOKEN` pasted into Settings.
+**On the Worker, a Serply key gets Scholar searches through.** With
+`SERPLY_KEY` set on the Worker, every Scholar results page — a search, people
+(found in the bylines of a search for their papers, with their profile ids),
+and a paper's versions — comes from [Serply](https://serply.io)'s Scholar
+endpoint, which Scholar answers. A credit per request (2,500 free a month),
+and the five-minute cache means an answer already given costs nothing more.
+
+That endpoint gives no profile and no single entry opened, so keep the
+`SERPAPI_KEY` too: those go to SerpApi, and so does anything Serply refuses.
+Without it they go to Serply's page fetch, which Scholar mostly refuses.
+Either key is spent only for the `READER_TOKEN` pasted into Settings.
 
 ```bash
 cd reader                                        # the app repository
@@ -534,13 +535,12 @@ npm run deploy:worker
 curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "scholar": "serply"
 ```
 
-A refusal of Serply's — a bad key, a spent allowance, Scholar showing Serply's
-machine a captcha — is reported as Serply's, so the panel does not offer a
-captcha window that could not help.
+A refusal of Serply's — a bad key, a spent allowance — is reported as
+Serply's, so the panel does not offer a captcha window that could not help.
 
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
-`SERPLY_KEY=… node scripts/scholar-live.mjs` asks the same pages through Serply.
+`SERPLY_KEY=… node scripts/scholar-live.mjs` asks the same through Serply.
 
 ## Removing a paper moves it to Junk in Drive
 
