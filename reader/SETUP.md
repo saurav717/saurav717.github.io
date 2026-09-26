@@ -595,6 +595,26 @@ curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "scholar":
 A refusal of Serply's — a bad key, a spent allowance — is reported as
 Serply's, so the panel does not offer a captcha window that could not help.
 
+**Where an author is now, when SerpApi's credits are spent.** SerpApi reads
+the affiliation off the profile page. Serply has only Google's snippet of that
+page, which is as often its list of works as its top, and once put a paper's
+title on the hover card's "Now" line. Serply's reading now keeps an
+affiliation only where the snippet is plainly the profile's header, and never
+one of the person's own titles; otherwise the card falls back to OpenAlex.
+With `DEEPSEEK_KEY` on the Worker as well — the secret the usage page already
+reads the balance with — DeepSeek reads the snippets Serply fetched and says
+where the person is: one request per person, thinking off, about 500–800
+tokens in and 50–150 out, a few hundredths of a cent, tallied on the usage
+page. It does not browse; its answer is kept only where the snippet bears it
+out. A person is still asked of SerpApi first; this is the stand-in once its
+credits run out.
+
+```bash
+cd reader                                        # the app repository
+npx --yes wrangler@4 secret put DEEPSEEK_KEY     # if it is not set already
+npm run deploy:worker
+```
+
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
 `SERPLY_KEY=… node scripts/scholar-live.mjs --raw` asks the same through Serply.
