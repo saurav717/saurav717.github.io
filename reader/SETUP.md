@@ -66,7 +66,9 @@ main thread) and every page is read out — the text set as paragraphs
 and headings, the figures and display equations painted from the page and
 shown in their place, the tables read into tables (IEEE's "TABLE IV" and
 tables in panels included), the paper's links kept as links, and the
-byline's affiliations and notes kept above the abstract. arXiv's HTML rendering
+byline read into the paper's heading — the marks on the authors' names
+(equal contribution, corresponding author), what they stand for, and the
+institutions the authors were at, which each author's card shows too. arXiv's HTML rendering
 and the abstract are what it falls back to when no copy of the PDF will come
 here, or the file is a scan with no text to read. The app repository's
 README says how the reading is done, under *Getting the PDF*.
