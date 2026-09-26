@@ -14,11 +14,19 @@ build has no proxy, and every browser has to be told one in Settings.
 ## Gemini, beside Claude and DeepSeek
 
 Ask AI, Explain and Implementation can run on Google's Gemini 3.1 Pro, 3.8
-Flash or 3.5 Flash-Lite. Pick one in the model picker, paste an API key from
-[aistudio.google.com/apikey](https://aistudio.google.com/apikey) when asked, and
-it is kept in this browser (`reader.gemini-key`) and sent only to
-generativelanguage.googleapis.com. Nothing to set on the Worker: its usage page
-prices Gemini's answers once the Worker is redeployed (`npm run deploy:worker`).
+Flash or 3.5 Flash-Lite. Nothing is pasted into the site for it: the key is
+the Worker's own secret, and the Worker asks Google for whoever is signed in.
+
+```bash
+cd reader                                        # the app repository
+npx --yes wrangler@4 secret put GEMINI_KEY       # a key from aistudio.google.com/apikey
+npm run deploy:worker
+curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "gemini": true
+```
+
+Only the owner — `READER_TOKEN`, or a Google account in `READER_OWNERS` — may
+use it, unless `GEMINI_FOR = "everyone"` in `wrangler.toml`, which lets anyone
+signed in spend the key. Its tokens and cost show on the usage page.
 
 ## The Implementation tab, and running things on your own machine
 
