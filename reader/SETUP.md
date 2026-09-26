@@ -11,6 +11,15 @@ run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
 build has no proxy, and every browser has to be told one in Settings.
 
+## Gemini, beside Claude and DeepSeek
+
+Ask AI, Explain and Implementation can run on Google's Gemini 3.1 Pro, 3.8
+Flash or 3.5 Flash-Lite. Pick one in the model picker, paste an API key from
+[aistudio.google.com/apikey](https://aistudio.google.com/apikey) when asked, and
+it is kept in this browser (`reader.gemini-key`) and sent only to
+generativelanguage.googleapis.com. Nothing to set on the Worker: its usage page
+prices Gemini's answers once the Worker is redeployed (`npm run deploy:worker`).
+
 ## The Implementation tab, and running things on your own machine
 
 Explain has a second page, **Implementation**: the paper as a project — what
