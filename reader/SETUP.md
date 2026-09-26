@@ -497,7 +497,7 @@ works. Anyone signed in may use it unless `READER_EMAILS` (a Worker secret:
 addresses or `@domain`s) names who; one person may ask Scholar thirty times a
 minute. Changing `READER_TOKEN` ends every pass. The token still works pasted,
 unlimited, for the owner. Name your own Google email in `READER_OWNERS` (a Worker
-secret) and, signed in, you see who uses it and how much under Settings → Usage.
+secret) and, signed in, you see who uses it and how much from the chart button on the left rail.
 
 ## Google Scholar
 
