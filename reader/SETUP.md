@@ -528,16 +528,19 @@ when that page is refused. The h-index and i10-index are on the profile page
 alone, which Scholar refuses Serply, so the hover card leaves them out. A
 credit per request (2,500 free a month), cached five minutes.
 
-With a `SERPAPI_KEY` too, SerpApi takes a profile, a person and an entry
-opened — it reads the profile page exactly, h-index and all — and anything
-Serply refuses, while Serply takes the searches. Either key is spent only for
-the `READER_TOKEN` pasted into Settings.
+Keep a `SERPAPI_KEY` beside it and each ask goes to the one that answers it
+better, then to the other when that one refuses: searches, people and
+versions to Serply first, a profile, a person and an entry opened to SerpApi
+first (it reads the profile page exactly, h-index and all). A service out of
+credits is asked last for ten minutes, so a spent SerpApi account does not
+slow every ask; `/health` says `"scholar": "serply+serpapi"`. Either key is
+spent only for the `READER_TOKEN` pasted into Settings.
 
 ```bash
 cd reader                                        # the app repository
 npx --yes wrangler@4 secret put SERPLY_KEY       # paste the key from app.serply.io
 npm run deploy:worker
-curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "scholar": "serply"
+curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "scholar": "serply+serpapi"
 ```
 
 A refusal of Serply's — a bad key, a spent allowance — is reported as
