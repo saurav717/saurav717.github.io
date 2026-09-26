@@ -64,7 +64,15 @@ time it is needed — `pdfWorkerMain-*.js` is the same code as a module of the
 app, for a browser that will not start the worker, which then reads on the
 main thread) and every page is read out — the text set as paragraphs
 and headings, the figures and display equations painted from the page and
-shown in their place, the tables read into tables. arXiv's HTML rendering
+shown in their place, the tables read into tables (IEEE's "TABLE IV" and
+tables in panels included), the paper's links kept as links, and the
+byline read into the paper's heading — the marks on the authors' names
+(equal contribution, corresponding author), what they stand for, and the
+institutions the authors were at, which each author's card shows too:
+*Now* from their Google Scholar profile (position, department, and the
+domain Scholar verified their email at — Scholar never shows the address)
+and *On this paper* from the PDF (the institution, and the address the
+paper prints in full). arXiv's HTML rendering
 and the abstract are what it falls back to when no copy of the PDF will come
 here, or the file is a scan with no text to read. The app repository's
 README says how the reading is done, under *Getting the PDF*.
