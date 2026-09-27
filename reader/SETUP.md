@@ -635,6 +635,18 @@ npx --yes wrangler@4 secret put DEEPSEEK_KEY     # if it is not set already
 npm run deploy:worker
 ```
 
+**Who did what on a paper, read by DeepSeek.** Reflow gives each author the
+sentences of the paper's contributions statement (a footnote on the byline,
+an "Author Contributions" section) that name them. For the rest, where the
+statement uses initials or roles ("A.V. and N.S. designed…", "the first two
+authors"), the author card asks the Worker's `/api/contributions`, which
+hands DeepSeek the byline and the statement and keeps only the statement's
+own words for each author. It uses the same `DEEPSEEK_KEY`: one request per
+paper, about 800 tokens in and 300 out, tallied on the usage page. The route
+is new, so the Worker needs deploying once (`npm run deploy:worker`, as
+above); until then, and without the key, the card shows Reflow's own
+reading.
+
 `node scripts/scholar-live.mjs` in the app repository says which is happening
 from a given machine: Scholar refusing, or the request never reaching it.
 `SERPLY_KEY=… node scripts/scholar-live.mjs --raw` asks the same through Serply.
