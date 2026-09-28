@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reader Home mock-ups</title>
+<meta name="description" content="Mock-ups of a Home page for the reader: the page you stopped on, a view switcher for Today, Projects and Inbox, and ideas for the rest of the reading workflow.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+  :root {
+    --paper: #fbfaf6; --surface: #fffdf7; --border: #e2ddce;
+    --ink: #1a1a17; --ink-2: #55524a; --muted: #6f6c63;
+    --accent: #1f5e52; --accent-soft: #e4efe7; --accent-ink: #14403a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+      --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+      --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+    --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+    --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 'IBM Plex Sans', system-ui, sans-serif; }
+  main { max-width: 1120px; margin: 0 auto; padding: 48px 16px 80px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  h1 { font: 500 clamp(30px, 5vw, 44px)/1.15 'Newsreader', Georgia, serif; margin: 0 0 14px; }
+  .lede { color: var(--ink-2); max-width: 68ch; margin: 0 0 12px; }
+  .note { font-size: 14px; color: var(--muted); max-width: 68ch; margin: 0 0 40px; }
+  .note a { color: var(--accent); }
+  .part { font: 500 28px/1.2 'Newsreader', Georgia, serif; margin: 64px 0 8px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .part + p { color: var(--ink-2); max-width: 68ch; margin: 0 0 32px; }
+  figure { margin: 0 0 56px; }
+  figure img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 18px 50px -24px rgba(0,0,0,.35); background: var(--surface); }
+  figcaption { margin-top: 16px; display: grid; grid-template-columns: 40px 1fr; gap: 0 12px; }
+  .num { font: 500 13px 'IBM Plex Sans', sans-serif; color: var(--accent-ink); background: var(--accent-soft); border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; }
+  figcaption h2 { font-size: 17px; font-weight: 600; margin: 3px 0 4px; }
+  figcaption p { margin: 0; color: var(--ink-2); max-width: 75ch; }
+  kbd { font: 500 12px ui-monospace, monospace; border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; background: var(--surface); }
+  .questions { border-top: 1px solid var(--border); padding-top: 32px; margin-top: 64px; }
+  .questions h2 { font: 500 26px 'Newsreader', Georgia, serif; margin: 0 0 12px; }
+  .questions li { margin-bottom: 8px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Reader · design mock-ups</p>
+  <h1>A Home page to start from</h1>
+  <p class="lede">After signing in, the reader opens straight onto the library list. These mock-ups replace that with a Home page, reached by clicking the <b>R</b> at the top of the rail. It opens on the page of the paper you stopped reading, and three other views are a click away.</p>
+  <p class="note">These pages were built by hand in the <a href="../../reader/">reader</a>'s own colours and type; the papers, highlights and notes in them are sample data. None of it is built yet. The full write-up is in the reader repository's <code>docs/landing-ideas.md</code>.</p>
+
+  <figure>
+    <img src="home-1-continue.png" alt="Home: most of the screen is the PDF page where reading stopped, with the lines already read dimmed, a highlight, a margin note and a dashed You stopped here line; papers in progress, recent highlights and up next in a column on the right; a view switcher at the top" loading="lazy">
+    <figcaption><span class="num">1</span><div>
+      <h2>Continue reading, the default</h2>
+      <p>The paper you last opened fills Home, and most of the page you stopped on is shown: the lines you'd read (dimmed), your highlight with its note in the margin, a <b>You stopped here</b> line, and what comes next. <b>Resume here</b> (<kbd>↵</kbd>) opens the paper at exactly that line. To draw it, the reader would save the top visible line as a text anchor, the way it already anchors highlights, and keep a small snapshot of the page when you leave.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-1b-continue-dark.png" alt="The same Home page in the dark theme, with the page preview dimmed to match" loading="lazy">
+    <figcaption><span class="num">2</span><div>
+      <h2>In the dark theme</h2>
+      <p>The page preview dims with the rest of the app rather than staying bright white.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-1c-choose-views.png" alt="The Home view menu: Home opens on Continue reading, Today, Projects, Inbox or whichever was used last, and checkboxes for which views show as tabs" loading="lazy">
+    <figcaption><span class="num">3</span><div>
+      <h2>Choose the views</h2>
+      <p>The switcher holds <b>Continue reading</b>, <b>Today</b>, <b>Projects</b> and <b>Inbox</b>, on keys <kbd>1</kbd>–<kbd>4</kbd>. Its <b>⋯</b> menu picks which one Home opens on (or whichever you used last), and which views show as tabs.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-8-today.png" alt="Today: a timed reading plan with a focus-session timer and this week's goals, and a strip at the bottom showing the lines where reading stopped with a Resume button" loading="lazy">
+    <figcaption><span class="num">4</span><div>
+      <h2>Today</h2>
+      <p>Pick how much time you have and Home proposes a plan from your queue, deadlines and stalled papers; drag to reorder. A focus session hides everything but the paper. On every view other than the default, a strip at the bottom keeps the lines where you stopped and <b>Resume</b> one key away.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-7-projects.png" alt="Projects: a research question as the title, papers in To find, To read, Reading and Read and summarised lanes, and what you know so far built from highlights with citations" loading="lazy">
+    <figcaption><span class="num">5</span><div>
+      <h2>Projects</h2>
+      <p>A project is a question you're reading toward. Its papers sit in lanes, and <b>what you know so far</b> is built from your highlights, each with its citation; open questions are marked as having no source yet.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-3-inbox.png" alt="Inbox: new papers since the last visit, each with the reason it is there, and Add, Open, Later and Not for me buttons with keyboard shortcuts" loading="lazy">
+    <figcaption><span class="num">6</span><div>
+      <h2>Inbox</h2>
+      <p>New papers since your last visit: from authors you've read, papers citing the one you're reading, arXiv categories and saved searches. Triage from the keyboard: <kbd>J</kbd>/<kbd>K</kbd> to move, <kbd>A</kbd> to add, <kbd>L</kbd> for later, <kbd>X</kbd> for not for me.</p>
+    </div></figcaption>
+  </figure>
+
+  <h2 class="part">The rest of the workflow</h2>
+  <p>Ideas for how you get from Home into a paper and back, and how a paper ends up as something you've written.</p>
+
+  <figure>
+    <img src="home-0-loop.png" alt="A loop of six stages around R, Home: Find, Triage, Plan, Read, Wrap up, Review and write" loading="lazy">
+    <figcaption><span class="num">7</span><div>
+      <h2>The loop</h2>
+      <p>Find → Triage → Plan → Read → Wrap up → Review &amp; write. Every step is one click from <b>R</b>, and each hands you to the next rather than back to a list.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-6-r-peek.png" alt="The reader with a popover from the R button listing papers in progress, the next paper in the queue, and what is waiting at Home" loading="lazy">
+    <figcaption><span class="num">8</span><div>
+      <h2>Hover R to switch papers</h2>
+      <p>Click <b>R</b> for Home; hover it inside a paper for a quick switcher: other papers in progress on number keys, the next in the queue on <kbd>N</kbd>, and <kbd>⌘[</kbd> back to the last paper.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-9-finish.png" alt="A dialog at the end of a paper: three takeaways drafted from highlights, a rating, where to file it, and the next papers from its references" loading="lazy">
+    <figcaption><span class="num">9</span><div>
+      <h2>Wrap up at the end of a paper</h2>
+      <p>At 100%, three takeaways drafted from your highlights, a rating and where to file it, and the next paper picked from its references. <b>Save &amp; open next</b> (<kbd>⌘↵</kbd>) keeps the loop going.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-10-map.png" alt="A citation map of a project's papers coloured finished, reading and unread, with dashed nodes for papers several of yours cite but that are not in the library" loading="lazy">
+    <figcaption><span class="num">10</span><div>
+      <h2>Library map</h2>
+      <p>Your papers drawn as who cites whom. The dashed nodes are papers several of yours cite but you don't have yet, each with an <b>Add</b> button.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-11-write.png" alt="A writing view: highlights grouped by colour meaning on the left, one being dragged into a draft on the right where it becomes a citation, with a bibliography below" loading="lazy">
+    <figcaption><span class="num">11</span><div>
+      <h2>From highlights to a draft</h2>
+      <p>Drag a highlight into a draft and it becomes a citation; the reference list stays in step with the bibliography in the Git notes repository.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-2-launchpad.png" alt="A search-first Home: one large box searching the library, papers, people and Ask Claude, with a drop area and four quick actions" loading="lazy">
+    <figcaption><span class="num">12</span><div>
+      <h2>Search-first (an optional tab)</h2>
+      <p>One box that searches your library first, so a paper you have resumes rather than being added twice, then the sources, people, and Ask Claude.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-4-review.png" alt="Review: a flashcard of an old highlight with Forgot, Fuzzy and Got it, open questions from notes, finished papers without a summary, and a reading heatmap" loading="lazy">
+    <figcaption><span class="num">13</span><div>
+      <h2>Review (an optional tab)</h2>
+      <p>A short pass over old highlights, the questions still open in your notes, and finished papers that have no summary yet.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="home-5-first-run.png" alt="First-run setup: a four-step checklist for Drive, importing papers, picking topics, and Git and a model, with starter papers and shortcuts" loading="lazy">
+    <figcaption><span class="num">14</span><div>
+      <h2>First visit</h2>
+      <p>For someone signing in for the first time: a checklist anyone can skip, two starter papers, and the four shortcuts worth knowing. It stands in for Home until the library has a few papers.</p>
+    </div></figcaption>
+  </figure>
+
+  <section class="questions">
+    <h2>Still to decide</h2>
+    <ul>
+      <li>Should a collection open as a small Home of its own, with the page you last read in it?</li>
+      <li>Are Projects a new thing, or collections with a question attached?</li>
+      <li>A snapshot of the page taken when you leave, or the live page drawn each time Home opens?</li>
+      <li>Reopen the last paper directly when it was open less than an hour ago, skipping Home?</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
