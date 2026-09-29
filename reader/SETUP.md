@@ -43,7 +43,11 @@ app repository under `docs/colab-run.md`; the mock-ups are in
 The calls to Colab's session backend go through the Worker, with the
 person's own Google token and nothing of the Worker's: no secret to set, no
 cost to the owner, and `colab: true` on `/health` once this build of the
-Worker is deployed:
+Worker is deployed. The Worker has to be at or past the app repository's
+commit *Colab: a runtime under colab.dev is Colab's* — an earlier one turns
+every real runtime away with *that is not a Colab runtime*, since Colab
+puts them under `*.prod.colab.dev` and the first build did not know that
+host. If the page says that, redeploy:
 
 ```bash
 cd reader                                        # the app repository
