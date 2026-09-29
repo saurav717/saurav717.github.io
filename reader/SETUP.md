@@ -57,11 +57,13 @@ curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "colab": t
 
 The Colab API is in beta and allowlisted per Google Cloud project; the
 project the site's client ID belongs to has to be on the list, or Colab
-answers `403` and the page says so. The kernel itself is a WebSocket from
-the page to the runtime; if Colab's runtime proxy turns away a connection
-whose Origin is this site, the cell says the address does not take
-connections from here — that is the one thing the app repository's design
-document lists as still to be confirmed against the reference.
+answers `403` and the page says so. The kernel's WebSocket goes straight
+from the page to the runtime when the runtime allows it; Colab's runtime
+proxy does not take a socket from another site's browser, so in practice
+the Worker carries it, on a one-minute ticket it signs with `READER_TOKEN`
+— which is why that secret has to be set for the Colab feature, as it is
+for the sign-in. The runtime menu on the page says which way the socket
+goes.
 
 ## The Implementation tab, and running things on your own machine
 
