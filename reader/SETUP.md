@@ -28,6 +28,37 @@ Only the owner — `READER_TOKEN`, or a Google account in `READER_OWNERS` — ma
 use it, unless `GEMINI_FOR = "everyone"` in `wrangler.toml`, which lets anyone
 signed in spend the key. Its tokens and cost show on the usage page.
 
+## Running the cells in Colab
+
+Every Python cell on the Explain and Implementation pages has **▶ Run in
+Colab**. It runs exactly that code in a Colab runtime of the signed-in
+person's own — their tier, their compute units — and puts what it printed
+under the cell, with a verdict against the output Claude expected, loss
+curves when the cell prints losses, and the GPU's use over the run on a GPU
+machine. Nothing runs without a click; the first click explains itself and
+asks Google once for the Colab scope. The rules and the design are in the
+app repository under `docs/colab-run.md`; the mock-ups are in
+[`reader-mockups/colab/`](../reader-mockups/colab/).
+
+The calls to Colab's session backend go through the Worker, with the
+person's own Google token and nothing of the Worker's: no secret to set, no
+cost to the owner, and `colab: true` on `/health` once this build of the
+Worker is deployed:
+
+```bash
+cd reader                                        # the app repository
+npm run deploy:worker
+curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "colab": true
+```
+
+The Colab API is in beta and allowlisted per Google Cloud project; the
+project the site's client ID belongs to has to be on the list, or Colab
+answers `403` and the page says so. The kernel itself is a WebSocket from
+the page to the runtime; if Colab's runtime proxy turns away a connection
+whose Origin is this site, the cell says the address does not take
+connections from here — that is the one thing the app repository's design
+document lists as still to be confirmed against the reference.
+
 ## The Implementation tab, and running things on your own machine
 
 Explain has a second page, **Implementation**: the paper as a project — what
