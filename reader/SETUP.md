@@ -85,7 +85,7 @@ rewrite one, or fix the one that failed, and the cells land in the notebook,
 marked, with **Run them** and **Undo** under the bar; **Rewrite** in the bar
 rewrites the notebook on that tab, cell by cell or as a whole, with the
 model picked (the bar takes *rewrite the whole notebook…* too), and the Ask AI window sees the notebook's
-cells and outputs while the tab is open. The key for the model is yours, in
+cells and outputs from any tab, and links every cell it names to the cell. The key for the model is yours, in
 the browser, as for the pages. The pane's **Metrics** tab draws every metric
 the cells print as they train, a chart a metric, live; every code cell
 carries a mark saying whether it ran, failed, or was edited since; and the
