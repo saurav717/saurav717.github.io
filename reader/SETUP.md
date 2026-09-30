@@ -65,6 +65,24 @@ the Worker carries it, on a one-minute ticket it signs with `READER_TOKEN`
 for the sign-in. The runtime menu on the page says which way the socket
 goes.
 
+## A notebook of your own, and Run it on Colab
+
+The **Colab** tab in Explain's bar is a notebook: cells of your own, run in
+the same runtime and kernel the pages' cells run in, seeded from the
+explanation's cells, kept in the browser one a paper, out as an `.ipynb`
+to a file, to the Git mirror under `notebooks/` and on to Colab from there.
+It needs nothing beyond the Colab routes above; its **Files** pane lists
+the runtime's disk through one more of them, `/colab/contents`, which the
+Worker has once it is deployed from the app repository at or past this
+build's commit. The Implementation page's **Run it on Colab** panel under
+the compute budget works out the budget on each of Colab's machines, sets
+the plan's needs against the machine — as measured, once a runtime is
+connected — and runs the plan's steps as cells, with the GPU, CPU, RAM and
+disk watched as they run; the same watch draws the machine's use under any
+cell that runs. All of it is documented in the app repository's README
+under *Running the cells in Colab*, *Run it on Colab, from the page* and
+*A notebook of your own, on the runtime*.
+
 ## The Implementation tab, and running things on your own machine
 
 Explain has a second page, **Implementation**: the paper as a project — what
