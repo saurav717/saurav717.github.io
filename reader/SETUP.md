@@ -79,9 +79,15 @@ the compute budget works out the budget on each of Colab's machines, sets
 the plan's needs against the machine — as measured, once a runtime is
 connected — and runs the plan's steps as cells, with the GPU, CPU, RAM and
 disk watched as they run; the same watch draws the machine's use under any
-cell that runs. All of it is documented in the app repository's README
-under *Running the cells in Colab*, *Run it on Colab, from the page* and
-*A notebook of your own, on the runtime*.
+cell that runs. The notebook has an ask bar of its own, under its toolbar:
+ask the model the pages are written with to write a cell from the paper,
+rewrite one, or fix the one that failed, and the cells land in the notebook,
+marked, with **Run them** and **Undo** under the bar; **Rewrite** in the bar
+rewrites the notebook on that tab, and the Ask AI window sees the notebook's
+cells and outputs while the tab is open. The key for the model is yours, in
+the browser, as for the pages. All of it is documented in the app
+repository's README under *Running the cells in Colab*, *Run it on Colab,
+from the page* and *A notebook of your own, on the runtime*.
 
 ## The Implementation tab, and running things on your own machine
 
