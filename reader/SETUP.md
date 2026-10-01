@@ -84,8 +84,11 @@ connected — and runs the plan's steps as cells, with the GPU, CPU, RAM and
 disk watched as they run; the same watch draws the machine's use under any
 cell that runs. The notebook has an ask bar of its own, under its toolbar:
 ask the model the pages are written with to write a cell from the paper,
-rewrite one, or fix the one that failed, and the cells land in the notebook,
-marked, with **Run them** and **Undo** under the bar; **Rewrite** in the bar
+rewrite one, or fix the one that failed — a cell being rewritten shows the
+answer streaming in where its code is, and the view stays on it — and the
+cells land in the notebook, marked, with **Run them** and **Undo** under
+the bar; text cells typeset their maths; the machine's use while a cell
+ran is the Runtime pane's, not drawn under the cell; **Rewrite** in the bar
 rewrites the notebook on that tab, cell by cell or as a whole, with the
 model picked (the bar takes *rewrite the whole notebook…* too), and the Ask AI window sees the notebook's
 cells and outputs from any tab, and links every cell it names to the cell. The key for the model is yours, in
