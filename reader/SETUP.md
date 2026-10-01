@@ -69,8 +69,11 @@ goes.
 
 The **Colab** tab in Explain's bar is a notebook: cells of your own, run in
 the same runtime and kernel the pages' cells run in, seeded from the
-explanation's cells, kept in the browser one a paper, out as an `.ipynb`
-to a file, to the Git mirror under `notebooks/` and on to Colab from there.
+explanation's cells — signed by the model that wrote them, by name — kept
+in the browser one a paper, out as an `.ipynb` to a file, to the Git mirror
+under `notebooks/` and on to Colab from there. Opened before the paper is
+explained, it asks which model writes the notebook and writes it with the
+one picked, from the paper; the pick is kept with the notebook.
 It needs nothing beyond the Colab routes above; its **Files** pane lists
 the runtime's disk through one more of them, `/colab/contents`, which the
 Worker has once it is deployed from the app repository at or past this
