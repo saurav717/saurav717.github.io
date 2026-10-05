@@ -62,6 +62,10 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .btn.sm { font-size: 11.5px; padding: 3px 8px; }
 .btn.ghost { border-color: transparent; color: var(--ink-2); }
 .btn.on { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+#stage-switch { display: inline-flex; align-items: center; gap: 5px; }
+#stage-switch[aria-pressed="false"] { color: var(--muted); }
+#stage-switch[aria-pressed="false"] svg { opacity: 0.4; }
+.mock.stage-off .outline .legend { display: none; }
 
 .ask { display: flex; justify-content: center; padding: 14px 16px; border-bottom: 1px solid var(--border-soft); background: var(--panel); }
 .ask .field { width: min(100%, 880px); display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--paper); color: var(--muted); font-size: 15px; }
@@ -280,7 +284,7 @@ section.s + section.s { border-top: 1px solid var(--border-soft); padding-top: 3
     <div class="kicker">Explain · a side stage that follows the reading</div>
     <h1>A companion stage beside the explanation</h1>
     <p>The margin column holds each section's figure, cell and caveat, as it does today. In the few sections where motion says more than a still, a stage appears at the top of the margin, stays put while you scroll that section, and steps with the paragraph you are reading. The example is a distillation paper: the temperature, the loss and the layer matching are animated; the rest stay figures.</p>
-    <div class="try">Scroll the explanation below. Every section has its figure in the margin, as today. Only 04, 05 and 06 have a scene: there the stage appears at the top of the margin, follows the paragraphs, and leaves when the section ends. On 02, Claude suggests a scene: press <kbd>Animate</kbd> on its figure and watch it stream in. <kbd>Pin</kbd> holds a scene; the dots or the slider step by hand.</div>
+    <div class="try">Scroll the explanation below. Every section has its figure in the margin, as today. Only 04, 05 and 06 have a scene: there the stage appears at the top of the margin, follows the paragraphs, and leaves when the section ends. On 02, Claude suggests a scene: press <kbd>Animate</kbd> on its figure and watch it stream in. <kbd>Pin</kbd> holds a scene; the dots or the slider step by hand. <kbd>Stage</kbd> in the bar turns all of it off: every section with its figure in the margin, as it was.</div>
   </div>
 
   <div class="mock">
@@ -295,7 +299,7 @@ section.s + section.s { border-top: 1px solid var(--border-soft); padding-top: 3
         <button type="button" aria-pressed="false">Notebook</button>
         <button type="button" aria-pressed="false">Beside the paper</button>
       </div>
-      <button type="button" class="btn sm on">Stage</button>
+      <button type="button" class="btn sm on" id="stage-switch" aria-pressed="true" title="Scenes on the stage, where a section has one. Off: every section with its figure in the margin, as it was."><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1 L9 5 L2 9 z" fill="currentColor"/></svg> Stage</button>
       <button type="button" class="btn sm ghost">Rewrite</button>
     </div>
     <div class="ask"><div class="field">✦ Ask anything about this explanation, or tell Claude how to change it… <span class="go">Ask</span></div></div>
@@ -391,6 +395,11 @@ section.s + section.s { border-top: 1px solid var(--border-soft); padding-top: 3
             </div>
           </div>
             <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-temp:0" data-still="temp">
+              <div class="fig-kind"><i></i> figure · drawn by Claude</div>
+              <svg viewBox="0 0 360 250" role="img" aria-label="Figure"></svg>
+              <figcaption>The softmax of the same five logits at a temperature T, and the T² factor that keeps the two loss terms comparable.</figcaption>
+            </figure>
             <figure class="margin-item explain-figure" data-anchor="s-temp:2">
             <div class="fig-kind"><i></i> still · drawn by Claude</div>
             <svg viewBox="0 0 320 120" role="img" aria-label="The same five logits through the softmax at three temperatures">
@@ -413,6 +422,11 @@ section.s + section.s { border-top: 1px solid var(--border-soft); padding-top: 3
             </div>
           </div>
             <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-loss:0" data-still="loss">
+              <div class="fig-kind"><i></i> figure · drawn by Claude</div>
+              <svg viewBox="0 0 360 250" role="img" aria-label="Figure"></svg>
+              <figcaption>The two networks on one batch. Only the softened outputs are compared; the hard label adds a small term; gradients reach the student only.</figcaption>
+            </figure>
             <figure class="margin-item explain-figure" data-anchor="s-loss:2">
             <div class="fig-kind"><i></i> from the paper · fig. 1</div>
             <div class="snip"><svg viewBox="0 0 320 150" aria-hidden="true"><rect x="0" y="0" width="320" height="150" class="f-paper"/><rect x="24" y="30" width="60" height="90" rx="2" class="f-none s-ink"/><rect x="236" y="60" width="60" height="60" rx="2" class="f-none s-ink"/><text x="54" y="22" font-size="9" text-anchor="middle" class="t-ink" font-family="serif">cumbersome model</text><text x="266" y="52" font-size="9" text-anchor="middle" class="t-ink" font-family="serif">small model</text><text x="54" y="80" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">T = 20</text><text x="266" y="94" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">T = 20</text><path d="M84 60 H 236" class="s-ink" stroke-dasharray="3 2" fill="none"/><text x="160" y="55" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">soft targets</text><path d="M160 135 V 120 M150 125 L160 135 L170 125" class="s-ink" fill="none"/><text x="160" y="146" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">x</text></svg></div>
@@ -432,6 +446,11 @@ section.s + section.s { border-top: 1px solid var(--border-soft); padding-top: 3
             </div>
           </div>
             <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-layers:0" data-still="layers">
+              <div class="fig-kind"><i></i> figure · drawn by Claude</div>
+              <svg viewBox="0 0 360 250" role="img" aria-label="Figure"></svg>
+              <figcaption>Six teacher blocks against three student blocks: which is matched with which, and the loss on each link.</figcaption>
+            </figure>
             <aside class="margin-item explain-caveat" data-anchor="s-layers:1">
             <span class="v">Refined since</span>
             <b>Matching only the outputs</b>
@@ -532,6 +551,7 @@ soft 74</div>
       <div class="card pick"><h4>One drawing, two states</h4><p>The figure is the scene at rest. On the stage, the <b>Still</b> tab is its resting frame; steps, bound to paragraphs, animate it. The figure card stays in the margin under the stage, marked as the source. Keep and the notes always get the still.</p></div>
       <div class="card pick"><h4>Filmstrip and Paper tab</h4><p>A section with several pictures gets thumbnails under the stage: scene, still, the paper's own figure. The current one is outlined; a click shows any of them.</p></div>
       <div class="card pick"><h4>Bound to a cell when it should be</h4><p>A scene can name a cell. Until it runs, the scene shows Claude's illustrative values; after, the real ones, and the header says which cell and machine. The training section shows this.</p></div>
+      <div class="card pick"><h4>Off, if you want it off</h4><p><b>Stage</b> in the Explain bar, beside the layout switch and remembered like it, turns every part of this off: no stage, no suggestions, no marks, every section with its figure in the margin as it was. Scenes already written stay in the page's Markdown and come back when it is switched on.</p></div>
       <div class="card pick"><h4>Video is an export</h4><p>The stage's menu renders the scene to WebM or GIF in the browser and keeps a frame as a still. Nothing is generated as a video file; a video is made from the scene when someone wants one.</p></div>
     </div>
 
@@ -1107,14 +1127,17 @@ steps:
   const t0 = performance.now();
   const now = () => (performance.now() - t0) / 1000;
 
+  let stageOn = true;
+  try { stageOn = localStorage.getItem('stage-mock-on') !== 'off'; } catch (e) { /* no storage: scenes on */ }
   const isReady = (sc) => sc.ready !== false;
   function marks() {
-    document.querySelectorAll('#outline li').forEach((li) => { const sc = SCENES[li.dataset.for]; const mk = li.querySelector('.motion'); mk.classList.toggle('off', !isReady(sc) && !!sc.suggest); mk.classList.toggle('none', !isReady(sc) && !sc.suggest); });
+    document.querySelector('.mock').classList.toggle('stage-off', !stageOn);
+    document.querySelectorAll('#outline li').forEach((li) => { const sc = SCENES[li.dataset.for]; const mk = li.querySelector('.motion'); mk.classList.toggle('off', stageOn && !isReady(sc) && !!sc.suggest); mk.classList.toggle('none', !stageOn || (!isReady(sc) && !sc.suggest)); });
     document.querySelectorAll('.s-head .animate').forEach((b) => {
       const sc = SCENES[b.dataset.sec];
       const ready = isReady(sc);
-      b.hidden = !ready && !sc.suggest && !sc.drawing;
-      const row = document.querySelector('.suggest-row:has([data-sec="' + b.dataset.sec + '"])'); if (row) row.hidden = ready || !!sc.drawing;
+      b.hidden = !stageOn || (!ready && !sc.suggest && !sc.drawing);
+      const row = document.querySelector('.suggest-row:has([data-sec="' + b.dataset.sec + '"])'); if (row) row.hidden = !stageOn || ready || !!sc.drawing;
       b.classList.toggle('has', ready);
       b.innerHTML = sc.drawing ? 'Drawing…' : ready ? '<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1 L9 5 L2 9 z" fill="currentColor"/></svg> On the stage' : '<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1 L9 5 L2 9 z" fill="currentColor"/></svg> Animate';
       b.title = ready ? 'This section has a scene; the stage shows it as you read' : 'Ask Claude to draw a scene for this section';
@@ -1146,12 +1169,12 @@ steps:
   function mount(id) {
     const sc = SCENES[id];
     const side = document.querySelector('#s-' + id + ' .s-side');
-    if (isReady(sc) || sc.drawing) { if (stage.parentElement !== side) side.prepend(stage); }
+    if (stageOn && (isReady(sc) || sc.drawing)) { if (stage.parentElement !== side) side.prepend(stage); }
     else if (stage.parentElement !== home) home.appendChild(stage);
     document.querySelectorAll('.explain-figure.is-source').forEach((f) => f.classList.remove('is-source'));
     document.querySelectorAll('.s-main').forEach((m) => { m.style.paddingTop = ''; });
     if (window.innerWidth <= 1100 && stage.parentElement === side) requestAnimationFrame(() => { side.previousElementSibling.style.paddingTop = (stage.offsetHeight + 12) + 'px'; });
-    if ((isReady(sc) || sc.drawing) && side.querySelector('[data-still="' + id + '"]')) side.querySelector('[data-still="' + id + '"]').classList.add('is-source');
+    if (stageOn && (isReady(sc) || sc.drawing) && side.querySelector('[data-still="' + id + '"]')) side.querySelector('[data-still="' + id + '"]').classList.add('is-source');
     placeMargin();
   }
   // A still is the scene at rest: the same drawing, built once and left on its last step.
@@ -1273,6 +1296,16 @@ steps:
     };
     setTimeout(tick, 500);
   }
+  const stageSwitch = document.getElementById('stage-switch');
+  stageSwitch.addEventListener('click', () => {
+    stageOn = !stageOn;
+    stageSwitch.setAttribute('aria-pressed', String(stageOn));
+    stageSwitch.classList.toggle('on', stageOn);
+    try { localStorage.setItem('stage-mock-on', stageOn ? 'on' : 'off'); } catch (e) { /* fine */ }
+    marks();
+    if (current) mount(current);
+    placeMargin();
+  });
   document.querySelectorAll('.s-head .animate, .explain-figure .suggest').forEach((b) => b.addEventListener('click', () => {
     const id = b.dataset.sec;
     if (isReady(SCENES[id])) { document.getElementById('s-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
@@ -1317,7 +1350,7 @@ steps:
       const sc = SCENES[sec.dataset.scene];
       const secTop = sec.getBoundingClientRect().top + window.scrollY;
       // A section with a scene keeps room for the stage at its top, whether or not the stage is in it right now.
-      const below = (isReady(sc) || sc.drawing) ? stageH + 24 : 0;
+      const below = stageOn && (isReady(sc) || sc.drawing) ? stageH + 24 : 0;
       let bottom = 0;
       side.querySelectorAll('.margin-item').forEach((item) => {
         const [id, idx] = item.dataset.anchor.split(':');
@@ -1346,6 +1379,7 @@ steps:
     });
   })();
 
+  stageSwitch.setAttribute('aria-pressed', String(stageOn)); stageSwitch.classList.toggle('on', stageOn);
   stageH = (() => { home.appendChild(stage); stage.style.display = 'block'; const h = stage.offsetHeight; stage.style.display = ''; return h; })();
   show('glance', 0);
   marks();
