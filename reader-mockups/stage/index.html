@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reader stage mock-ups</title>
+<meta name="description" content="Mock-ups of a stage beside the reader's explanation: an animation that follows the section you are reading, for the sections where motion says more than a still.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+  :root {
+    --paper: #fbfaf6; --surface: #fffdf7; --border: #e2ddce;
+    --ink: #1a1a17; --ink-2: #55524a; --muted: #6f6c63;
+    --accent: #1f5e52; --accent-soft: #e4efe7; --accent-ink: #14403a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+      --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+      --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+    --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+    --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 'IBM Plex Sans', system-ui, sans-serif; }
+  main { max-width: 1120px; margin: 0 auto; padding: 48px 16px 80px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  h1 { font: 500 clamp(30px, 5vw, 44px)/1.15 'Newsreader', Georgia, serif; margin: 0 0 14px; }
+  .lede { color: var(--ink-2); max-width: 68ch; margin: 0 0 12px; }
+  .note { font-size: 14px; color: var(--muted); max-width: 68ch; margin: 0 0 40px; }
+  .note a { color: var(--accent); }
+  .try { display: inline-flex; gap: 10px; align-items: center; margin: 0 0 40px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 15px; }
+  .try a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  .try a:hover { text-decoration: underline; }
+  figure { margin: 0 0 56px; }
+  figure img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 18px 50px -24px rgba(0,0,0,.35); background: var(--surface); }
+  figure.phone img { max-width: 360px; margin: 0 auto; }
+  figcaption { margin-top: 16px; display: grid; grid-template-columns: 40px 1fr; gap: 0 12px; }
+  .num { font: 500 13px 'IBM Plex Sans', sans-serif; color: var(--accent-ink); background: var(--accent-soft); border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; }
+  figcaption h2 { font-size: 17px; font-weight: 600; margin: 3px 0 4px; }
+  figcaption p { margin: 0; color: var(--ink-2); max-width: 75ch; }
+  kbd { font: 500 12px ui-monospace, monospace; border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; background: var(--surface); }
+  .questions { border-top: 1px solid var(--border); padding-top: 32px; }
+  .questions h2 { font: 500 26px 'Newsreader', Georgia, serif; margin: 0 0 12px; }
+  .questions li { margin-bottom: 8px; color: var(--ink-2); }
+  .questions a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Reader · design mock-ups</p>
+  <h1>A stage beside the explanation</h1>
+  <p class="lede">The Explain page keeps each section's figure in the margin beside its paragraph. In the few sections where motion says more than a still, a stage appears at the top of the margin, stays put while you scroll that section, steps with the paragraph you are reading, and leaves when the section ends.</p>
+  <p class="note">These are frames of a working mock-up in the reader's own colours and type, on a distillation paper as the example. The feature isn't built yet; the design note is in the reader's repository under <code>docs/explain-stage.md</code>.</p>
+  <p class="try">▶ <a href="mock.html">Scroll the mock-up itself</a> <span style="color:var(--muted)">· the stage follows your reading; press Animate on section 02</span></p>
+
+  <figure>
+    <img src="stage-1-figure-only.png" alt="Section 01 of the explanation: the outline on the left, the prose, and in the margin a figure drawn by Claude beside its paragraph; no stage" loading="lazy">
+    <figcaption><span class="num">1</span><div>
+      <h2>Figures first</h2>
+      <p>Every section keeps its figure in the margin, as today. Only some sections get a scene: the ones Claude marks as worth animating, a mechanism or a loss rather than a table or a timeline, and the ones the reader asks for.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-2-suggested.png" alt="Section 02: its figure in the margin with a row under it reading Animate this figure, and Claude's one-line reason" loading="lazy">
+    <figcaption><span class="num">2</span><div>
+      <h2>Claude suggests one</h2>
+      <p>A figure Claude thinks worth animating carries <b>Animate this figure</b> with a one-line reason. The section head has the same button and the outline marks the section with a hollow play. Any other figure can be asked for in the Ask bar; Claude just does not offer.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-3-drawing.png" alt="The stage has appeared at the top of the margin with an amber drawing indicator; the network's edges are streaming in" loading="lazy">
+    <figcaption><span class="num">3</span><div>
+      <h2>Drawing</h2>
+      <p>Pressing it is a section-scoped edit like any other: Claude writes a small declarative <code>motion</code> block, the scene streams in node by node, and the block is saved into the page.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-4-drawn.png" alt="The scene plays: packets flow through a small fully connected network; the outline mark is filled and the section head reads On the stage" loading="lazy">
+    <figcaption><span class="num">4</span><div>
+      <h2>Drawn</h2>
+      <p>The scene plays, bound to the paragraphs: the paragraph crossing the reading line picks the step, and reading backwards steps backwards. Dots and a slider step by hand; <kbd>Pin</kbd> holds a scene while you read on.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-5-stage-gone.png" alt="Section 03: no stage, only the section's figure beside its paragraph" loading="lazy">
+    <figcaption><span class="num">5</span><div>
+      <h2>A stage per section, not per page</h2>
+      <p>In the next section the stage is gone and the margin is exactly what it is now.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-6-stage-with-still-under.png" alt="Section 04: the stage with the temperature scene, a slider at T = 4, and below it a still of the softmax at three temperatures coming out from under the stage" loading="lazy">
+    <figcaption><span class="num">6</span><div>
+      <h2>Stills and motion, both</h2>
+      <p>In a section with a scene, its other margin items sit beside their paragraphs beneath the stage and come out from under it as you read on. The still shows all three temperatures at once; the scene shows one at a time.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-7-loss-tabs.png" alt="Section 05: the stage's tab row reads Scene, Still, Cell, Paper; the scene shows the teacher's and student's softened outputs joined by a T²·KL link" loading="lazy">
+    <figcaption><span class="num">7</span><div>
+      <h2>The tab row is the filmstrip</h2>
+      <p>Only what the section has: the scene, its still, the cell, and the paper's own figure when Claude cites one, snipped from the PDF. Three pictures of one idea, from the most trusted to the most explanatory.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-8-still-tab.png" alt="Section 06 on the Still tab: the layer-matching drawing at rest, with all three teacher-to-student links and the total loss" loading="lazy">
+    <figcaption><span class="num">8</span><div>
+      <h2>One drawing, two states</h2>
+      <p>The figure and the scene are the same drawing. The margin's still is the scene on its last step, the Still tab is the resting frame, and Keep and the notes always get the still.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-9-static-with-cell-chip.png" alt="Section 07: a static loss-curve figure with a chip reading curves from In [3], ran on T4, and the cell under it" loading="lazy">
+    <figcaption><span class="num">9</span><div>
+      <h2>Bound to a cell when it should be</h2>
+      <p>A figure or scene can name a cell. Until it runs, the illustrative values Claude wrote; after, the real ones, and which machine ran them. Drawing stays on the page; computing stays in Colab.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-10-menu.png" alt="The stage's menu: Open large, Save as video, Save as GIF, Keep this frame as a still, Animate every section, Copy the motion block" loading="lazy">
+    <figcaption><span class="num">10</span><div>
+      <h2>Video is an export</h2>
+      <p>Nothing is generated as a video file. The menu renders the scene to WebM or GIF in the browser and keeps a frame as a still.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure>
+    <img src="stage-11-dark.png" alt="The loss scene in the dark theme, on its backward step: the teacher greyed out, the gradient path down the student" loading="lazy">
+    <figcaption><span class="num">11</span><div>
+      <h2>Dark</h2>
+      <p>Scenes colour themselves with the same few classes the page themes for Claude's figures, so they follow light and dark like everything else.</p>
+    </div></figcaption>
+  </figure>
+
+  <figure class="phone">
+    <img src="stage-12-phone.png" alt="On a phone: the stage fixed to the top of the screen while its section is read, the prose scrolling under it" loading="lazy">
+    <figcaption><span class="num">12</span><div>
+      <h2>Phone</h2>
+      <p>The stage is pinned to the top of the screen only while its section is read.</p>
+    </div></figcaption>
+  </figure>
+
+  <section class="questions">
+    <h2>Open questions</h2>
+    <ul>
+      <li>How much idle motion beside prose. The mock idles gently and has a pause; a stricter version animates only on a step change.</li>
+      <li>Whether to show Claude's suggestions before the reader has used a scene once.</li>
+      <li>The size of the scene vocabulary: about a dozen node kinds is the guess, and the first ten papers explained with it will say.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

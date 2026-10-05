@@ -1,0 +1,1361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A working mock of the reader's Explain page with a stage beside the prose that animates the section being read, for the sections where motion says more than a still.">
+</head>
+<body>
+<title>Companion Stage</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the Explain page as it is (outline · prose · margin), with the margin's top turned into a sticky stage that follows the reading. Below the mock, the brainstorm. */
+:root {
+  --paper: #fbfaf7; --panel: #f2f0ea; --ink: #1f1e1a; --ink-2: #4a4842; --muted: #7b786f;
+  --border: #d9d6cd; --border-soft: #e8e5dc;
+  --accent: #2c7a6b; --accent-soft: #e2efeb; --accent-ink: #fff;
+  --blue: #3b6fb6; --blue-soft: #e3ebf7; --yellow: #d9a62a; --yellow-soft: #f6ecd2; --pink: #b7527a; --pink-soft: #f3e2ea;
+  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --stage-h: 420px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #16161a; --panel: #1f1f25; --ink: #ecebe6; --ink-2: #c3c1b9; --muted: #8b8980;
+  --border: #35353d; --border-soft: #2a2a31;
+  --accent: #5fbba6; --accent-soft: #1d3330; --accent-ink: #0f1a17;
+  --blue: #7ea4e0; --blue-soft: #1f2a3d; --yellow: #e0b650; --yellow-soft: #3a3120; --pink: #d57aa0; --pink-soft: #3a2230;
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --paper: #16161a; --panel: #1f1f25; --ink: #ecebe6; --ink-2: #c3c1b9; --muted: #8b8980;
+  --border: #35353d; --border-soft: #2a2a31;
+  --accent: #5fbba6; --accent-soft: #1d3330; --accent-ink: #0f1a17;
+  --blue: #7ea4e0; --blue-soft: #1f2a3d; --yellow: #e0b650; --yellow-soft: #3a3120; --pink: #d57aa0; --pink-soft: #3a2230;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.5 var(--sans); }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+a { color: var(--accent); }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { padding-inline: 16px; }
+
+/* ---------- the note at the top ---------- */
+.intro { max-width: 760px; margin: 0 auto; padding-block: 36px 20px; }
+.intro .kicker { font: 600 11px/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.intro h1 { font: 500 34px/1.15 var(--serif); margin: 10px 0 10px; }
+.intro p { font: 16px/1.55 var(--sans); color: var(--ink-2); margin: 0 0 8px; }
+.intro .try { display: inline-flex; gap: 8px; align-items: center; margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--border); border-radius: 8px; color: var(--ink-2); font-size: 13px; }
+.intro .try kbd { font: 11.5px var(--mono); background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+/* ---------- the mock Explain window ---------- */
+.mock { max-width: 1320px; margin: 16px auto 0; border: 1px solid var(--border); border-radius: 14px; background: var(--paper); overflow: clip; }
+.bar { display: flex; align-items: center; gap: 12px; height: 48px; padding: 0 14px 0 18px; border-bottom: 1px solid var(--border-soft); }
+.brand { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; font-size: 13px; color: var(--accent); white-space: nowrap; }
+.bar .title { flex: 1; min-width: 0; color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; padding: 2px; background: var(--panel); }
+.segmented button { font-size: 11.5px; padding: 4px 10px; border-radius: 6px; color: var(--ink-2); white-space: nowrap; }
+.segmented button[aria-pressed="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+.btn { font-size: 12px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--paper); }
+.btn.sm { font-size: 11.5px; padding: 3px 8px; }
+.btn.ghost { border-color: transparent; color: var(--ink-2); }
+.btn.on { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+.ask { display: flex; justify-content: center; padding: 14px 16px; border-bottom: 1px solid var(--border-soft); background: var(--panel); }
+.ask .field { width: min(100%, 880px); display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--paper); color: var(--muted); font-size: 15px; }
+.ask .field .go { margin-left: auto; padding: 7px 16px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+
+.scroll { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; padding: 36px 28px 80px 24px; }
+.outline { position: sticky; top: 12px; align-self: start; font-size: 13.5px; }
+.outline .paper { font: 500 16px/1.3 var(--serif); margin-bottom: 4px; }
+.outline .by { color: var(--muted); font-size: 12.5px; padding-bottom: 12px; border-bottom: 1px solid var(--border-soft); margin-bottom: 10px; }
+.outline ol { list-style: none; margin: 0; padding: 0; }
+.outline li a { display: flex; gap: 10px; align-items: baseline; padding: 7px 10px; color: var(--ink-2); text-decoration: none; border-left: 2px solid transparent; border-radius: 0 7px 7px 0; }
+.outline li.active a { color: var(--ink); border-left-color: var(--accent); background: var(--accent-soft); }
+.outline .n { font: 500 10.5px var(--mono); color: var(--muted); }
+.outline li.active .n { color: var(--accent); }
+.outline .motion { margin-left: auto; width: 14px; height: 10px; border-radius: 2px; border: 1px solid var(--border); position: relative; flex: none; align-self: center; }
+.outline .motion::after { content: ''; position: absolute; left: 4px; top: 2px; border-left: 4px solid var(--muted); border-top: 2.5px solid transparent; border-bottom: 2.5px solid transparent; }
+.outline li.active .motion { border-color: var(--accent); }
+.outline li.active .motion::after { border-left-color: var(--accent); }
+.outline .legend { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-soft); color: var(--muted); font-size: 11.5px; display: grid; gap: 5px; }
+.outline .legend > span { display: flex; gap: 8px; align-items: center; }
+
+.doc { min-width: 0; max-width: 1044px; }
+.doc-title { max-width: 700px; margin-bottom: 28px; }
+section.s { display: grid; grid-template-columns: minmax(0, 600px) minmax(300px, 400px); column-gap: 44px; align-items: stretch; }
+.s-main { min-width: 0; }
+.s-side { position: relative; min-width: 0; }
+.doc-title .kicker { font: 600 11px/1 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.doc-title h1 { font: 500 32px/1.18 var(--serif); margin: 8px 0 8px; }
+.doc-title .by { color: var(--muted); font-size: 13px; }
+
+section.s { padding: 6px 0 26px; }
+section.s + section.s { border-top: 1px solid var(--border-soft); padding-top: 30px; }
+.s-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 12px; }
+.s-head .num { font: 500 13px var(--mono); color: var(--accent); }
+.s-head h2 { font: 600 20px/1.3 var(--sans); letter-spacing: -0.005em; }
+.prose { font-family: var(--serif); font-size: 17.5px; line-height: 1.66; max-width: 620px; }
+.prose p { margin: 0 0 16px; padding-left: 14px; margin-left: -14px; border-left: 2px solid transparent; transition: border-color 0.25s; }
+.prose p.reading { border-left-color: var(--accent); }
+.prose .eq { font: 15px/1.5 var(--mono); background: var(--panel); border-radius: 8px; padding: 10px 14px; margin: 0 0 16px; overflow-x: auto; }
+.prose em.term { font-style: normal; background: var(--yellow-soft); padding: 0 3px; border-radius: 3px; cursor: default; }
+.prose em.term:hover { outline: 1px solid var(--yellow); }
+.prose .mark { color: var(--muted); font: 11px var(--mono); margin-left: 6px; vertical-align: 2px; }
+
+/* ---------- the stage ---------- */
+.stage { position: sticky; top: 12px; z-index: 2; animation: stage-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+@keyframes stage-in { from { opacity: 0; transform: translateY(6px); } }
+#stage-home { display: none; }
+.margin-item { position: absolute; left: 0; right: 0; }
+.explain-figure { border: 1px solid var(--border-soft); border-radius: 10px; padding: 10px 10px 8px; background: var(--paper); }
+.explain-figure svg { display: block; width: 100%; height: auto; font-family: var(--sans); }
+.explain-figure figcaption { font: 12.5px/1.45 var(--sans); color: var(--ink-2); margin-top: 8px; }
+.explain-figure .fig-kind { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 5px; font: 500 10.5px var(--mono); color: var(--muted); margin-bottom: 6px; }
+.explain-figure .fig-kind .chip { margin-left: auto; }
+.explain-figure .suggest-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-soft); font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+.explain-figure .suggest-row[hidden] { display: none; }
+.explain-figure .suggest { flex: none; display: inline-flex; gap: 5px; align-items: center; font: 500 11px var(--sans); color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 3px 8px; white-space: nowrap; }
+.explain-figure .suggest:hover { background: var(--accent); color: var(--accent-ink); }
+.explain-figure.is-source { border-color: var(--accent); }
+.explain-figure.is-source .fig-kind::after { content: 'on the stage above'; margin-left: auto; color: var(--accent); }
+.explain-figure .fig-kind i { width: 10px; height: 7px; border: 1px solid var(--muted); border-radius: 1px; }
+.snip { background: var(--panel); border-radius: 6px; padding: 10px; }
+.snip svg { opacity: 0.85; filter: grayscale(0.2); }
+.explain-caveat { border-left: 3px solid var(--blue); background: var(--blue-soft); border-radius: 0 10px 10px 0; padding: 10px 12px; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.explain-caveat b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
+.explain-caveat .v { font: 500 10.5px var(--mono); color: var(--blue); text-transform: uppercase; letter-spacing: 0.04em; }
+.explain-cell { border: 1px solid var(--border-soft); border-radius: 10px; overflow: hidden; background: var(--paper); }
+.explain-cell header { display: flex; align-items: center; gap: 8px; padding: 6px 10px; font: 12px var(--sans); color: var(--ink-2); border-bottom: 1px solid var(--border-soft); }
+.explain-cell header .in { font: 11px var(--mono); color: var(--accent); white-space: nowrap; }
+.explain-cell header .run { white-space: nowrap; }
+.explain-cell header .run { margin-left: auto; font-size: 11px; color: var(--accent); }
+.explain-cell pre { margin: 0; font: 11px/1.5 var(--mono); padding: 10px 12px; overflow-x: auto; }
+.explain-cell .out { font: 11px/1.5 var(--mono); color: var(--muted); padding: 6px 12px 8px; border-top: 1px solid var(--border-soft); white-space: pre; overflow-x: auto; }
+.stage { border: 1px solid var(--border); border-radius: 12px; background: var(--paper); box-shadow: 0 12px 30px -22px rgba(0,0,0,0.5); overflow: hidden; }
+.stage-head { display: flex; align-items: center; gap: 8px; padding: 9px 10px 9px 12px; border-bottom: 1px solid var(--border-soft); }
+.stage-head .tabs { display: inline-flex; gap: 2px; }
+.stage-head .tabs button { font-size: 11.5px; padding: 4px 8px; border-radius: 6px; color: var(--muted); }
+.stage-head .tabs button[aria-selected="true"] { background: var(--panel); color: var(--ink); }
+.stage-head .tabs button::before { content: attr(data-glyph); margin-right: 5px; font-size: 9px; opacity: 0.8; }
+.stage-head .right { margin-left: auto; display: inline-flex; gap: 4px; }
+.stage-head .right button { font-size: 11.5px; padding: 4px 8px; border-radius: 6px; color: var(--muted); }
+.stage-head .right button[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); }
+.stage-where { display: flex; align-items: baseline; gap: 8px; padding: 10px 14px 0; font-size: 11.5px; color: var(--muted); }
+.stage-where .n { font: 500 11px var(--mono); color: var(--accent); }
+.stage-where .t { color: var(--ink-2); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stage-where .live { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.stage-where .live i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; animation: blink 1.4s infinite; }
+.stage-where .live.paused i { background: var(--muted); animation: none; }
+@keyframes blink { 50% { opacity: 0.25; } }
+.canvas { padding: 10px 10px 0; }
+.canvas svg { display: block; width: 100%; height: auto; max-height: 222px; margin: 0 auto; aspect-ratio: 360 / 250; font-family: var(--sans); }
+.canvas .still, .canvas .cell, .canvas .paper { display: none; }
+.stage[data-tab="figure"] .canvas .anim, .stage[data-tab="cell"] .canvas .anim, .stage[data-tab="paper"] .canvas .anim { display: none; }
+.stage[data-tab="paper"] .canvas .paper { display: block; }
+.canvas .paper { padding: 4px 4px 0; }
+.canvas .paper .snip-cap { font-size: 12px; color: var(--muted); margin: 8px 4px 0; }
+.stage.no-paper .canvas .paper .snip { opacity: 0.25; }
+.stage[data-tab="figure"] .canvas .still { display: block; }
+.stage[data-tab="cell"] .canvas .cell { display: block; }
+.canvas .still { padding: 0; }
+.canvas .still .snip-cap { font-size: 12px; color: var(--muted); margin: 8px 4px 0; }
+.canvas .cell pre { margin: 0; font: 11.5px/1.5 var(--mono); background: var(--panel); border-radius: 8px; padding: 10px 12px; overflow-x: auto; max-height: 230px; }
+.caption { padding: 8px 14px 2px; font-size: 13px; line-height: 1.45; color: var(--ink-2); min-height: 42px; }
+.caption b { color: var(--ink); font-weight: 600; }
+.steps { display: flex; align-items: center; gap: 10px; padding: 6px 12px 10px; }
+.steps .dots { display: inline-flex; gap: 5px; }
+.steps .dots button { width: 18px; height: 18px; border-radius: 50%; position: relative; }
+.steps .dots button::after { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: var(--border); }
+.steps .dots button[aria-current="step"]::after { background: var(--accent); inset: 4px; }
+.steps .dots button.done::after { background: var(--muted); }
+.steps input[type="range"] { flex: 1; min-width: 0; accent-color: var(--accent); }
+.steps .play { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); display: inline-grid; place-items: center; }
+.steps .play svg { width: 10px; height: 10px; fill: var(--ink); }
+.stage-foot { display: flex; gap: 6px; padding: 8px 10px 10px; border-top: 1px solid var(--border-soft); flex-wrap: wrap; }
+.stage-foot .btn { font-size: 11.5px; padding: 4px 9px; }
+.stage-foot .src { margin-left: auto; align-self: center; font: 11px var(--mono); color: var(--muted); }
+.stage-foot .chip { align-self: center; }
+.stage-foot .src:has(+ .chip:not([hidden])) { display: none; }
+.under { margin-top: 14px; color: var(--muted); font-size: 11.5px; padding: 0 4px; }
+.under b { color: var(--ink-2); font-weight: 500; }
+
+
+/* On demand: a section with no scene yet folds the stage to a strip with one button; drawing streams the scene in. */
+.stage-where .live.drawing i { background: var(--yellow); animation: blink 0.6s infinite; }
+.stage-empty { display: none; padding: 14px 14px 14px; }
+.stage.is-empty .canvas, .stage.is-empty .caption, .stage.is-empty .steps, .stage.is-empty .stage-foot { display: none; }
+.stage.is-empty .stage-empty { display: flex; flex-direction: column; gap: 10px; }
+.stage.is-empty .tabs { visibility: hidden; }
+.stage-empty p { margin: 0; font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.stage-empty .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.stage-empty .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; display: inline-flex; gap: 6px; align-items: center; }
+.stage-empty .hint { font-size: 11.5px; color: var(--muted); }
+.stage.is-drawing .steps, .stage.is-drawing .stage-foot { opacity: 0.4; pointer-events: none; }
+.chip { font: 500 10.5px var(--mono); color: var(--accent); background: var(--accent-soft); padding: 2px 6px; border-radius: 4px; white-space: nowrap; flex: none; }
+.film { display: flex; gap: 6px; padding: 2px 12px 8px; }
+.film:empty { display: none; }
+.film button { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 5px; border: 1px solid var(--border-soft); border-radius: 6px; font-size: 10px; color: var(--muted); background: var(--panel); }
+.film button[aria-current="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.film button i { display: grid; place-items: center; width: 44px; height: 28px; border-radius: 3px; background: var(--paper); border: 1px solid var(--border-soft); font-style: normal; font-size: 11px; }
+.menu { position: relative; }
+.pop { position: absolute; right: 0; top: 30px; z-index: 6; min-width: 196px; background: var(--paper); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 12px 30px -12px rgba(0,0,0,0.45); padding: 4px; display: none; }
+.pop.open { display: block; }
+.pop button { display: block; width: 100%; text-align: left; padding: 6px 10px; border-radius: 5px; font-size: 12px; color: var(--ink); }
+.pop button:hover { background: var(--panel); }
+.pop button small { display: block; color: var(--muted); font-size: 10.5px; }
+.pop hr { border: 0; border-top: 1px solid var(--border-soft); margin: 4px 0; }
+.s-head .animate { margin-left: auto; font-size: 11.5px; color: var(--ink-2); border: 1px solid var(--border-soft); border-radius: 6px; padding: 2px 8px; display: inline-flex; gap: 5px; align-items: center; white-space: nowrap; }
+.s-head .animate.has { color: var(--accent); border-color: transparent; background: var(--accent-soft); }
+.outline li .motion.off { border-style: dashed; opacity: 0.8; } .outline li .motion.off::after { display: none; }
+.outline li .motion.none { visibility: hidden; }
+.s-head .animate[hidden] { display: none; }
+.outline .legend .motion.off { position: static; }
+
+/* SVG theming, the way the page themes Claude's figures */
+.f-accent { fill: var(--accent); } .f-soft { fill: var(--accent-soft); } .f-blue { fill: var(--blue); } .f-blue-soft { fill: var(--blue-soft); }
+.f-yellow { fill: var(--yellow); } .f-yellow-soft { fill: var(--yellow-soft); } .f-pink { fill: var(--pink); } .f-pink-soft { fill: var(--pink-soft); }
+.f-paper { fill: var(--paper); } .f-panel { fill: var(--panel); } .f-ink { fill: var(--ink); } .f-muted { fill: var(--muted); } .f-none { fill: none; }
+.s-ink { stroke: var(--ink); } .s-muted { stroke: var(--muted); } .s-accent { stroke: var(--accent); } .s-blue { stroke: var(--blue); } .s-pink { stroke: var(--pink); } .s-border { stroke: var(--border); } .s-yellow { stroke: var(--yellow); }
+.t-muted { fill: var(--muted); } .t-ink { fill: var(--ink); } .t-accent { fill: var(--accent); } .t-on { fill: var(--accent-ink); } .t-blue { fill: var(--blue); } .t-pink { fill: var(--pink); }
+.mono { font-family: var(--mono); }
+.dim { opacity: 0.28; transition: opacity 0.35s; }
+.fade { transition: opacity 0.35s; }
+
+/* ---------- brainstorm ---------- */
+.ideas { max-width: 1100px; margin: 56px auto 80px; }
+.ideas > header { max-width: 720px; margin-bottom: 28px; }
+.ideas > header h2 { font: 500 30px/1.2 var(--serif); margin-bottom: 8px; }
+.ideas > header p { color: var(--ink-2); font-size: 16px; margin: 0; }
+.ideas h3 { font: 600 17px/1.3 var(--sans); margin: 34px 0 12px; }
+.ideas p { max-width: 700px; color: var(--ink-2); font-size: 15px; line-height: 1.6; margin: 0 0 10px; }
+.ideas p b { color: var(--ink); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px 14px; background: var(--paper); min-width: 0; }
+.card.pick { border-color: var(--accent); }
+.card h4 { font: 600 13.5px/1.3 var(--sans); margin: 0 0 6px; display: flex; gap: 8px; align-items: center; }
+.card h4 .tag { font: 500 10px/1 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 6px; border-radius: 4px; }
+.card p { font-size: 13px; line-height: 1.5; margin: 0 0 6px; }
+.card .wire { display: block; width: 100%; height: auto; margin: 2px 0 10px; }
+.card .wire rect, .card .wire line { vector-effect: non-scaling-stroke; }
+.card ul { margin: 0; padding-left: 16px; font-size: 13px; color: var(--ink-2); }
+.card li { margin: 3px 0; }
+.card .plus { color: var(--accent); } .card .minus { color: var(--pink); }
+.ideas pre { font: 12px/1.55 var(--mono); background: var(--panel); border-radius: 8px; padding: 12px 14px; overflow-x: auto; max-width: 760px; margin: 0 0 12px; }
+.ideas table { border-collapse: collapse; font-size: 13px; max-width: 760px; width: 100%; margin: 4px 0 14px; }
+.ideas th, .ideas td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+.ideas th { font-weight: 600; color: var(--ink-2); font-size: 12px; }
+.ideas td:first-child { white-space: nowrap; font-weight: 500; }
+.q { border-left: 3px solid var(--yellow); padding: 2px 0 2px 14px; max-width: 700px; }
+.q p { margin: 0 0 8px; }
+
+@media (max-width: 1100px) {
+  .scroll { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 24px 16px 60px; }
+  .outline { position: static; margin-bottom: 20px; }
+  .outline ol { display: flex; flex-wrap: wrap; gap: 2px; }
+  .outline .motion, .outline .legend, .outline .by { display: none; }
+  .doc { grid-template-columns: minmax(0, 1fr); }
+  .doc-title { grid-column: 1; }
+  /* The stage goes to the top of the column and stays there as a strip, the prose scrolls under it. */
+  section.s { grid-template-columns: minmax(0, 1fr); }
+  .s-side { order: -1; margin-bottom: 14px; }
+  .stage { position: fixed; top: 0; left: 0; right: 0; z-index: 3; margin: 0; border-radius: 0 0 12px 12px; border-top: 0; max-height: 58vh; overflow: auto; animation: none; }
+  .s-side { order: 2; }
+  .margin-item { position: static !important; margin: 0 0 12px; }
+  .canvas svg { max-height: 170px; margin: 0 auto; }
+  .s-head { flex-wrap: wrap; }
+  .s-head .animate { order: 3; margin-left: 0; flex-basis: 100%; justify-content: flex-start; border: 0; padding-left: 0; }
+  .s-head h2 { font-size: 19px; }
+  .caption { min-height: 0; }
+  .stage-foot { display: none; }
+  .under { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .stage-where .live i { animation: none; } }
+</style>
+
+<div class="wrap">
+  <div class="intro">
+    <div class="kicker">Explain · a side stage that follows the reading</div>
+    <h1>A companion stage beside the explanation</h1>
+    <p>The margin column holds each section's figure, cell and caveat, as it does today. In the few sections where motion says more than a still, a stage appears at the top of the margin, stays put while you scroll that section, and steps with the paragraph you are reading. The example is a distillation paper: the temperature, the loss and the layer matching are animated; the rest stay figures.</p>
+    <div class="try">Scroll the explanation below. Every section has its figure in the margin, as today. Only 04, 05 and 06 have a scene: there the stage appears at the top of the margin, follows the paragraphs, and leaves when the section ends. On 02, Claude suggests a scene: press <kbd>Animate</kbd> on its figure and watch it stream in. <kbd>Pin</kbd> holds a scene; the dots or the slider step by hand.</div>
+  </div>
+
+  <div class="mock">
+    <div class="bar">
+      <span class="brand">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 5.2v5.6l4.6-2.8z" fill="currentColor"/></svg>
+        Explained by Claude
+      </span>
+      <span class="title">Distilling the Knowledge in a Neural Network</span>
+      <div class="segmented" role="group" aria-label="Layout">
+        <button type="button" aria-pressed="true">Margin</button>
+        <button type="button" aria-pressed="false">Notebook</button>
+        <button type="button" aria-pressed="false">Beside the paper</button>
+      </div>
+      <button type="button" class="btn sm on">Stage</button>
+      <button type="button" class="btn sm ghost">Rewrite</button>
+    </div>
+    <div class="ask"><div class="field">✦ Ask anything about this explanation, or tell Claude how to change it… <span class="go">Ask</span></div></div>
+
+    <div class="scroll">
+      <nav class="outline" aria-label="Sections">
+        <div class="paper">Distilling the Knowledge in a Neural Network</div>
+        <div class="by">Geoffrey Hinton, Oriol Vinyals, Jeff Dean · 2015</div>
+        <ol id="outline">
+          <li data-for="glance"><a href="#s-glance"><span class="n">01</span>At a glance<span class="motion"></span></a></li>
+          <li data-for="problem"><a href="#s-problem"><span class="n">02</span>The problem: the wrong shape to deploy<span class="motion"></span></a></li>
+          <li data-for="soft"><a href="#s-soft"><span class="n">03</span>Soft targets: what a teacher knows beyond the label<span class="motion"></span></a></li>
+          <li data-for="temp"><a href="#s-temp"><span class="n">04</span>Temperature: softening the softmax<span class="motion"></span></a></li>
+          <li data-for="loss"><a href="#s-loss"><span class="n">05</span>The distillation loss: what is compared to what<span class="motion"></span></a></li>
+          <li data-for="layers"><a href="#s-layers"><span class="n">06</span>Matching the middle: layer against layer<span class="motion"></span></a></li>
+          <li data-for="train"><a href="#s-train"><span class="n">07</span>Training and results<span class="motion"></span></a></li>
+          <li data-for="since"><a href="#s-since"><span class="n">08</span>Since then<span class="motion"></span></a></li>
+        </ol>
+        <div class="legend"><span><span class="motion" style="position:static"></span> has a scene on the stage</span><span><span class="motion off" style="position:static"></span> Claude suggests one</span></div>
+      </nav>
+
+      <div class="doc">
+        <div class="doc-title">
+          <div class="kicker">Explanation</div>
+          <h1>Distilling the Knowledge in a Neural Network</h1>
+          <div class="by">Hinton, Vinyals &amp; Dean · arXiv 1503.02531 · 2015 · explained for a reader who has trained a classifier before</div>
+        </div>
+
+          <section class="s" id="s-glance" data-scene="glance">
+            <div class="s-main">
+            <div class="s-head"><span class="num">01</span><h2>At a glance</h2><button type="button" class="animate" data-sec="glance"></button></div>
+            <div class="prose">
+              <p data-step="0">A large model, or an ensemble of them, learns a function that a much smaller model could represent but would not find on its own. The paper's claim is that the knowledge sits in the big model's <em class="term">output distribution</em>, not in its weights, and that a small model can be trained to copy that distribution.<span class="mark">¶1</span></p>
+              <p data-step="1">The method is two models and one extra loss. A <em class="term">teacher</em>, already trained, and a <em class="term">student</em>, small enough to deploy, see the same inputs. The student is trained to match the teacher's softened predictions as well as the true labels.</p>
+              <p data-step="2">It works because wrong answers carry information. A teacher that puts 0.9 on <i>cat</i> and 0.08 on <i>dog</i> has told the student that this cat looks like a dog, something a one-hot label never says. Who should care: anyone shipping a model to a budget the training run never had.</p>
+            </div>
+          </div>
+            <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-glance:0" data-still="glance">
+              <div class="fig-kind"><i></i> figure · drawn by Claude</div>
+              <svg viewBox="0 0 360 250" role="img" aria-label="Figure"></svg>
+              <figcaption>A teacher, already trained, and a student small enough to ship. The student is trained to match the teacher's output.</figcaption>
+            </figure>
+            </div>
+          </section>
+
+          <section class="s" id="s-problem" data-scene="problem">
+            <div class="s-main">
+            <div class="s-head"><span class="num">02</span><h2>The problem: the wrong shape to deploy</h2><button type="button" class="animate" data-sec="problem"></button></div>
+            <div class="prose">
+              <p data-step="0">Training and serving want different models. In training you are free to be extravagant: train many models, average them, use far more parameters than the data strictly needs, because extra capacity makes the optimisation easier. Watch a forward pass through such a model on the right: every layer touches every unit, and the cost is the number of arrows.</p>
+              <p data-step="1">The extreme case is an ensemble. Ten models, ten forward passes, and the answer is the average. In 2015 this was the reliable way to win a benchmark, and it was ten times the cost of one model at serving time.</p>
+              <p data-step="2">The serving budget is fixed by latency and memory on a phone or a datacentre at scale. The question the paper asks is whether the <em class="term">function</em> the ensemble has learned, as opposed to its parameters, can be moved into one small model.</p>
+            </div>
+          </div>
+            <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-problem:0" data-still="problem">
+              <div class="fig-kind"><i></i> figure · drawn by Claude</div>
+              <svg viewBox="0 0 360 250" role="img" aria-label="Figure"></svg>
+              <figcaption>One forward pass through a small fully connected network: every unit feeds every unit in the next layer.</figcaption>
+              <div class="suggest-row"><button type="button" class="suggest" data-sec="problem"><svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1 L9 5 L2 9 z" fill="currentColor"/></svg>Animate this figure</button><span>Claude thinks motion would help here: the pass, then the ensemble, then the budget.</span></div>
+            </figure>
+            </div>
+          </section>
+
+          <section class="s" id="s-soft" data-scene="soft">
+            <div class="s-main">
+            <div class="s-head"><span class="num">03</span><h2>Soft targets: what a teacher knows beyond the label</h2><button type="button" class="animate" data-sec="soft"></button></div>
+            <div class="prose">
+              <p data-step="0">Start with how a classifier is usually trained. The target for one image is a <em class="term">hard label</em>: 1 on the right class, 0 everywhere else. The stage shows that for a picture of a cat over five classes.</p>
+              <p data-step="1">Now look at what a trained teacher actually outputs for the same image. Most of the mass is on <i>cat</i>, but a little goes to <i>dog</i>, far less to <i>car</i> and <i>truck</i>, and almost nothing to <i>ship</i>. That ordering is not noise. It is the teacher's similarity structure over classes, learned from millions of images.</p>
+              <p data-step="2">The paper calls this <em class="term">dark knowledge</em>: the information in the small probabilities. One soft target constrains the student far more than one hard label, because it says something about every class at once. The trouble is that at the usual softmax these small probabilities are tiny, around 10⁻⁶, and contribute almost nothing to a cross-entropy gradient.</p>
+            </div>
+          </div>
+            <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-soft:1" data-still="soft">
+              <div class="fig-kind"><i></i> figure · drawn by Claude</div>
+              <svg viewBox="0 0 360 250" role="img" aria-label="Figure"></svg>
+              <figcaption>For one picture of a cat: the hard label, and what the teacher says. The ordering of the small probabilities is learned similarity.</figcaption>
+            </figure>
+            </div>
+          </section>
+
+          <section class="s" id="s-temp" data-scene="temp">
+            <div class="s-main">
+            <div class="s-head"><span class="num">04</span><h2>Temperature: softening the softmax</h2><button type="button" class="animate" data-sec="temp"></button></div>
+            <div class="prose">
+              <p data-step="0">The fix is to divide the logits by a <em class="term">temperature</em> T before the softmax, in both the teacher and the student:</p>
+              <div class="eq">q_i = exp(z_i / T) / Σ_j exp(z_j / T)</div>
+              <p data-step="1">At T = 1 this is the ordinary softmax and the distribution is peaked. Raise T and the logits are squeezed together, so the distribution flattens and the small probabilities become visible to the loss. The stage raises T as you read on; watch the <i>dog</i> and <i>car</i> bars grow while the ordering stays the same.</p>
+              <p data-step="2">At very high T the softmax becomes nearly uniform and the information is gone again, so there is a useful band. The paper used T between 2 and 20, with smaller students preferring lower T because they cannot fit all of the teacher's structure anyway.</p>
+              <p data-step="3">Because dividing by T scales gradients by 1/T², the paper multiplies the soft loss by T² so that the two terms stay comparable when T is tuned. That is a bookkeeping detail, but one that matters when you implement it.</p>
+            </div>
+          </div>
+            <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-temp:2">
+            <div class="fig-kind"><i></i> still · drawn by Claude</div>
+            <svg viewBox="0 0 320 120" role="img" aria-label="The same five logits through the softmax at three temperatures">
+              <g id="mf-bars"></g>
+            </svg>
+            <figcaption>The same five logits at T = 1, 4 and 20, side by side. A still shows all three at once; the scene above shows one at a time.</figcaption>
+          </figure>
+            </div>
+          </section>
+
+          <section class="s" id="s-loss" data-scene="loss">
+            <div class="s-main">
+            <div class="s-head"><span class="num">05</span><h2>The distillation loss: what is compared to what</h2><button type="button" class="animate" data-sec="loss"></button></div>
+            <div class="prose">
+              <p data-step="0">Both networks see the same batch. The teacher runs forward once with its weights frozen; the student runs forward and will be updated. On the stage, the same input enters both stacks and each produces logits at the top.</p>
+              <p data-step="1">The first term compares the two <em class="term">softened outputs</em>. Teacher logits at temperature T give a soft distribution; student logits at the same T give another; the loss is the cross-entropy between them, which is the KL divergence up to a constant. Only the final layer's outputs are compared. Nothing inside either network is looked at.</p>
+              <div class="eq">L = T² · CE(softmax(z_T / T), softmax(z_S / T)) + λ · CE(y, softmax(z_S))</div>
+              <p data-step="2">The second term is the ordinary cross-entropy against the hard label, at T = 1. It keeps the student honest when the teacher is wrong and gives it a sharp decision at serving time. The paper found a small weight on this term works best.</p>
+              <p data-step="3">Gradients flow back through the student only. The teacher is a fixed function during distillation, so it is drawn greyed out once the backward pass starts. This is why distillation is cheap to add: one extra forward pass through a model you already have.</p>
+            </div>
+          </div>
+            <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-loss:2">
+            <div class="fig-kind"><i></i> from the paper · fig. 1</div>
+            <div class="snip"><svg viewBox="0 0 320 150" aria-hidden="true"><rect x="0" y="0" width="320" height="150" class="f-paper"/><rect x="24" y="30" width="60" height="90" rx="2" class="f-none s-ink"/><rect x="236" y="60" width="60" height="60" rx="2" class="f-none s-ink"/><text x="54" y="22" font-size="9" text-anchor="middle" class="t-ink" font-family="serif">cumbersome model</text><text x="266" y="52" font-size="9" text-anchor="middle" class="t-ink" font-family="serif">small model</text><text x="54" y="80" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">T = 20</text><text x="266" y="94" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">T = 20</text><path d="M84 60 H 236" class="s-ink" stroke-dasharray="3 2" fill="none"/><text x="160" y="55" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">soft targets</text><path d="M160 135 V 120 M150 125 L160 135 L170 125" class="s-ink" fill="none"/><text x="160" y="146" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">x</text></svg></div>
+            <figcaption>The paper's own sketch of the setup, snipped from the PDF. Claude's redraw is the Figure tab on the stage; the scene animates it.</figcaption>
+          </figure>
+            </div>
+          </section>
+
+          <section class="s" id="s-layers" data-scene="layers">
+            <div class="s-main">
+            <div class="s-head"><span class="num">06</span><h2>Matching the middle: layer against layer</h2><button type="button" class="animate" data-sec="layers"></button></div>
+            <div class="prose">
+              <p data-step="0">This paper matches outputs only, but the obvious next question is whether the student should also match what the teacher computes on the way. Later work, starting with FitNets in 2015, does exactly that, and it is the version most people mean today when they say they distilled an intermediate layer. The stage shows a six-layer teacher beside a three-layer student.</p>
+              <p data-step="1">The teacher's second block is paired with the student's first. The two feature maps have different widths, 512 against 256 here, so a small learned <em class="term">regressor</em> projects the student's activations into the teacher's space before a mean-squared-error loss is taken between them.</p>
+              <p data-step="2">The fourth teacher block is paired with the student's second block in the same way. Which pairs to choose is a design decision; the usual rule is to spread them evenly through the depth so that the student is guided throughout, rather than only told the answer.</p>
+              <p data-step="3">The final pair is the two output layers, which is this paper's loss again. Putting it all together, the student is pulled toward the teacher at three points in its depth, each with its own weight in the total loss.</p>
+            </div>
+          </div>
+            <div class="s-side">
+            <aside class="margin-item explain-caveat" data-anchor="s-layers:1">
+            <span class="v">Refined since</span>
+            <b>Matching only the outputs</b>
+            FitNets (Romero et al., 2015) added hint losses between intermediate layers; attention transfer (2017) matched attention maps instead of raw activations. Both are usually combined with the output loss.
+          </aside>
+            </div>
+          </section>
+
+          <section class="s" id="s-train" data-scene="train">
+            <div class="s-main">
+            <div class="s-head"><span class="num">07</span><h2>Training and results</h2><button type="button" class="animate" data-sec="train"></button></div>
+            <div class="prose">
+              <p data-step="0">On MNIST, a large teacher with two hidden layers of 1200 units makes 67 test errors. A small student of two layers of 800 units trained on labels alone makes 146. Watch the student's error curve on the stage as it trains on hard labels only.</p>
+              <p data-step="1">The same small student, trained with soft targets from the teacher at T = 20, makes 74 errors. The second curve shows that run. Almost the whole gap to the teacher closes, with no change to the student's architecture.</p>
+              <p data-step="2">The striking experiment removes every example of the digit 3 from the student's training set. Distilled from the teacher, the student still recognises 98.6% of the 3s it has never seen, because the teacher's soft targets on other digits say what a 3 is not.</p>
+            </div>
+          </div>
+            <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-train:1" data-still="train">
+              <div class="fig-kind"><i></i> figure · drawn by Claude <span class="chip">curves from In [3] · ran on T4</span></div>
+              <svg viewBox="0 0 360 250" role="img" aria-label="Figure"></svg>
+              <figcaption>Test errors on MNIST: the student on labels alone settles at 146; with soft targets at T = 20 it reaches 74. The teacher is at 67.</figcaption>
+            </figure>
+            <figure class="margin-item explain-cell" data-anchor="s-train:1">
+            <header><span class="in">In [3]</span>Student with and without soft targets<span class="run">▶ Run in Colab</span></header>
+            <pre>for soft in (False, True):
+    errs = train_student(soft_targets=soft, T=20)
+    print("soft" if soft else "hard", errs[-1])</pre>
+            <div class="out">hard 146
+soft 74</div>
+          </figure>
+            </div>
+          </section>
+
+          <section class="s" id="s-since" data-scene="since">
+            <div class="s-main">
+            <div class="s-head"><span class="num">08</span><h2>Since then</h2><button type="button" class="animate" data-sec="since"></button></div>
+            <div class="prose">
+              <p data-step="0">Output distillation is standard practice and the recipe has barely changed. Intermediate-layer matching, attention-map matching and relational losses were added by later work and are usually combined with it.</p>
+              <p data-step="1">For language models the method moved to sequence level: DistilBERT and TinyBERT in 2019 distilled encoder models with layer matching, and current instruction-tuned small models are routinely trained on a larger model's generations, which is distillation through samples rather than through logits.</p>
+              <p data-step="2">What a reader should use today: the T² soft-target loss as written, a modest weight on the hard label, and one or two intermediate matches if the student is much shallower than the teacher.</p>
+            </div>
+          </div>
+            <div class="s-side">
+            <figure class="margin-item explain-figure" data-anchor="s-since:1" data-still="since">
+              <div class="fig-kind"><i></i> figure · drawn by Claude</div>
+              <svg viewBox="0 0 360 250" role="img" aria-label="Figure"></svg>
+              <figcaption>What came after: hints between layers, attention maps, and sequence-level distillation for language models.</figcaption>
+            </figure>
+            </div>
+          </section>
+      </div>
+    </div>
+    <div id="stage-home">
+          <div class="stage" id="stage" data-tab="anim">
+            <div class="stage-head">
+              <div class="tabs" role="tablist" id="tabs"></div>
+              <div class="right">
+                <button type="button" id="pin" aria-pressed="false" title="Hold this scene while you read on">Pin</button>
+                <span class="menu"><button type="button" id="menu-btn" aria-haspopup="menu" aria-expanded="false" title="More">⋯</button><div class="pop" id="pop" role="menu"><button type="button" role="menuitem">Open large<small>In a floating window, with the caption</small></button><button type="button" role="menuitem">Save as video<small>WebM, rendered in the browser</small></button><button type="button" role="menuitem">Save as GIF</button><button type="button" role="menuitem">Keep this frame as a still</button><hr><button type="button" role="menuitem">Animate every section<small>Draws a scene for each section that can take one</small></button><button type="button" role="menuitem">Copy the motion block</button></div></span>
+              </div>
+            </div>
+            <div class="stage-where">
+              <span class="n" id="where-n">01</span><span class="t" id="where-t">At a glance</span>
+              <span class="live" id="live"><i></i><span id="live-t">follows your reading</span></span>
+            </div>
+            <div class="canvas">
+              <svg class="anim" id="svg" viewBox="0 0 360 250" role="img" aria-label="Animated scene for the section being read"></svg>
+              <div class="still"><svg viewBox="0 0 360 250" role="img" aria-label="The figure, still"></svg><div class="snip-cap">The figure at rest: the same drawing, on its last step. This is what Keep and the notes get.</div></div>
+              <div class="cell"><pre id="cell-code"></pre></div>
+              <div class="paper"><div class="snip"><svg viewBox="0 0 320 150" aria-hidden="true"><rect x="0" y="0" width="320" height="150" class="f-paper"/><rect x="24" y="30" width="60" height="90" rx="2" class="f-none s-ink"/><rect x="236" y="60" width="60" height="60" rx="2" class="f-none s-ink"/><text x="54" y="22" font-size="9" text-anchor="middle" class="t-ink" font-family="serif">cumbersome model</text><text x="266" y="52" font-size="9" text-anchor="middle" class="t-ink" font-family="serif">small model</text><text x="54" y="80" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">T = 20</text><text x="266" y="94" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">T = 20</text><path d="M84 60 H 236" class="s-ink" stroke-dasharray="3 2" fill="none"/><text x="160" y="55" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">soft targets</text><path d="M160 135 V 120 M150 125 L160 135 L170 125" class="s-ink" fill="none"/><text x="160" y="146" font-size="8" text-anchor="middle" class="t-ink" font-family="serif">x</text></svg></div><div class="snip-cap" id="paper-cap">From the paper, fig. 1 · snipped from the PDF · click to open it there</div></div>
+            </div>
+            <div class="caption" id="caption"></div>
+            <div class="steps">
+              <button type="button" class="play" id="play" aria-label="Pause"><svg viewBox="0 0 10 10" id="play-icon"><rect x="1" y="1" width="3" height="8"/><rect x="6" y="1" width="3" height="8"/></svg></button>
+              <div class="dots" id="dots"></div>
+              <input type="range" id="scrub" min="0" max="100" value="0" aria-label="Scrub through the scene">
+            </div>
+            <div class="stage-foot">
+              <button type="button" class="btn">Ask about this scene</button>
+              <button type="button" class="btn">Keep</button>
+              <button type="button" class="btn">Redraw…</button>
+              <span class="src" id="src">motion · glance</span><span class="chip" id="where-chip" hidden></span>
+            </div>
+          </div>
+    </div>
+  </div>
+
+  <div class="ideas">
+    <header>
+      <h2>The design, decided</h2>
+      <p>What the mock above now does, chosen from the options below it.</p>
+    </header>
+    <div class="grid">
+      <div class="card pick"><h4>Figures first, motion where it earns it</h4><p>Every section keeps its figure in the margin, drawn as today. Only some sections get a scene: the ones Claude marks as worth animating when it writes the page, a mechanism or a loss rather than a table or a timeline, and the ones the reader asks for. The page is never without its stills.</p></div>
+      <div class="card pick"><h4>A stage per section, not per page</h4><p>The stage appears at the top of the margin when you enter a section with a scene, follows its paragraphs, and leaves when the section ends. In every other section the margin is exactly what it is now.</p></div>
+      <div class="card pick"><h4>Suggested, then on demand</h4><p>A figure Claude thinks worth animating carries <b>Animate · Claude suggests it here</b>; the outline marks the section with a hollow play. Pressing it, or asking in the bar, streams the scene in node by node and saves it with the page. Any other figure can be asked for the same way; Claude just does not offer.</p></div>
+      <div class="card pick"><h4>One drawing, two states</h4><p>The figure is the scene at rest. On the stage, the <b>Still</b> tab is its resting frame; steps, bound to paragraphs, animate it. The figure card stays in the margin under the stage, marked as the source. Keep and the notes always get the still.</p></div>
+      <div class="card pick"><h4>Filmstrip and Paper tab</h4><p>A section with several pictures gets thumbnails under the stage: scene, still, the paper's own figure. The current one is outlined; a click shows any of them.</p></div>
+      <div class="card pick"><h4>Bound to a cell when it should be</h4><p>A scene can name a cell. Until it runs, the scene shows Claude's illustrative values; after, the real ones, and the header says which cell and machine. The training section shows this.</p></div>
+      <div class="card pick"><h4>Video is an export</h4><p>The stage's menu renders the scene to WebM or GIF in the browser and keeps a frame as a still. Nothing is generated as a video file; a video is made from the scene when someone wants one.</p></div>
+    </div>
+
+    <h3>The options considered</h3>
+    <p>What the stage is, where it could sit, what moves it, and what Claude would have to write for it to exist.</p>
+
+    <h3>The idea in one line</h3>
+    <p>A section of the explanation gets, besides its figure and its cell, a <b>scene</b>: a small animation with named steps. The stage shows the scene of the section you are in and the step of the paragraph you are on. It stays on screen while the prose scrolls, so the text and the picture are always read together.</p>
+
+    <h3>Where it sits</h3>
+    <div class="grid">
+      <div class="card pick">
+        <h4>Top of the margin, sticky <span class="tag">shown above</span></h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="10" width="28" height="60" rx="2" class="f-panel"/><rect x="46" y="10" width="78" height="100" rx="2" class="f-panel"/><rect x="134" y="10" width="58" height="48" rx="3" class="f-accent" opacity="0.85"/><rect x="134" y="66" width="58" height="18" rx="2" class="f-panel"/><rect x="134" y="90" width="58" height="18" rx="2" class="f-panel"/></svg>
+        <p>The Margin layout already has the column. The stage takes its top and stays; the section's static figures and cells keep scrolling beneath it.</p>
+        <ul><li class="plus">No new column, no new mode.</li><li class="plus">Same width the figures have now.</li><li class="minus">Pushes the stills down by its own height; see <i>Stills and motion, both</i> below.</li></ul>
+      </div>
+      <div class="card">
+        <h4>The whole margin becomes the stage</h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="10" width="28" height="60" rx="2" class="f-panel"/><rect x="46" y="10" width="78" height="100" rx="2" class="f-panel"/><rect x="134" y="10" width="58" height="100" rx="3" class="f-accent" opacity="0.85"/><rect x="140" y="16" width="14" height="6" rx="1" class="f-paper"/><rect x="157" y="16" width="14" height="6" rx="1" class="f-paper" opacity="0.5"/><rect x="174" y="16" width="12" height="6" rx="1" class="f-paper" opacity="0.5"/></svg>
+        <p>Figure, cell and caveat are tabs on one sticky stage, as in the mock's header. Nothing scrolls in the margin at all; the stage swaps what it shows as you read.</p>
+        <ul><li class="plus">One place to look, always in view.</li><li class="plus">The cell output and the animation can sit side by side.</li><li class="minus">A section with three figures has to hide two of them behind tabs.</li></ul>
+      </div>
+      <div class="card">
+        <h4>A floating card, picture-in-picture</h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="10" width="28" height="60" rx="2" class="f-panel"/><rect x="46" y="10" width="146" height="100" rx="2" class="f-panel"/><rect x="126" y="64" width="64" height="46" rx="3" class="f-accent" opacity="0.85"/></svg>
+        <p>A draggable card over the bottom corner, the way the reader's floating windows already work. Works in every layout, including Notebook and Beside the paper, where there is no margin.</p>
+        <ul><li class="plus">Layout-independent; can be enlarged or dismissed.</li><li class="minus">Covers prose; feels like a widget rather than part of the page.</li></ul>
+      </div>
+      <div class="card">
+        <h4>A strip under the bar on narrow screens</h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="8" width="184" height="34" rx="3" class="f-accent" opacity="0.85"/><rect x="8" y="50" width="184" height="60" rx="2" class="f-panel"/></svg>
+        <p>On the phone layout the stage becomes a short sticky band above the prose, landscape, with the caption to the right of the picture. The mock does this below 1100px.</p>
+        <ul><li class="plus">The one way to keep it in view on a phone.</li><li class="minus">Eats a third of the screen; needs a collapse.</li></ul>
+      </div>
+    </div>
+
+    <h3>What drives it</h3>
+    <div class="grid">
+      <div class="card pick">
+        <h4>Stepped by paragraph <span class="tag">shown above</span></h4>
+        <p>Each paragraph is a step. The paragraph crossing the reading line (a third of the way down) picks the step; the scene animates to that state and idles there. Reading backwards steps backwards.</p>
+        <ul><li class="plus">The text says what you are looking at; the picture never runs ahead.</li><li class="plus">Claude can write steps, it cannot easily write keyframe timing.</li></ul>
+      </div>
+      <div class="card">
+        <h4>Scrubbed by scroll</h4>
+        <p>Scroll position within the section maps to time within the scene, like an Apple product page. The slider in the mock is this, by hand.</p>
+        <ul><li class="plus">Direct, tactile.</li><li class="minus">Reading speed is not animation speed; you stop mid-frame to think and the picture is half-drawn.</li></ul>
+      </div>
+      <div class="card">
+        <h4>Autoplay per section, loop</h4>
+        <p>Entering a section plays its scene once, then it loops slowly. The paragraph steps are ignored.</p>
+        <ul><li class="plus">Simplest to author.</li><li class="minus">Motion in the corner of the eye while reading is a distraction; needs the pause the mock has.</li></ul>
+      </div>
+    </div>
+
+    <h3>What Claude would write</h3>
+    <p>The page already draws four fenced blocks specially. A fifth, <b>motion</b>, would be a declarative scene rather than code, so it can be validated, themed and redrawn without running anything untrusted. Nodes, groups, edges, and per-step properties; the page owns the layout and the tweening.</p>
+<pre>```motion title="The distillation loss" steps="forward,soft match,hard label,backward"
+nodes:
+  x:        {kind: input, label: "x"}
+  teacher:  {kind: stack, layers: 6, label: "teacher", frozen: true}
+  student:  {kind: stack, layers: 3, label: "student"}
+  zT:       {kind: dist,  label: "softmax(z_T / T)", from: teacher}
+  zS:       {kind: dist,  label: "softmax(z_S / T)", from: student}
+  y:        {kind: label, label: "y"}
+edges:
+  - {from: x, to: [teacher, student], flow: forward}
+  - {from: zT, to: zS, kind: compare, label: "KL", step: 1}
+  - {from: y,  to: zS, kind: compare, label: "CE", step: 2}
+  - {from: zS, to: student, flow: backward, step: 3}
+steps:
+  0: {caption: "The same batch runs through both networks."}
+  1: {caption: "Only the two softened outputs are compared.", highlight: [zT, zS]}
+  2: {caption: "A small hard-label term keeps the student honest.", highlight: [y, zS]}
+  3: {caption: "Gradients reach the student only.", dim: [teacher]}
+```</pre>
+    <p>Steps are bound to paragraphs in order, or by name with a marker in the prose (the <span style="font-family:var(--mono);font-size:12px">¶1</span> in the mock's first paragraph). A vocabulary of a dozen node kinds covers most ML papers: <b>stack</b>, <b>layer</b>, <b>tensor</b>, <b>dist</b>, <b>curve</b>, <b>grid</b>, <b>timeline</b>, <b>token row</b>, <b>attention matrix</b>. Papers outside ML get fewer scenes and that is fine; a section without a motion block shows its figure on the stage instead.</p>
+    <table>
+      <tr><th>Kind of section</th><th>Scene that fits</th></tr>
+      <tr><td>Architecture</td><td>Flow through a stack: packets along edges, layers lighting in order, a tensor's shape changing at each.</td></tr>
+      <tr><td>Loss or objective</td><td>Two outputs and the comparison between them, then the gradient path drawn back. Which layers meet which.</td></tr>
+      <tr><td>A hyperparameter</td><td>One slider, one live chart: T and the softmax, the learning rate and a curve, the context window and a mask.</td></tr>
+      <tr><td>Training</td><td>Curves drawn over time, the two runs the text contrasts.</td></tr>
+      <tr><td>Attention, routing, mixing</td><td>A matrix or bipartite graph whose weights fill in as the step moves.</td></tr>
+      <tr><td>Since then</td><td>A timeline, each later paper a dot the caption names.</td></tr>
+    </table>
+
+
+    <h3>Stills and motion, both</h3>
+    <p>A still and a scene do different jobs. A still shows everything at once and is what you keep, print and come back to. A scene shows one thing at a time and is only useful while you read. The page should have both, and the question is only where each goes and whether Claude draws them twice.</p>
+    <div class="grid">
+      <div class="card pick">
+        <h4>Stage on top, stills flow under it <span class="tag">in the mock now</span></h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="10" width="24" height="60" rx="2" class="f-panel"/><rect x="42" y="10" width="82" height="100" rx="2" class="f-panel"/><rect x="134" y="10" width="58" height="40" rx="3" class="f-accent" opacity="0.85"/><rect x="134" y="58" width="58" height="22" rx="2" class="f-blue-soft s-blue"/><rect x="134" y="86" width="58" height="22" rx="2" class="f-panel"/><line x1="124" y1="66" x2="134" y2="66" class="s-blue" stroke-dasharray="2 2"/></svg>
+        <p>The margin keeps its rows. Each still, snip, caveat and cell sits beside its paragraph, pushed down by the stage's height, and comes out from under the stage as you read on.</p>
+        <ul><li class="plus">Nothing about the margin changes; the stage is an addition.</li><li class="minus">A still trails its paragraph by the stage's height. Keep the stage short, around 300px, or fold it to a strip when a still is due.</li></ul>
+      </div>
+      <div class="card pick">
+        <h4>One drawing, two states <span class="tag">authoring</span></h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="10" width="24" height="60" rx="2" class="f-panel"/><rect x="42" y="10" width="82" height="100" rx="2" class="f-panel"/><rect x="134" y="10" width="58" height="44" rx="3" class="f-blue-soft s-blue"/><rect x="142" y="18" width="12" height="28" rx="1" class="f-blue"/><rect x="172" y="30" width="12" height="16" rx="1" class="f-accent"/><path d="M154 22 C 166 22, 166 38, 172 38" class="s-pink" fill="none" stroke-dasharray="2 2"/><text x="163" y="70" font-size="7" text-anchor="middle" class="t-muted">steps animate it</text></svg>
+        <p>The figure Claude already draws is the scene at rest. A motion block names elements in that SVG by id and says what each step does to them: light this, move that, draw this edge. No step, and it is a still as today.</p>
+        <ul><li class="plus">Drawn once. The still and the animation can never disagree.</li><li class="plus">Reuses the figure pipeline: DOMPurify, the colour classes, Keep.</li><li class="minus">Claude has to give elements ids, and a step vocabulary has to be small enough to write reliably.</li></ul>
+      </div>
+      <div class="card">
+        <h4>Stills in the prose, the margin is the stage</h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="10" width="24" height="60" rx="2" class="f-panel"/><rect x="42" y="10" width="82" height="26" rx="2" class="f-panel"/><rect x="42" y="42" width="82" height="30" rx="2" class="f-blue-soft s-blue"/><rect x="42" y="78" width="82" height="32" rx="2" class="f-panel"/><rect x="134" y="10" width="58" height="48" rx="3" class="f-accent" opacity="0.85"/></svg>
+        <p>Figures and snips go into the reading column at full width, the way Notebook lays them out, and the margin holds only the stage, cells and caveats. What moves stays put; what is still scrolls with the text.</p>
+        <ul><li class="plus">No trailing, no competition for the strip; stills get wider.</li><li class="minus">Breaks the Margin layout's sidenote idea. Better as a fourth layout, "Stage", than as a change to Margin.</li></ul>
+      </div>
+      <div class="card">
+        <h4>Two panes: scene above, current still below</h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="10" width="24" height="60" rx="2" class="f-panel"/><rect x="42" y="10" width="82" height="100" rx="2" class="f-panel"/><rect x="134" y="10" width="58" height="44" rx="3" class="f-accent" opacity="0.85"/><rect x="134" y="60" width="58" height="48" rx="3" class="f-blue-soft s-blue"/></svg>
+        <p>Both sticky. The lower pane crossfades to the still that belongs to the paragraph being read, so a still is never behind the stage and never trails.</p>
+        <ul><li class="plus">Still and scene visible together, always aligned with the text.</li><li class="minus">Needs about 700px of height; on a laptop both panes get small.</li></ul>
+      </div>
+      <div class="card">
+        <h4>A filmstrip under the stage</h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="10" width="24" height="60" rx="2" class="f-panel"/><rect x="42" y="10" width="82" height="100" rx="2" class="f-panel"/><rect x="134" y="10" width="58" height="40" rx="3" class="f-accent" opacity="0.85"/><rect x="134" y="56" width="12" height="9" rx="1" class="f-accent"/><rect x="149" y="56" width="12" height="9" rx="1" class="f-blue-soft s-blue"/><rect x="164" y="56" width="12" height="9" rx="1" class="f-blue-soft s-blue"/><rect x="179" y="56" width="12" height="9" rx="1" class="f-panel s-border"/></svg>
+        <p>Thumbnails of everything the section has: the scene, its stills, the paper's own figures. The one that belongs to the paragraph is outlined as you read; a click shows any of them on the stage and pins it.</p>
+        <ul><li class="plus">A section with three figures is no longer a problem.</li><li class="plus">The paper's figure and Claude's redraw sit next to each other.</li><li class="minus">Another row of chrome on the stage.</li></ul>
+      </div>
+      <div class="card">
+        <h4>Three columns on a wide screen</h4>
+        <svg class="wire" viewBox="0 0 200 120" aria-hidden="true"><rect x="1" y="1" width="198" height="118" rx="4" class="f-none s-border"/><rect x="8" y="10" width="24" height="60" rx="2" class="f-panel"/><rect x="42" y="10" width="64" height="100" rx="2" class="f-panel"/><rect x="114" y="14" width="34" height="22" rx="2" class="f-blue-soft s-blue"/><rect x="114" y="70" width="34" height="22" rx="2" class="f-blue-soft s-blue"/><rect x="156" y="10" width="36" height="40" rx="3" class="f-accent" opacity="0.85"/></svg>
+        <p>Above about 1500px the margin splits: stills beside their paragraphs in a narrow column, the stage sticky in a third. Below that width it collapses to the first option.</p>
+        <ul><li class="plus">Everything in place, nothing trailing, nothing hidden.</li><li class="minus">Only for big displays; three widths of chrome to keep consistent.</li></ul>
+      </div>
+    </div>
+
+    <h3>Three views of one idea</h3>
+    <p>The stage in the mock has a <b>Paper</b> tab. For any section Claude can point at a figure in the paper, a snip from the PDF is a tab beside Claude's redraw and the scene, with the page number and a link into the paper. Three pictures of the same thing, from the most trusted to the most explanatory, and the reader can check one against the other. The reader already snips PDFs, so this is the existing snip, placed by Claude.</p>
+    <table>
+      <tr><th>Case</th><th>What the reader sees</th></tr>
+      <tr><td>Section with one figure</td><td>The figure is the scene at rest; steps animate it; Figure tab shows it still. Nothing in the margin but cells and caveats.</td></tr>
+      <tr><td>Section with several figures</td><td>The main one is the scene; the others are stills beside their paragraphs beneath the stage, and thumbnails on the filmstrip.</td></tr>
+      <tr><td>The paper's own figure</td><td>Paper tab on the stage, and a snip in the margin where Claude cites it.</td></tr>
+      <tr><td>No motion block</td><td>The stage shows the section's figure, still. A section with no figure folds the stage to a one-line strip.</td></tr>
+      <tr><td>Keep, notes, Markdown export</td><td>Always a still: the resting frame or the current step as SVG, with its caption. Motion never leaves the page.</td></tr>
+      <tr><td>Phone</td><td>A short strip with the still, tap to play; the margin items go inline under their paragraphs.</td></tr>
+    </table>
+    <p><b>Recommendation.</b> One drawing, two states, as the authoring model: it removes the duplication at the root and makes every scene also a figure. Stage on top with the margin flowing under it as the default placement, with the stage kept short and the filmstrip for sections that have more than one picture. The Paper tab for figures Claude cites. Stills in the prose column as a separate "Stage" layout for readers who prefer it.</p>
+
+    <h3>Small interactions worth having</h3>
+    <div class="grid">
+      <div class="card"><h4>Terms light the picture</h4><p>Hovering a highlighted term in the prose (teacher, temperature, regressor) pulses the node it names on the stage. The reverse too: hovering a node underlines its term.</p></div>
+      <div class="card"><h4>Pin</h4><p>Hold a scene while reading on. The live dot in the stage header goes grey and the text says <i>pinned to §05</i>. Scrolling into a new section shows a small <i>follow</i> nudge rather than switching.</p></div>
+      <div class="card"><h4>Ask about this scene</h4><p>Puts the scene's spec and current step into the Ask bar as scope, the way a cell's output does now: <i>why is the teacher greyed out here?</i></p></div>
+      <div class="card"><h4>Redraw</h4><p>Asks Claude for a different scene for this section: <i>show it with real feature map sizes</i>, <i>animate the backward pass slower</i>. The block is rewritten like any other section edit.</p></div>
+      <div class="card"><h4>Keep</h4><p>Keeps the scene's current frame as a still, with its caption and step, in your notes. The notes clip renders it as a figure.</p></div>
+      <div class="card"><h4>Large</h4><p>The ⤢ button opens the scene in a floating window with the caption under it, for a projector or a second look.</p></div>
+    </div>
+
+    <h3>Open questions</h3>
+    <div class="q">
+      <p><b>Margin vs stage.</b> The paragraph-adjacent figure is the Tufte idea the Margin layout is built on. The stage breaks adjacency for whatever used to sit at the top. The mock's answer is to keep both, stage above, figures below, but it is worth deciding whether a section's figure simply becomes the last step of its scene.</p>
+      <p><b>How much motion.</b> Idling animation beside prose pulls the eye. The mock idles gently (packets moving, a curve breathing) and has a pause. A stricter version animates only on a step change and is otherwise still.</p>
+      <p><b>Where the scenes come from.</b> Claude writes them with the explanation, which makes a page slower and longer to write. Alternatively they are written on demand the first time a section is read, with a <i>drawing…</i> state on the stage, which keeps the first explanation as fast as it is now.</p>
+      <p><b>Scope per paper.</b> Not every section needs a scene. Two to four per paper, on the method and the loss, is probably right; the outline's small play icon marks which have one.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('svg');
+  const captionEl = document.getElementById('caption');
+  const dotsEl = document.getElementById('dots');
+  const scrub = document.getElementById('scrub');
+  const whereN = document.getElementById('where-n');
+  const whereT = document.getElementById('where-t');
+  const live = document.getElementById('live');
+  const liveT = document.getElementById('live-t');
+  const src = document.getElementById('src');
+  const cellCode = document.getElementById('cell-code');
+  const stage = document.getElementById('stage');
+  const pinBtn = document.getElementById('pin');
+  const playBtn = document.getElementById('play');
+  const playIcon = document.getElementById('play-icon');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function text(parent, x, y, str, cls, anchor) {
+    const t = el('text', { x, y, class: cls || 't-ink', 'font-size': 11, 'text-anchor': anchor || 'start' }, parent);
+    t.textContent = str;
+    return t;
+  }
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const ease = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+  // A stack of layers drawn bottom-up. Returns the rects and the centre x.
+  function stack(parent, x, yTop, n, w, h, gap, cls) {
+    const rects = [];
+    for (let i = 0; i < n; i++) {
+      const y = yTop + (n - 1 - i) * (h + gap);
+      rects.push(el('rect', { x, y, width: w, height: h, rx: 3, class: cls || 'f-blue-soft s-blue' }, parent));
+    }
+    return rects;
+  }
+  // A packet moving up through a stack, phase in [0,1).
+  function packetY(yTop, n, h, gap, phase) {
+    const yBottom = yTop + n * (h + gap);
+    return yBottom - phase * (yBottom - yTop + 6);
+  }
+  function bars(parent, x, y, w, h, values, labels, cls) {
+    const bw = w / values.length;
+    const out = [];
+    values.forEach((v, i) => {
+      const r = el('rect', { x: x + i * bw + 4, y: y + h, width: bw - 8, height: 0, rx: 2, class: cls || 'f-accent' }, parent);
+      out.push(r);
+      text(parent, x + i * bw + bw / 2, y + h + 14, labels[i], 't-muted', 'middle');
+    });
+    return out;
+  }
+  function setBars(rects, values, y, h) {
+    rects.forEach((r, i) => {
+      const bh = Math.max(0.5, values[i] * h);
+      r.setAttribute('y', y + h - bh);
+      r.setAttribute('height', bh);
+    });
+  }
+  const softmax = (z, T) => { const e = z.map((v) => Math.exp(v / T)); const s = e.reduce((a, b) => a + b, 0); return e.map((v) => v / s); };
+  const LOGITS = [9.0, 6.0, 2.5, 2.0, -1.0];
+  const CLASSES = ['cat', 'dog', 'car', 'truck', 'ship'];
+
+  // ----------------------------------------------------------------------
+  // Scenes. Each builds once into a <g>, then render(step, u, t) where
+  // step is the paragraph step, u in [0,1] the tween into that step, t seconds.
+  // ----------------------------------------------------------------------
+  const SCENES = {
+    glance: {
+      title: 'At a glance', n: '01', ready: false, paper: 'From the paper, fig. 1 · snipped from the PDF · click to open it there',
+      captions: ['<b>A teacher and a student.</b> The big network has already been trained. The small one is the one you will ship.',
+        '<b>The same input to both.</b> Each produces a distribution over classes at the top.',
+        '<b>The student copies the teacher\'s output.</b> Not its weights: its answers, including the near-misses.'],
+      build(g) {
+        this.tRects = stack(g, 70, 40, 6, 80, 18, 6, 'f-blue-soft s-blue');
+        this.sRects = stack(g, 230, 112, 3, 60, 18, 6, 'f-soft s-accent');
+        text(g, 110, 28, 'teacher', 't-blue', 'middle'); text(g, 260, 100, 'student', 't-accent', 'middle');
+        text(g, 110, 206, '~10M params', 't-muted mono', 'middle').setAttribute('font-size', 9.5);
+        text(g, 260, 206, '~0.5M', 't-muted mono', 'middle').setAttribute('font-size', 9.5);
+        this.input = el('g', { class: 'fade', opacity: 0 }, g);
+        el('circle', { cx: 180, cy: 232, r: 7, class: 'f-yellow' }, this.input);
+        text(this.input, 180, 236, 'x', 't-ink mono', 'middle').setAttribute('font-size', 10);
+        el('path', { d: 'M173 229 L110 229 L110 192', class: 'f-none s-muted', 'stroke-width': 1.2, fill: 'none' }, this.input);
+        el('path', { d: 'M187 229 L260 229 L260 192', class: 'f-none s-muted', 'stroke-width': 1.2, fill: 'none' }, this.input);
+        this.pT = el('circle', { cx: 110, r: 4, class: 'f-yellow', opacity: 0 }, g);
+        this.pS = el('circle', { cx: 260, r: 4, class: 'f-yellow', opacity: 0 }, g);
+        this.outT = el('g', { class: 'fade', opacity: 0 }, g);
+        this.outS = el('g', { class: 'fade', opacity: 0 }, g);
+        this.bT = bars(this.outT, 72, 2, 76, 20, [1, 1, 1, 1, 1], ['', '', '', '', ''], 'f-blue');
+        this.bS = bars(this.outS, 232, 70, 56, 18, [1, 1, 1, 1, 1], ['', '', '', '', ''], 'f-accent');
+        this.cmp = el('g', { class: 'fade', opacity: 0 }, g);
+        el('path', { d: 'M150 14 C 190 14, 200 78, 230 78', class: 'f-none s-pink', 'stroke-width': 1.5, 'stroke-dasharray': '4 3', fill: 'none' }, this.cmp);
+        text(this.cmp, 196, 42, 'match', 't-pink', 'middle');
+      },
+      render(step, u, t) {
+        this.input.setAttribute('opacity', step >= 1 ? 1 : 0);
+        const flow = step >= 1;
+        const ph = (t * 0.45) % 1;
+        this.pT.setAttribute('opacity', flow ? 1 : 0); this.pS.setAttribute('opacity', flow ? 1 : 0);
+        this.pT.setAttribute('cy', packetY(40, 6, 18, 6, ph));
+        this.pS.setAttribute('cy', packetY(112, 3, 18, 6, ph));
+        this.tRects.forEach((r, i) => r.setAttribute('class', flow && Math.floor(ph * 6) === i ? 'f-blue s-blue' : 'f-blue-soft s-blue'));
+        this.sRects.forEach((r, i) => r.setAttribute('class', flow && Math.floor(ph * 3) === i ? 'f-accent s-accent' : 'f-soft s-accent'));
+        this.outT.setAttribute('opacity', step >= 1 ? 1 : 0); this.outS.setAttribute('opacity', step >= 1 ? 1 : 0);
+        const pT = softmax(LOGITS, 4);
+        const pS0 = [0.5, 0.1, 0.2, 0.15, 0.05];
+        const pS = pS0.map((v, i) => lerp(v, pT[i], step >= 2 ? ease(u) : 0));
+        setBars(this.bT, pT, 2, 20); setBars(this.bS, pS, 70, 18);
+        this.cmp.setAttribute('opacity', step >= 2 ? 1 : 0);
+      },
+      cell: 'import numpy as np\nrng = np.random.default_rng(0)\nz_teacher = rng.normal(size=5) * 3\np = np.exp(z_teacher / 4); p /= p.sum()\nprint("soft target:", np.round(p, 3))'
+    },
+
+    problem: {
+      title: 'The problem: the wrong shape to deploy', n: '02', ready: false, suggest: true,
+      captions: ['<b>One forward pass.</b> Every unit in a layer feeds every unit in the next; the cost is the number of edges.',
+        '<b>An ensemble.</b> Ten models, ten passes, one average. Best accuracy of its day, ten times the serving cost.',
+        '<b>The budget.</b> What has to run on the device is the small box. The question is whether the function fits, not the weights.'],
+      build(g) {
+        const layers = [4, 6, 6, 3];
+        const xs = [40, 110, 180, 250];
+        this.nodes = []; this.edges = [];
+        for (let l = 0; l < layers.length; l++) {
+          const ys = []; const n = layers[l];
+          for (let i = 0; i < n; i++) ys.push(125 + (i - (n - 1) / 2) * 24);
+          this.nodes.push(ys);
+        }
+        for (let l = 0; l < layers.length - 1; l++) for (const y1 of this.nodes[l]) for (const y2 of this.nodes[l + 1])
+          this.edges.push({ e: el('line', { x1: xs[l], y1, x2: xs[l + 1], y2, class: 's-border', 'stroke-width': 0.8 }, g), l, y1, y2, x1: xs[l], x2: xs[l + 1] });
+        this.circles = [];
+        this.nodes.forEach((ys, l) => ys.forEach((y) => this.circles.push({ c: el('circle', { cx: xs[l], cy: y, r: 5, class: 'f-paper s-blue', 'stroke-width': 1.2 }, g), l })));
+        this.packs = [];
+        for (let i = 0; i < 14; i++) this.packs.push({ c: el('circle', { r: 2.2, class: 'f-yellow' }, g), e: this.edges[(i * 37) % this.edges.length], off: i / 14 });
+        text(g, 145, 232, '4 · 6 · 6 · 3 units, 78 weights', 't-muted mono', 'middle').setAttribute('font-size', 9.5);
+        this.ens = el('g', { class: 'fade', opacity: 0 }, g);
+        for (let k = 1; k <= 3; k++) el('rect', { x: 30 + k * 7, y: 55 - k * 7, width: 240, height: 140, rx: 6, class: 'f-none s-muted', 'stroke-dasharray': '3 3' }, this.ens);
+        text(this.ens, 300, 36, '×10', 't-muted mono', 'start').setAttribute('font-size', 12);
+        this.budget = el('g', { class: 'fade', opacity: 0 }, g);
+        el('rect', { x: 300, y: 92, width: 48, height: 66, rx: 6, class: 'f-none s-accent', 'stroke-width': 1.5 }, this.budget);
+        el('rect', { x: 314, y: 150, width: 20, height: 3, rx: 1.5, class: 'f-accent' }, this.budget);
+        text(this.budget, 324, 124, 'budget', 't-accent', 'middle').setAttribute('font-size', 9);
+        el('path', { d: 'M270 125 L296 125', class: 's-accent', 'stroke-width': 1.2, 'marker-end': 'url(#arr)' }, this.budget);
+        text(this.budget, 324, 178, '≤ 10 ms', 't-muted mono', 'middle').setAttribute('font-size', 9.5);
+      },
+      render(step, u, t) {
+        for (const p of this.packs) {
+          const ph = ((t * 0.35 + p.off) % 1);
+          const l = Math.floor(ph * 3);
+          const w = (ph * 3) % 1;
+          const e = this.edges.find((x) => x.l === l && (x.y1 === p.e.y1 || l !== p.e.l)) || p.e;
+          const cands = this.edges.filter((x) => x.l === l); const ee = cands[(this.packs.indexOf(p) * 7 + l * 5) % cands.length] || e;
+          p.c.setAttribute('cx', lerp(ee.x1, ee.x2, w)); p.c.setAttribute('cy', lerp(ee.y1, ee.y2, w));
+        }
+        this.ens.setAttribute('opacity', step >= 1 ? 1 : 0);
+        this.budget.setAttribute('opacity', step >= 2 ? 1 : 0);
+      },
+      cell: 'import numpy as np\nsizes = [4, 6, 6, 3]\nweights = sum(a * b for a, b in zip(sizes, sizes[1:]))\nprint("weights per model:", weights)\nprint("ensemble of 10 :", 10 * weights)'
+    },
+
+    soft: {
+      title: 'Soft targets: what a teacher knows beyond the label', n: '03', ready: false,
+      captions: ['<b>The hard label.</b> One on <i>cat</i>, zero elsewhere. It says nothing about dogs.',
+        '<b>What the teacher says.</b> Mostly cat; a little dog; faint car and truck; no ship. The ordering is learned similarity.',
+        '<b>Dark knowledge.</b> The small probabilities, magnified ×40. At T = 1 they are too small to move a gradient.'],
+      build(g) {
+        text(g, 180, 22, 'target for one picture of a cat', 't-muted', 'middle');
+        this.hard = bars(g, 40, 50, 280, 100, [1, 0, 0, 0, 0], CLASSES, 'f-yellow');
+        this.soft = bars(g, 40, 50, 280, 100, [0, 0, 0, 0, 0], ['', '', '', '', ''], 'f-blue');
+        this.vals = CLASSES.map((c, i) => text(g, 40 + i * 56 + 28, 44, '', 't-muted mono', 'middle'));
+        this.vals.forEach((v) => v.setAttribute('font-size', 9.5));
+        this.mag = el('g', { class: 'fade', opacity: 0 }, g);
+        el('rect', { x: 100, y: 194, width: 220, height: 50, rx: 5, class: 'f-panel s-border' }, this.mag);
+        text(this.mag, 108, 208, '×40', 't-muted mono').setAttribute('font-size', 9.5);
+        this.magBars = bars(this.mag, 130, 198, 180, 30, [0, 0, 0, 0], ['dog', 'car', 'truck', 'ship'], 'f-blue');
+        this.mag.querySelectorAll('text').forEach((tx, i) => { if (i > 0) tx.setAttribute('y', 240); tx.setAttribute('font-size', 9); });
+        this.lbl = text(g, 180, 182, '', 't-blue', 'middle');
+      },
+      render(step, u) {
+        const p = softmax(LOGITS, 1);
+        const k = step >= 1 ? ease(u) : 0;
+        setBars(this.hard, [1 - k, 0, 0, 0, 0], 50, 100);
+        setBars(this.soft, p.map((v) => v * k), 50, 100);
+        this.vals.forEach((v, i) => v.textContent = step >= 1 ? (p[i] < 0.001 ? p[i].toExponential(0) : p[i].toFixed(3)) : (i === 0 ? '1' : '0'));
+        this.mag.setAttribute('opacity', step >= 2 ? 1 : 0);
+        if (step >= 2) setBars(this.magBars, p.slice(1).map((v) => Math.min(1, v * 40 * ease(u))), 198, 30);
+        this.lbl.textContent = step === 1 ? 'teacher output, T = 1' : step >= 2 ? 'the tail, magnified' : 'hard label y';
+      },
+      cell: 'import numpy as np\nz = np.array([9.0, 6.0, 2.5, 2.0, -1.0])\np = np.exp(z); p /= p.sum()\nfor c, v in zip(["cat","dog","car","truck","ship"], p):\n    print(f"{c:>6} {v:.5f}")'
+    },
+
+    temp: {
+      title: 'Temperature: softening the softmax', n: '04', still: true,
+      captions: ['<b>T = 1.</b> The ordinary softmax: nearly all the mass on the top class.',
+        '<b>Raising T.</b> Logits are squeezed together; the tail rises; the order never changes.',
+        '<b>Too hot.</b> Near uniform at T = 20: the structure is gone again. The useful band is in between.',
+        '<b>The T² factor.</b> Gradients shrink by 1/T², so the soft loss is scaled back up to keep both terms comparable.'],
+      Ts: [1, 4, 20, 4],
+      build(g) {
+        this.bars = bars(g, 40, 60, 280, 120, [0, 0, 0, 0, 0], CLASSES, 'f-accent');
+        this.tLbl = text(g, 180, 30, '', 't-ink mono', 'middle'); this.tLbl.setAttribute('font-size', 13);
+        this.track = el('rect', { x: 60, y: 212, width: 240, height: 4, rx: 2, class: 'f-panel s-border' }, g);
+        this.knob = el('circle', { cx: 60, cy: 214, r: 7, class: 'f-accent' }, g);
+        text(g, 60, 236, '1', 't-muted mono', 'middle').setAttribute('font-size', 9.5);
+        text(g, 300, 236, '20', 't-muted mono', 'middle').setAttribute('font-size', 9.5);
+        text(g, 180, 236, 'T', 't-muted', 'middle').setAttribute('font-size', 10);
+        this.g2 = el('g', { class: 'fade', opacity: 0 }, g);
+        el('rect', { x: 206, y: 44, width: 118, height: 34, rx: 5, class: 'f-yellow-soft s-yellow' }, this.g2);
+        text(this.g2, 265, 58, '∂L/∂z ∝ 1/T²', 't-ink mono', 'middle').setAttribute('font-size', 10);
+        text(this.g2, 265, 71, 'so multiply loss by T²', 't-muted', 'middle').setAttribute('font-size', 9);
+        this.T = 1;
+      },
+      render(step, u) {
+        const target = this.Ts[Math.min(step, this.Ts.length - 1)];
+        const prev = this.Ts[Math.max(0, Math.min(step, this.Ts.length - 1) - 1)];
+        const T = step === 0 ? 1 : Math.exp(lerp(Math.log(prev), Math.log(target), ease(u)));
+        this.T = T;
+        setBars(this.bars, softmax(LOGITS, T), 60, 120);
+        this.tLbl.textContent = 'T = ' + (T < 10 ? T.toFixed(1) : T.toFixed(0));
+        this.knob.setAttribute('cx', 60 + 240 * (Math.log(T) / Math.log(20)));
+        this.g2.setAttribute('opacity', step >= 3 ? 1 : 0);
+      },
+      cell: 'import numpy as np\nz = np.array([9.0, 6.0, 2.5, 2.0, -1.0])\nfor T in (1, 2, 5, 20):\n    p = np.exp(z / T); p /= p.sum()\n    print(f"T={T:>2}", np.round(p, 3))'
+    },
+
+    loss: {
+      title: 'The distillation loss: what is compared to what', n: '05', still: true, paper: 'From the paper, fig. 1 · snipped from the PDF · click to open it there',
+      captions: ['<b>Forward, both.</b> The same batch through the frozen teacher and the student being trained.',
+        '<b>Soft match.</b> Only the two softened output distributions are compared. Nothing inside either network.',
+        '<b>Hard label.</b> A smaller cross-entropy against y at T = 1 keeps the student sharp.',
+        '<b>Backward, student only.</b> The teacher is a fixed function; gradients stop at its edge.'],
+      build(g) {
+        this.tG = el('g', { class: 'fade' }, g); this.sG = el('g', { class: 'fade' }, g);
+        this.tRects = stack(this.tG, 56, 70, 6, 76, 15, 5, 'f-blue-soft s-blue');
+        this.sRects = stack(this.sG, 228, 130, 3, 64, 15, 5, 'f-soft s-accent');
+        text(this.tG, 94, 60, 'teacher · frozen', 't-blue', 'middle').setAttribute('font-size', 10);
+        text(this.sG, 260, 120, 'student', 't-accent', 'middle').setAttribute('font-size', 10);
+        el('circle', { cx: 176, cy: 226, r: 7, class: 'f-yellow' }, g); text(g, 176, 230, 'x', 't-ink mono', 'middle').setAttribute('font-size', 10);
+        el('path', { d: 'M169 226 L94 226 L94 192', class: 'f-none s-muted', fill: 'none', 'stroke-width': 1.2 }, g);
+        el('path', { d: 'M183 226 L260 226 L260 192', class: 'f-none s-muted', fill: 'none', 'stroke-width': 1.2 }, g);
+        this.pT = el('circle', { cx: 94, r: 4, class: 'f-yellow' }, g); this.pS = el('circle', { cx: 260, r: 4, class: 'f-yellow' }, g);
+        this.bT = bars(g, 58, 18, 72, 26, [0, 0, 0, 0, 0], ['', '', '', '', ''], 'f-blue');
+        this.bS = bars(g, 230, 78, 60, 26, [0, 0, 0, 0, 0], ['', '', '', '', ''], 'f-accent');
+        this.lT = text(g, 94, 14, 'softmax(z_T / T)', 't-muted mono', 'middle'); this.lT.setAttribute('font-size', 8.5);
+        this.lS = text(g, 260, 74, 'softmax(z_S / T)', 't-muted mono', 'middle'); this.lS.setAttribute('font-size', 8.5);
+        this.kl = el('g', { class: 'fade', opacity: 0 }, g);
+        el('path', { d: 'M132 32 C 180 32, 190 92, 228 92', class: 'f-none s-pink', fill: 'none', 'stroke-width': 1.6, 'stroke-dasharray': '5 3' }, this.kl);
+        el('rect', { x: 150, y: 40, width: 60, height: 18, rx: 4, class: 'f-pink' }, this.kl);
+        text(this.kl, 180, 53, 'T² · KL', 't-on mono', 'middle').setAttribute('font-size', 9.5);
+        this.ce = el('g', { class: 'fade', opacity: 0 }, g);
+        el('rect', { x: 312, y: 80, width: 36, height: 22, rx: 4, class: 'f-yellow-soft s-yellow' }, this.ce);
+        text(this.ce, 330, 95, 'y', 't-ink mono', 'middle').setAttribute('font-size', 10);
+        el('path', { d: 'M310 91 L294 91', class: 's-yellow', 'stroke-width': 1.6, 'marker-end': 'url(#arr)' }, this.ce);
+        text(this.ce, 318, 116, 'λ · CE', 't-muted mono', 'middle').setAttribute('font-size', 9);
+        this.grad = el('g', { class: 'fade', opacity: 0 }, g);
+        this.gPack = el('circle', { cx: 302, r: 3.5, class: 'f-pink' }, this.grad);
+        this.gLine = el('line', { x1: 302, y1: 110, x2: 302, y2: 192, class: 's-pink', 'stroke-width': 1.2, 'stroke-dasharray': '2 3' }, this.grad);
+        el('path', { d: 'M302 192 L294 176', class: 's-pink', 'stroke-width': 1.2 }, this.grad);
+        text(this.grad, 310, 160, '∇', 't-pink mono').setAttribute('font-size', 11);
+        this.stop = el('g', { class: 'fade', opacity: 0 }, g);
+        el('line', { x1: 48, y1: 50, x2: 140, y2: 50, class: 's-muted', 'stroke-width': 1, 'stroke-dasharray': '2 2' }, this.stop);
+        text(this.stop, 94, 203, 'no gradient', 't-muted', 'middle').setAttribute('font-size', 9);
+      },
+      render(step, u, t) {
+        const ph = (t * 0.45) % 1;
+        const fwd = step < 3;
+        this.pT.setAttribute('opacity', fwd ? 1 : 0); this.pS.setAttribute('opacity', fwd ? 1 : 0);
+        this.pT.setAttribute('cy', packetY(70, 6, 15, 5, ph)); this.pS.setAttribute('cy', packetY(130, 3, 15, 5, ph));
+        this.tRects.forEach((r, i) => r.setAttribute('class', fwd && Math.floor(ph * 6) === i ? 'f-blue s-blue' : 'f-blue-soft s-blue'));
+        this.sRects.forEach((r, i) => r.setAttribute('class', (fwd ? Math.floor(ph * 3) === i : Math.floor((1 - ph) * 3) === i) ? 'f-accent s-accent' : 'f-soft s-accent'));
+        const pT = softmax(LOGITS, 4), pS = [0.45, 0.12, 0.2, 0.18, 0.05].map((v, i) => lerp(v, pT[i], step >= 3 ? 0.6 : step >= 1 ? 0.25 * ease(u) : 0));
+        setBars(this.bT, pT, 18, 26); setBars(this.bS, pS, 78, 26);
+        this.kl.setAttribute('opacity', step >= 1 ? 1 : 0);
+        this.ce.setAttribute('opacity', step >= 2 ? 1 : 0);
+        this.grad.setAttribute('opacity', step >= 3 ? 1 : 0);
+        this.gPack.setAttribute('cy', lerp(110, 192, ph));
+        this.tG.setAttribute('opacity', step >= 3 ? 0.3 : 1);
+        this.stop.setAttribute('opacity', step >= 3 ? 1 : 0);
+      },
+      cell: 'import torch, torch.nn.functional as F\nT, lam = 4.0, 0.1\nz_t = torch.tensor([[9., 6., 2.5, 2., -1.]])      # teacher, frozen\nz_s = torch.zeros(1, 5, requires_grad=True)      # student\ny = torch.tensor([0])\nsoft = F.kl_div(F.log_softmax(z_s/T, 1), F.softmax(z_t/T, 1), reduction="batchmean") * T*T\nhard = F.cross_entropy(z_s, y)\nloss = soft + lam * hard; loss.backward()\nprint("loss", round(loss.item(), 3), "grad", z_s.grad.round(decimals=3))'
+    },
+
+    layers: {
+      title: 'Matching the middle: layer against layer', n: '06', still: true,
+      captions: ['<b>Six against three.</b> The teacher is twice as deep; which of its blocks should guide which of the student\'s?',
+        '<b>Pair 1.</b> Teacher block 2 ↔ student block 1. 512 vs 256 channels, so a 1×1 regressor projects the student up before the MSE.',
+        '<b>Pair 2.</b> Teacher block 4 ↔ student block 2, evenly spaced through the depth so the student is guided throughout.',
+        '<b>Pair 3.</b> The outputs: this paper\'s soft-target loss. Three pulls, each with its own weight in the total.'],
+      pairs: [[1, 0, '512 → 256', 'MSE'], [3, 1, '1024 → 512', 'MSE'], [5, 2, 'logits', 'T²·KL']],
+      build(g) {
+        this.tRects = stack(g, 50, 38, 6, 84, 22, 8, 'f-blue-soft s-blue');
+        this.sRects = stack(g, 240, 38 + 3 * 30, 3, 70, 22, 8, 'f-soft s-accent');
+        text(g, 92, 26, 'teacher', 't-blue', 'middle'); text(g, 275, 26 + 90, 'student', 't-accent', 'middle');
+        ['block 1', 'block 2', 'block 3', 'block 4', 'block 5', 'block 6'].forEach((s, i) => text(g, 92, 38 + (5 - i) * 30 + 15, s, 't-ink', 'middle').setAttribute('font-size', 9.5));
+        ['block 1', 'block 2', 'out'].forEach((s, i) => text(g, 275, 128 + (2 - i) * 30 + 15, s, 't-ink', 'middle').setAttribute('font-size', 9.5));
+        this.links = this.pairs.map(([ti, si, dims, lossName], k) => {
+          const gg = el('g', { class: 'fade', opacity: 0 }, g);
+          const y1 = 38 + (5 - ti) * 30 + 11, y2 = 128 + (2 - si) * 30 + 11;
+          el('path', { d: `M134 ${y1} C 190 ${y1}, 190 ${y2}, 240 ${y2}`, class: 'f-none s-pink', fill: 'none', 'stroke-width': 1.6 }, gg);
+          const mx = 187, my = (y1 + y2) / 2;
+          el('rect', { x: mx - 30, y: my - 16, width: 60, height: 30, rx: 4, class: 'f-paper s-pink' }, gg);
+          text(gg, mx, my - 4, lossName, 't-pink mono', 'middle').setAttribute('font-size', 9);
+          text(gg, mx, my + 8, dims, 't-muted mono', 'middle').setAttribute('font-size', 8.5);
+          return gg;
+        });
+        this.lossBar = el('g', { class: 'fade', opacity: 0 }, g);
+        text(this.lossBar, 180, 240, 'L = α·L₁ + β·L₂ + γ·L₃ + λ·CE(y)', 't-ink mono', 'middle').setAttribute('font-size', 10);
+      },
+      render(step, u, t) {
+        this.links.forEach((l, k) => l.setAttribute('opacity', step >= k + 1 ? (step === k + 1 ? 1 : 0.45) : 0));
+        const cur = step - 1;
+        const pulse = 0.5 + 0.5 * Math.sin(t * 4);
+        this.tRects.forEach((r, i) => r.setAttribute('class', cur >= 0 && cur < 3 && this.pairs[cur][0] === i ? 'f-blue s-blue' : (step >= 1 && this.pairs.slice(0, step).some((p) => p[0] === i) ? 'f-blue-soft s-blue' : 'f-blue-soft s-blue')));
+        this.sRects.forEach((r, i) => r.setAttribute('class', cur >= 0 && cur < 3 && this.pairs[cur][1] === i ? 'f-accent s-accent' : 'f-soft s-accent'));
+        if (cur >= 0 && cur < 3) { this.tRects[this.pairs[cur][0]].setAttribute('opacity', 0.75 + 0.25 * pulse); this.sRects[this.pairs[cur][1]].setAttribute('opacity', 0.75 + 0.25 * pulse); }
+        this.tRects.forEach((r, i) => { if (!(cur >= 0 && this.pairs[cur][0] === i)) r.setAttribute('opacity', 1); });
+        this.sRects.forEach((r, i) => { if (!(cur >= 0 && this.pairs[cur][1] === i)) r.setAttribute('opacity', 1); });
+        this.lossBar.setAttribute('opacity', step >= 3 ? 1 : 0);
+      },
+      cell: 'import torch, torch.nn as nn\nh_teacher = torch.randn(8, 512)   # block 2 output\nh_student = torch.randn(8, 256)   # block 1 output\nregressor = nn.Linear(256, 512)    # learned with the student\nloss = ((regressor(h_student) - h_teacher) ** 2).mean()\nprint("hint loss", round(loss.item(), 3))'
+    },
+
+    train: {
+      title: 'Training and results', n: '07', ready: false,
+      captions: ['<b>Hard labels only.</b> The small student trains on MNIST and settles at 146 test errors.',
+        '<b>With soft targets, T = 20.</b> The same student reaches 74. The teacher is at 67.',
+        '<b>Never shown a 3.</b> Distilled, the student still gets 98.6% of them: the teacher\'s soft targets on other digits say what a 3 is not.'],
+      build(g) {
+        const x0 = 46, y0 = 196, w = 280, h = 150;
+        this.x0 = x0; this.y0 = y0; this.w = w; this.h = h;
+        el('line', { x1: x0, y1: y0, x2: x0 + w, y2: y0, class: 's-border' }, g);
+        el('line', { x1: x0, y1: y0 - h, x2: x0, y2: y0, class: 's-border' }, g);
+        [50, 100, 150, 200].forEach((v) => { const y = y0 - (v / 220) * h; el('line', { x1: x0, y1: y, x2: x0 + w, y2: y, class: 's-border', 'stroke-dasharray': '2 3', opacity: 0.6 }, g); text(g, x0 - 6, y + 3, String(v), 't-muted mono', 'end').setAttribute('font-size', 8.5); });
+        text(g, x0 + w / 2, y0 + 16, 'epochs', 't-muted', 'middle').setAttribute('font-size', 9.5);
+        text(g, 14, 36, 'test', 't-muted', 'start').setAttribute('font-size', 9); text(g, 14, 46, 'errors', 't-muted', 'start').setAttribute('font-size', 9);
+        const tY = y0 - (67 / 220) * h;
+        el('line', { x1: x0, y1: tY, x2: x0 + w, y2: tY, class: 's-blue', 'stroke-dasharray': '4 3' }, g);
+        text(g, x0 + 6, tY - 4, 'teacher 67', 't-blue mono', 'start').setAttribute('font-size', 9);
+        this.c1 = el('path', { class: 'f-none s-yellow', fill: 'none', 'stroke-width': 2 }, g);
+        this.c2 = el('path', { class: 'f-none s-accent', fill: 'none', 'stroke-width': 2 }, g);
+        this.l1 = text(g, 0, 0, '146 · labels only', 't-ink mono', 'end'); this.l1.setAttribute('font-size', 9);
+        this.l2 = text(g, 0, 0, '74 · distilled', 't-accent mono', 'end'); this.l2.setAttribute('font-size', 9);
+        this.note = el('g', { class: 'fade', opacity: 0 }, g);
+        el('rect', { x: 150, y: 56, width: 170, height: 40, rx: 5, class: 'f-yellow-soft s-yellow' }, this.note);
+        text(this.note, 235, 72, 'no 3s in training', 't-ink', 'middle').setAttribute('font-size', 10);
+        text(this.note, 235, 87, 'still 98.6% of 3s right', 't-muted', 'middle').setAttribute('font-size', 9.5);
+      },
+      curve(end, k, u) {
+        const pts = []; const n = 60;
+        for (let i = 0; i <= n * u; i++) { const f = i / n; const v = end + (215 - end) * Math.exp(-k * f) + 4 * Math.sin(f * 40) * (1 - f); pts.push([this.x0 + f * this.w, this.y0 - Math.min(220, v) / 220 * this.h]); }
+        return pts;
+      },
+      render(step, u, t) {
+        const d = (pts) => pts.length ? 'M' + pts.map((p) => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L ') : '';
+        const u1 = step === 0 ? u : 1, u2 = step === 1 ? u : step > 1 ? 1 : 0;
+        const p1 = this.curve(146, 6, u1), p2 = this.curve(74, 7, u2);
+        this.c1.setAttribute('d', d(p1)); this.c2.setAttribute('d', d(p2));
+        const last = (pts, lbl) => { if (pts.length < 3) { lbl.setAttribute('opacity', 0); return; } const e = pts[pts.length - 1]; lbl.setAttribute('x', e[0] - 4); lbl.setAttribute('y', e[1] - 6); lbl.setAttribute('opacity', 1); };
+        last(p1, this.l1); last(p2, this.l2);
+        this.note.setAttribute('opacity', step >= 2 ? 1 : 0);
+      },
+      cell: 'import numpy as np\n# the paper\'s MNIST numbers, as a table\nrows = [("teacher 2×1200", 67), ("student 2×800, labels", 146), ("student 2×800, distilled T=20", 74)]\nfor name, err in rows:\n    print(f"{name:<32}{err:>5} test errors")'
+    },
+
+    since: {
+      title: 'Since then', n: '08', ready: false,
+      captions: ['<b>Still the recipe.</b> Output distillation at a temperature is used unchanged.',
+        '<b>Added to it.</b> Hints between layers (2015), attention maps (2017), sequence-level distillation for language models (2019 on).',
+        '<b>Use today.</b> The T² soft loss, a small hard-label weight, one or two layer matches if the student is much shallower.'],
+      events: [[2015, 'this paper'], [2015, 'FitNets'], [2017, 'attention transfer'], [2019, 'DistilBERT, TinyBERT'], [2023, 'distill from generations']],
+      build(g) {
+        el('line', { x1: 30, y1: 120, x2: 330, y2: 120, class: 's-border', 'stroke-width': 1.5 }, g);
+        this.dots = this.events.map(([yr, lbl], i) => {
+          const x = 36 + (yr - 2015) / 9 * 280 + (i === 1 ? 22 : 0);
+          const gg = el('g', { class: 'fade', opacity: 0.25 }, g);
+          el('circle', { cx: x, cy: 120, r: 6, class: i === 0 ? 'f-accent' : 'f-blue' }, gg);
+          text(gg, x, i % 2 ? 150 : 100, lbl, 't-ink', 'middle').setAttribute('font-size', 9.5);
+          text(gg, x, i % 2 ? 163 : 87, String(yr), 't-muted mono', 'middle').setAttribute('font-size', 8.5);
+          return gg;
+        });
+        this.today = el('g', { class: 'fade', opacity: 0 }, g);
+        el('rect', { x: 60, y: 190, width: 240, height: 44, rx: 5, class: 'f-soft s-accent' }, this.today);
+        text(this.today, 180, 208, 'use today: T²·KL + λ·CE', 't-accent mono', 'middle').setAttribute('font-size', 10);
+        text(this.today, 180, 224, '+ 1–2 hint losses when the student is shallow', 't-ink', 'middle').setAttribute('font-size', 9.5);
+      },
+      render(step) {
+        this.dots.forEach((d, i) => d.setAttribute('opacity', i === 0 ? 1 : step >= 1 ? 1 : 0.25));
+        this.today.setAttribute('opacity', step >= 2 ? 1 : 0);
+      },
+      cell: '# nothing to run here: this section is a reading list'
+    }
+  };
+
+  // Arrow marker shared by scenes.
+  const defs = el('defs', {}, svg);
+  const m = el('marker', { id: 'arr', viewBox: '0 0 8 8', refX: 7, refY: 4, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse' }, defs);
+  el('path', { d: 'M0 0 L8 4 L0 8 z', class: 'f-accent' }, m);
+  const root = el('g', {}, svg);
+
+  // ----------------------------------------------------------------------
+  // State
+  // ----------------------------------------------------------------------
+  let current = null, step = 0, stepAt = 0, playing = !reduced, pinned = false, manual = false;
+  const t0 = performance.now();
+  const now = () => (performance.now() - t0) / 1000;
+
+  const isReady = (sc) => sc.ready !== false;
+  function marks() {
+    document.querySelectorAll('#outline li').forEach((li) => { const sc = SCENES[li.dataset.for]; const mk = li.querySelector('.motion'); mk.classList.toggle('off', !isReady(sc) && !!sc.suggest); mk.classList.toggle('none', !isReady(sc) && !sc.suggest); });
+    document.querySelectorAll('.s-head .animate').forEach((b) => {
+      const sc = SCENES[b.dataset.sec];
+      const ready = isReady(sc);
+      b.hidden = !ready && !sc.suggest && !sc.drawing;
+      const row = document.querySelector('.suggest-row:has([data-sec="' + b.dataset.sec + '"])'); if (row) row.hidden = ready || !!sc.drawing;
+      b.classList.toggle('has', ready);
+      b.innerHTML = sc.drawing ? 'Drawing…' : ready ? '<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1 L9 5 L2 9 z" fill="currentColor"/></svg> On the stage' : '<svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1 L9 5 L2 9 z" fill="currentColor"/></svg> Animate';
+      b.title = ready ? 'This section has a scene; the stage shows it as you read' : 'Ask Claude to draw a scene for this section';
+    });
+  }
+  // The tab row is the filmstrip: only what this section has. Scene, its still, the cell, the paper's figure.
+  const tabsEl = document.getElementById('tabs');
+  function film(sc) {
+    tabsEl.replaceChildren();
+    const items = [];
+    if (isReady(sc) || sc.drawing) items.push(['anim', 'Scene', '▶']);
+    if (isReady(sc) || sc.drawing || sc.still) items.push(['figure', 'Still', '▭']);
+    if (sc.cell && !/^#/.test(sc.cell)) items.push(['cell', 'Cell', '⌨']);
+    if (sc.paper) items.push(['paper', 'Paper', '¶']);
+    for (const [tab, label, glyph] of items) {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.dataset.tab = tab; b.dataset.glyph = glyph;
+      b.textContent = label;
+      b.setAttribute('aria-selected', String(stage.dataset.tab === tab));
+      b.addEventListener('click', () => setTab(tab));
+      tabsEl.appendChild(b);
+    }
+  }
+  function setTab(tab) {
+    stage.dataset.tab = tab;
+    tabsEl.querySelectorAll('[role="tab"]').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.tab === tab)));
+  }
+  // The stage lives in the section being read, when that section has a scene; otherwise it is away.
+  const home = document.getElementById('stage-home');
+  function mount(id) {
+    const sc = SCENES[id];
+    const side = document.querySelector('#s-' + id + ' .s-side');
+    if (isReady(sc) || sc.drawing) { if (stage.parentElement !== side) side.prepend(stage); }
+    else if (stage.parentElement !== home) home.appendChild(stage);
+    document.querySelectorAll('.explain-figure.is-source').forEach((f) => f.classList.remove('is-source'));
+    document.querySelectorAll('.s-main').forEach((m) => { m.style.paddingTop = ''; });
+    if (window.innerWidth <= 1100 && stage.parentElement === side) requestAnimationFrame(() => { side.previousElementSibling.style.paddingTop = (stage.offsetHeight + 12) + 'px'; });
+    if ((isReady(sc) || sc.drawing) && side.querySelector('[data-still="' + id + '"]')) side.querySelector('[data-still="' + id + '"]').classList.add('is-source');
+    placeMargin();
+  }
+  // A still is the scene at rest: the same drawing, built once and left on its last step.
+  function renderStill(svgEl, sc) {
+    if (!svgEl) return;
+    svgEl.replaceChildren();
+    const g = el('g', {}, svgEl);
+    const inst = Object.create(sc);
+    inst.build(g);
+    inst.render(sc.captions.length - 1, 1, 0.3);
+  }
+  function show(id, s) {
+    if (current !== id) {
+      current = id;
+      const sc = SCENES[id];
+      root.replaceChildren();
+      sc.g = el('g', {}, root);
+      sc.build(sc.g);
+      stage.classList.toggle('is-drawing', !!sc.drawing);
+      setTab('anim');
+      mount(id);
+      renderStill(document.querySelector('.canvas .still svg'), sc);
+      const chip = document.getElementById('where-chip'); chip.hidden = !sc.data; chip.textContent = sc.data || '';
+      live.classList.toggle('drawing', !!sc.drawing);
+      liveT.textContent = sc.drawing ? 'drawing…' : pinned ? 'pinned to §' + sc.n : 'follows your reading';
+      film(sc);
+      marks();
+      whereN.textContent = sc.n; whereT.textContent = sc.title;
+      src.textContent = 'motion · ' + id;
+      cellCode.textContent = sc.cell;
+      document.getElementById('paper-cap').textContent = sc.paper || 'The paper has no figure for this section.';
+      stage.classList.toggle('no-paper', !sc.paper);
+      dotsEl.replaceChildren();
+      sc.captions.forEach((c, i) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Step ' + (i + 1)); b.addEventListener('click', () => { manual = true; setStep(i); }); dotsEl.appendChild(b); });
+      scrub.max = String((sc.captions.length - 1) * 100);
+      document.querySelectorAll('#outline li').forEach((li) => li.classList.toggle('active', li.dataset.for === id));
+      step = -1;
+    }
+    setStep(s);
+  }
+  function setStep(s) {
+    const sc = SCENES[current];
+    s = Math.max(0, Math.min(sc.captions.length - 1, s));
+    if (s === step) return;
+    step = s; stepAt = now();
+    captionEl.innerHTML = sc.captions[s];
+    Array.from(dotsEl.children).forEach((b, i) => { b.toggleAttribute('aria-current', i === s); if (i === s) b.setAttribute('aria-current', 'step'); b.classList.toggle('done', i < s); });
+    if (!scrubbing) scrub.value = String(s * 100);
+    document.querySelectorAll('.prose p.reading').forEach((p) => p.classList.remove('reading'));
+    const sec = document.getElementById('s-' + current);
+    const ps = sec ? sec.querySelectorAll('p[data-step]') : [];
+    if (ps[s]) ps[s].classList.add('reading');
+  }
+
+  let frozenT = 0;
+  function frame() {
+    if (current) {
+      const sc = SCENES[current];
+      const t = playing ? now() : frozenT;
+      const u = scrubbing ? scrubU : clamp01((now() - stepAt) / 0.9);
+      if (!sc.drawing) sc.render(step, u, t);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // Scrub: continuous position across steps.
+  let scrubbing = false, scrubU = 1;
+  scrub.addEventListener('input', () => {
+    manual = true; scrubbing = true;
+    const v = Number(scrub.value) / 100; const s = Math.floor(v); scrubU = v - s;
+    if (s !== step) { setStep(s); }
+    if (scrubU === 0) scrubU = 1;
+    if (s === Number(scrub.max) / 100) scrubU = 1;
+  });
+  scrub.addEventListener('change', () => { scrubbing = false; });
+
+  playBtn.addEventListener('click', () => {
+    playing = !playing;
+    if (!playing) frozenT = now();
+    playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    playIcon.innerHTML = playing ? '<rect x="1" y="1" width="3" height="8"/><rect x="6" y="1" width="3" height="8"/>' : '<path d="M2 1 L9 5 L2 9 z"/>';
+  });
+  pinBtn.addEventListener('click', () => {
+    pinned = !pinned;
+    pinBtn.setAttribute('aria-pressed', String(pinned));
+    live.classList.toggle('paused', pinned);
+    if (!SCENES[current].drawing) liveT.textContent = pinned ? 'pinned to §' + SCENES[current].n : 'follows your reading';
+  });
+  const menuBtn = document.getElementById('menu-btn'), pop = document.getElementById('pop');
+  menuBtn.addEventListener('click', () => { const open = !pop.classList.contains('open'); pop.classList.toggle('open', open); menuBtn.setAttribute('aria-expanded', String(open)); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.menu')) { pop.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false'); } });
+
+  // Animate this section: Claude writes the motion block; the scene streams in node by node, then plays.
+  let drawingId = null;
+  function animate(id) {
+    const sc = SCENES[id];
+    if (isReady(sc) || sc.drawing) return;
+    sc.drawing = true; drawingId = id;
+    current = null; show(id, 0);
+    stage.classList.add('is-drawing'); live.classList.add('drawing'); liveT.textContent = 'drawing…'; marks();
+    setTab('anim');
+    captionEl.innerHTML = '<b>Drawing…</b> a scene for these ' + sc.captions.length + ' paragraphs, one step each.';
+    const parts = Array.from(sc.g.children);
+    parts.forEach((p) => { p.style.opacity = '0'; p.style.transition = 'opacity 0.35s'; });
+    let i = 0;
+    const tick = () => {
+      if (current !== id) { parts.forEach((p) => { p.style.opacity = ''; }); finish(); return; }
+      if (i < parts.length) { parts[i++].style.opacity = '1'; setTimeout(tick, 2600 / parts.length); } else finish();
+    };
+    const finish = () => {
+      sc.drawing = false; sc.ready = true; drawingId = null;
+      parts.forEach((p) => { p.style.opacity = ''; p.style.transition = ''; });
+      if (current === id) {
+        stage.classList.remove('is-drawing'); live.classList.remove('drawing');
+        liveT.textContent = pinned ? 'pinned to §' + sc.n : 'follows your reading';
+        film(sc); step = -1; setStep(0); stepAt = now();
+      }
+      marks(); mount(id);
+    };
+    setTimeout(tick, 500);
+  }
+  document.querySelectorAll('.s-head .animate, .explain-figure .suggest').forEach((b) => b.addEventListener('click', () => {
+    const id = b.dataset.sec;
+    if (isReady(SCENES[id])) { document.getElementById('s-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    pinned = false; pinBtn.setAttribute('aria-pressed', 'false'); live.classList.remove('paused');
+    manual = true; animate(id);
+  }));
+
+  // Follow the reading: the paragraph whose top last crossed a line a third of the way down the viewport.
+  function follow() {
+    if (pinned) return;
+    const line = window.innerHeight * 0.36;
+    let secId = null, stepIdx = 0;
+    for (const sec of document.querySelectorAll('section.s[data-scene]')) {
+      if (sec.getBoundingClientRect().top <= line) secId = sec.dataset.scene;
+    }
+    if (!secId) secId = 'glance';
+    const sec = document.getElementById('s-' + secId);
+    const ps = sec.querySelectorAll('p[data-step]');
+    ps.forEach((p, i) => { if (p.getBoundingClientRect().top <= line + 10) stepIdx = i; });
+    if (drawingId) return; // the stage holds while a scene is being drawn
+    if (manual && secId === current) return; // a hand-picked step holds until you move to another section
+    manual = false;
+    show(secId, stepIdx);
+  }
+  let ticking = false;
+  window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { follow(); ticking = false; }); } }, { passive: true });
+  window.addEventListener('resize', follow);
+
+  // Terms in the prose pulse the stage header, a stand-in for lighting the node they name.
+  document.querySelectorAll('.prose .term').forEach((term) => {
+    term.addEventListener('mouseenter', () => { whereT.style.color = 'var(--accent)'; });
+    term.addEventListener('mouseleave', () => { whereT.style.color = ''; });
+  });
+
+  // Margin items sit beside the paragraph they belong to, pushed down by the stage so they come out from under it as you read on.
+  let stageH = 0;
+  function placeMargin() {
+    if (window.innerWidth <= 1100) return;
+    if (stage.offsetHeight) stageH = stage.offsetHeight;
+    document.querySelectorAll('section.s').forEach((sec) => {
+      const side = sec.querySelector('.s-side');
+      const sc = SCENES[sec.dataset.scene];
+      const secTop = sec.getBoundingClientRect().top + window.scrollY;
+      // A section with a scene keeps room for the stage at its top, whether or not the stage is in it right now.
+      const below = (isReady(sc) || sc.drawing) ? stageH + 24 : 0;
+      let bottom = 0;
+      side.querySelectorAll('.margin-item').forEach((item) => {
+        const [id, idx] = item.dataset.anchor.split(':');
+        const para = document.querySelectorAll('#' + id + ' p[data-step]')[Number(idx)];
+        if (!para) return;
+        let top = para.getBoundingClientRect().top + window.scrollY - secTop + below;
+        top = Math.max(top, bottom + 16);
+        item.style.top = top + 'px';
+        bottom = top + item.offsetHeight;
+      });
+      // The section is at least as tall as what its margin holds.
+      sec.querySelector('.s-main').style.minHeight = Math.max(0, bottom + 8) + 'px';
+    });
+  }
+  // The stills in the margin: each is its scene at rest.
+  document.querySelectorAll('.margin-item[data-still]').forEach((f) => renderStill(f.querySelector(':scope > svg'), SCENES[f.dataset.still]));
+  // The still for the temperature section: the same bars three times.
+  (function () {
+    const g = document.getElementById('mf-bars'); if (!g) return;
+    [1, 4, 20].forEach((T, k) => {
+      const x0 = 12 + k * 104;
+      text(g, x0 + 42, 12, 'T = ' + T, 't-muted mono', 'middle').setAttribute('font-size', 9.5);
+      const bs = bars(g, x0, 20, 84, 70, [0, 0, 0, 0, 0], CLASSES, 'f-accent');
+      g.querySelectorAll('text').forEach((tx) => { if (tx.getAttribute('font-size') !== '9.5') tx.setAttribute('font-size', 8); });
+      setBars(bs, softmax(LOGITS, T), 20, 70);
+    });
+  })();
+
+  stageH = (() => { home.appendChild(stage); stage.style.display = 'block'; const h = stage.offsetHeight; stage.style.display = ''; return h; })();
+  show('glance', 0);
+  marks();
+  placeMargin();
+  window.addEventListener('resize', placeMargin);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeMargin);
+  setTimeout(placeMargin, 600);
+  follow();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
