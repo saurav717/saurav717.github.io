@@ -46,7 +46,9 @@ curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "web": tru
 
 Until then the button says the proxy has no search key when you point at it.
 Anyone signed in may use it, under the per-person limit; each search goes on
-the usage page as *Web searches*. Gemini's relay lets no tool through, so the
+the usage page as *Web searches*, where a **Web searches** section charts them
+per day and shows, from Tavily's own usage endpoint, how much of the month's
+free thousand the key has spent. Gemini's relay lets no tool through, so the
 button is off for its models.
 
 ## Running the cells in Colab
