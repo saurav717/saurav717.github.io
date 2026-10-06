@@ -28,6 +28,27 @@ Only the owner — `READER_TOKEN`, or a Google account in `READER_OWNERS` — ma
 use it, unless `GEMINI_FOR = "everyone"` in `wrangler.toml`, which lets anyone
 signed in spend the key. Its tokens and cost show on the usage page.
 
+## The Web button in Ask AI
+
+Beside the Ask AI box is a globe — **Web**, off by default. On, the model may
+search the web and read pages as it answers, and lists each search and page
+above the answer with the sources linked. Claude does it through Anthropic's
+own search, on the visitor's key. DeepSeek — the usual choice — does it
+through the Worker, which needs a search key and the routes this build
+expects, so redeploy the Worker with a key set:
+
+```bash
+cd reader                                        # the app repository
+npx --yes wrangler@4 secret put TAVILY_KEY       # Tavily, app.tavily.com: a thousand searches a month free — or BRAVE_KEY, or SERPLY_KEY / SERPAPI_KEY, the keys Scholar has
+npm run deploy:worker
+curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "web": true
+```
+
+Until then the button says the proxy has no search key when you point at it.
+Anyone signed in may use it, under the per-person limit; each search goes on
+the usage page as *Web searches*. Gemini's relay lets no tool through, so the
+button is off for its models.
+
 ## Running the cells in Colab
 
 Every Python cell on the Explain and Implementation pages has **▶ Run in
