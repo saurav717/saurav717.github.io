@@ -893,6 +893,28 @@ as `<paper> — explained by Claude.md`, and fetched from there when Explain is
 opened in another browser, so it is not paid for twice. Nothing to set up:
 it uses the same Drive grant as the PDFs and sidecars.
 
+## Pictures on the Explain page: Google Images wants the Worker's SerpApi key
+
+The Explain page now shows real pictures beside the diagrams the model draws:
+the paper's own figures (taken from the Reflow column, arXiv's HTML, or cut
+out of the PDF — nothing to set up) and pictures from the web. A web picture
+is found by an image search through the Worker's new `/web/images` route:
+**Google Images** through SerpApi when `SERPAPI_KEY` is set, else Brave's
+(`BRAVE_KEY`) or Tavily's (`TAVILY_KEY`) image search. Redeploy the Worker
+so it has the route:
+
+```bash
+cd reader                                        # the app repository
+npx --yes wrangler@4 secret put SERPAPI_KEY      # if it is not set already — serpapi.com
+npm run deploy:worker
+curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "images": true
+```
+
+Each search is one SerpApi search on the owner's account, counted on the
+usage page under *Web searches*, and each picture is searched for once per
+browser. With no image key (or before the redeploy) the page falls back to
+Wikipedia's and Wikimedia Commons' pictures, which need no key.
+
 ## Ask Claude can show you where
 
 Ask *"show me where the paper talks about …"* and the paper scrolls to the
