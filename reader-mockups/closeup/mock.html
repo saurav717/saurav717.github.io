@@ -1,0 +1,178 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reader close-up mock-up</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap"><style>body{background:#e8e6df;margin:0;padding:24px 0;font:14px "IBM Plex Sans",sans-serif}.pick{width:1440px;margin:0 auto 12px;display:flex;gap:8px;align-items:center;color:#55524a}.pick button{font:500 13px "IBM Plex Sans",sans-serif;padding:6px 12px;border:1px solid #cfcabb;border-radius:8px;background:#fffdf7;cursor:pointer}.pick button.on{background:#1f5e52;color:#fff;border-color:#1f5e52}.pick a{margin-left:auto;color:#1f5e52}</style></head><body><div class="pick">The alternatives considered: <button data-s="expand" class="on">B · Expand in place</button><button data-s="peek">C · A peek on hover</button><button data-s="pane">D · Pinned beside the prose</button><button data-s="zoom">E · Zoom inside the close-up</button><a href="index.html">← the pictures, with the design as built</a></div>
+<!-- The Explain page, mocked up small, with four ways a figure could be looked at larger.
+     data-state on .mock picks one: expand (in place), peek (a glass on hover), pane (pinned beside the prose), zoom (inside the close-up).
+     Rendered to docs/mockups/closeup-alt-*.png by render.mjs beside this file. -->
+<style>
+  :root { --paper: #fbfaf6; --surface: #fffdf7; --panel: #f3f1ea; --border: #e2ddce; --border-soft: #ebe7da; --ink: #1a1a17; --ink-2: #55524a; --muted: #6f6c63; --accent: #1f5e52; --accent-soft: #e4efe7; --accent-ink: #14403a; --accent-on: #fff; --hl-yellow: #f6e7a1; --hl-blue: #cfe0f5; --hl-green: #cfe8d8; --serif: 'Newsreader', Georgia, serif; --sans: 'IBM Plex Sans', system-ui, sans-serif; --mono: ui-monospace, Menlo, monospace; }
+  .mock[data-theme="dark"] { --paper: #15161a; --surface: #1d1f25; --panel: #22242b; --border: #2c2f36; --border-soft: #272a31; --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c; --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8; --accent-on: #0f1512; --hl-yellow: #4a4430; --hl-blue: #2d3a4a; --hl-green: #2c4136; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e8e6df; font: 14px/1.5 var(--sans); }
+  .mock { position: relative; width: 1440px; height: 900px; overflow: hidden; background: var(--paper); color: var(--ink); font: 14px/1.55 var(--sans); }
+  .bar { height: 52px; display: flex; align-items: center; gap: 18px; padding: 0 20px; border-bottom: 1px solid var(--border-soft); font-size: 12.5px; color: var(--muted); }
+  .bar b { color: var(--ink); font-weight: 500; }
+  .tabs { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+  .tabs span { padding: 3px 10px; border-radius: 6px; }
+  .tabs span.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
+  .ask { margin: 16px auto 0; width: 980px; height: 44px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--muted); display: flex; align-items: center; padding: 0 16px; font-size: 13px; }
+  .body { position: absolute; top: 130px; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 260px 1fr; }
+  .outline { padding: 36px 24px 0 40px; font-size: 12.5px; color: var(--muted); }
+  .outline h1 { font: 500 15px var(--sans); color: var(--ink); margin: 0 0 4px; }
+  .outline p { margin: 0 0 20px; font-size: 11.5px; }
+  .outline ol { list-style: none; margin: 0; padding: 0; }
+  .outline li { padding: 5px 0 5px 12px; border-left: 2px solid transparent; }
+  .outline li.on { color: var(--accent); border-left-color: var(--accent); }
+  .doc { position: relative; padding: 36px 48px 0 24px; overflow: hidden; }
+  .row { display: grid; grid-template-columns: 560px 1fr; column-gap: 44px; align-items: start; }
+  h2 { font: 500 26px/1.2 var(--serif); margin: 0 0 14px; }
+  h2 small { font: 500 11px var(--mono); color: var(--muted); margin-right: 10px; vertical-align: 3px; }
+  .prose p { margin: 0 0 14px; font: 15.5px/1.65 var(--serif); color: var(--ink); }
+  .prose code { font: 0.9em var(--mono); background: var(--panel); padding: 1px 4px; border-radius: 4px; }
+  figure.fig { margin: 0; padding: 16px 16px 12px; background: var(--surface); border: 1px solid var(--border-soft); border-radius: 12px; }
+  figure.fig svg { display: block; width: 100%; height: auto; }
+  figure.fig figcaption { margin-top: 10px; font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+  svg text { fill: var(--ink); font-family: var(--sans); }
+  svg path { stroke: var(--ink); }
+  .f-blue { fill: var(--hl-blue); } .f-yellow { fill: var(--hl-yellow); } .f-green { fill: var(--hl-green); } .f-soft { fill: var(--accent-soft); } .f-accent { fill: var(--accent); }
+  .s-muted { stroke: var(--muted); } .t-accent { fill: var(--accent); } .t-on { fill: var(--accent-on); }
+  .cell { margin-top: 16px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .cell .h { display: flex; gap: 10px; align-items: center; padding: 7px 12px; background: var(--panel); border-bottom: 1px solid var(--border-soft); font-size: 11.5px; color: var(--muted); }
+  .cell .h b { font: 500 11px var(--mono); color: var(--accent); }
+  .cell pre { margin: 0; padding: 12px 14px; font: 12px/1.6 var(--mono); color: var(--ink-2); }
+  .chip { position: absolute; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; background: rgb(22 22 19 / .9); color: #f6f3ea; font: 500 12.5px var(--sans); white-space: nowrap; box-shadow: 0 10px 30px -10px rgb(0 0 0 / .5); }
+  .chip b { color: #8fd3b8; } .chip kbd { font: 500 10.5px var(--mono); padding: 0 5px; border: 1px solid rgb(255 255 255 / .3); border-bottom-width: 2px; border-radius: 4px; } .chip .sep { width: 1px; height: 12px; background: rgb(255 255 255 / .22); }
+  .note { position: absolute; top: 14px; right: 20px; z-index: 5; max-width: 300px; padding: 10px 12px; border-radius: 10px; background: #fff7d6; color: #4a3f10; border: 1px solid #ecd98a; font-size: 12px; line-height: 1.45; box-shadow: 0 6px 20px -10px rgb(0 0 0 / .4); }
+  .note b { display: block; margin-bottom: 2px; }
+
+  /* B · expand in place: the figure takes the reading column and the margin, the prose moves down. */
+  .mock[data-state="expand"] .row.exp { grid-template-columns: 1fr; }
+  .mock[data-state="expand"] .row.exp figure.fig { grid-row: 1; width: 100%; padding: 22px 22px 14px; box-shadow: 0 18px 40px -24px rgb(0 0 0 / .4); border-color: var(--accent); }
+  .mock[data-state="expand"] .row.exp figure.fig figcaption { font-size: 13.5px; }
+  .mock[data-state="expand"] .row.exp .prose { grid-row: 2; margin-top: 18px; }
+  .mock[data-state="expand"] .row.exp .cell { display: none; }
+  .mock[data-state="expand"] .collapse { display: inline-flex; }
+  .collapse { display: none; position: absolute; right: 14px; top: 12px; align-items: center; gap: 6px; font-size: 11.5px; padding: 3px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-ink); }
+
+  /* C · a peek: a round glass over the figure at twice the size, following the pointer. */
+  .peek { display: none; position: absolute; width: 300px; height: 300px; border-radius: 50%; overflow: hidden; background: var(--surface); box-shadow: 0 0 0 3px var(--accent), 0 24px 50px -20px rgb(0 0 0 / .6), inset 0 0 36px rgb(0 0 0 / .14); pointer-events: none; }
+  .peek svg { position: absolute; width: 1120px; height: auto; }
+  .mock[data-state="peek"] .peek { display: block; }
+  .cursor { display: none; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgb(31 94 82 / .25); }
+  .mock[data-state="peek"] .cursor { display: block; }
+
+  /* D · pinned beside the prose: the explanation narrows, a pane on the right holds the figure. */
+  .pane { display: none; position: absolute; top: 0; right: 0; bottom: 0; width: 560px; padding: 28px 32px; background: var(--surface); border-left: 1px solid var(--border); box-shadow: -30px 0 60px -40px rgb(0 0 0 / .35); }
+  .pane .ph { display: flex; align-items: center; justify-content: space-between; font: 600 11px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .pane .ph span:last-child { color: var(--muted); letter-spacing: 0; text-transform: none; font-weight: 500; }
+  .pane svg { width: 100%; height: auto; }
+  .pane p { font: 13.5px/1.5 var(--serif); color: var(--ink-2); margin: 14px 0 0; }
+  .mock[data-state="pane"] .pane { display: block; }
+  .mock[data-state="pane"] .doc { padding-right: 580px; }
+  .mock[data-state="pane"] .row { grid-template-columns: 1fr; }
+  .mock[data-state="pane"] .row figure.fig, .mock[data-state="pane"] .row .cell { display: none; }
+
+  /* E · the close-up, with zoom inside: the drawing larger than the window, scrolled under a frame. */
+  .closeup { display: none; position: absolute; inset: 0; z-index: 10; align-items: center; justify-content: center; }
+  .closeup .back { position: absolute; inset: 0; background: rgb(8 11 15 / .66); backdrop-filter: blur(2px); }
+  .closeup .cbody { position: relative; width: 1200px; display: flex; flex-direction: column; gap: 12px; }
+  .closeup .ch { display: flex; align-items: center; gap: 12px; font: 600 11px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #8fd3b8; }
+  .closeup .ch .sp { flex: 1; }
+  .closeup .ch .btn { font: 500 11.5px var(--sans); letter-spacing: 0; text-transform: none; color: #f6f3ea; border: 1px solid rgb(255 255 255 / .2); background: rgb(255 255 255 / .08); border-radius: 8px; padding: 5px 9px; }
+  .closeup .card { position: relative; height: 560px; overflow: hidden; background: var(--surface); border-radius: 12px; box-shadow: 0 30px 80px -20px rgb(0 0 0 / .65); }
+  .closeup .card svg { position: absolute; left: -620px; top: -120px; width: 2800px; height: auto; }
+  .closeup .zoom { position: absolute; right: 14px; top: 12px; display: inline-flex; gap: 2px; padding: 2px; border-radius: 8px; background: var(--panel); border: 1px solid var(--border); font-size: 11.5px; }
+  .closeup .zoom span { padding: 3px 9px; border-radius: 6px; color: var(--muted); } .closeup .zoom span.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .1); }
+  .closeup .mini { position: absolute; right: 14px; bottom: 14px; width: 150px; height: 42px; border-radius: 6px; background: var(--panel); border: 1px solid var(--border); }
+  .closeup .mini i { position: absolute; left: 36%; top: 22%; width: 36%; height: 60%; border: 2px solid var(--accent); border-radius: 3px; background: rgb(31 94 82 / .15); }
+  .closeup .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 18px 13px; font: 13.5px/1.5 var(--serif); color: var(--ink-2); border-top: 1px solid var(--border-soft); background: var(--surface); }
+  .closeup .chip { position: static; transform: none; align-self: center; }
+  .mock[data-state="zoom"] .closeup { display: flex; }
+</style>
+<div class="mock" data-state="expand">
+  <div class="bar"><b>Explained by Claude Opus 5</b> <span class="tabs"><span class="on">Explanation</span><span>Implementation</span></span> <span class="tabs"><span class="on">Margin</span><span>Notebook</span><span>Beside the paper</span></span> <span>▶ Stage</span><span>Colab · no runtime</span><span>Runtime</span><span>Metrics</span><span>Rewrite ▾</span><span>✕ Skip</span></div>
+  <div class="ask">✎ Ask Claude Opus 5 anything about this explanation, or how to change it… ( / )</div>
+  <div class="body">
+    <nav class="outline"><h1>Attention Is All You Need</h1><p>Ashish Vaswani, Noam Shazeer, Niki Parmar et al. · 2017</p>
+      <ol><li>01 At a glance</li><li>02 The problem: recurrence is a queue</li><li class="on">03 Scaled dot-product attention</li><li>04 Multi-head attention</li><li>05 Where is each word? Positional encoding</li><li>06 The block: residuals, LayerNorm and the feed-forward layer</li><li>07 Training and results</li><li>08 Since then</li></ol></nav>
+    <article class="doc">
+      <div class="row exp">
+        <div class="prose">
+          <h2><small>03</small>Scaled dot-product attention</h2>
+          <p>Each token is turned into three vectors: a <b>query</b> (what am I looking for?), a <b>key</b> (what do I contain?) and a <b>value</b> (what do I hand over if chosen?). A token's output is an average of all the values, weighted by how well its query matches each key:</p>
+          <p><code>Attention(Q, K, V) = softmax(Q Kᵀ / √d_k) · V</code></p>
+          <p>That is the whole mechanism. The softmax turns match scores into weights that sum to one, so the output is a <i>soft lookup</i>: like a dictionary, but it returns a blend of the entries whose keys are closest.</p>
+          <p>The dot product of two random d-dimensional vectors has variance d. With d = 512 the scores are huge, the softmax puts almost all its weight on one key, and its gradient all but vanishes. Dividing by √d brings the variance back to 1 whatever the width.</p>
+        </div>
+        <div class="side">
+          <figure class="fig" id="fig">
+            <span class="collapse">⤡ Back to the margin</span>
+            <svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="22" width="44" height="34" rx="7" class="f-blue" /><text x="26" y="44" font-size="13" text-anchor="middle">Q</text>
+              <rect x="4" y="74" width="44" height="34" rx="7" class="f-yellow" /><text x="26" y="96" font-size="13" text-anchor="middle">K</text>
+              <path d="M48 39 H80 M48 91 H80 V60" fill="none" class="s-muted" stroke-width="1.6" />
+              <rect x="80" y="44" width="88" height="34" rx="7" class="f-soft" /><text x="124" y="66" font-size="12" text-anchor="middle">MatMul QKᵀ</text>
+              <path d="M168 61 H192" class="s-muted" stroke-width="1.6" />
+              <rect x="192" y="44" width="82" height="34" rx="7" class="f-soft" /><text x="233" y="66" font-size="12" text-anchor="middle">÷ √d_k</text>
+              <path d="M274 61 H298" class="s-muted" stroke-width="1.6" />
+              <rect x="298" y="44" width="82" height="34" rx="7" class="f-accent" /><text x="339" y="66" font-size="12" text-anchor="middle" class="t-on">softmax</text>
+              <path d="M380 61 H410" class="s-muted" stroke-width="1.6" />
+              <rect x="410" y="44" width="72" height="34" rx="7" class="f-soft" /><text x="446" y="66" font-size="12" text-anchor="middle">× V</text>
+              <rect x="410" y="104" width="72" height="34" rx="7" class="f-green" /><text x="446" y="126" font-size="13" text-anchor="middle">V</text>
+              <path d="M446 104 V78" class="s-muted" stroke-width="1.6" />
+              <path d="M482 61 H510" class="s-muted" stroke-width="1.6" />
+              <text x="514" y="66" font-size="12">out</text>
+              <text x="339" y="30" font-size="11" text-anchor="middle" class="t-accent">weights sum to 1</text>
+            </svg>
+            <figcaption>The pipeline, left to right: match queries against keys, scale, normalise into weights, and use the weights to mix the values.</figcaption>
+          </figure>
+          <div class="cell"><div class="h"><b>In [1]</b> Self-attention over four tokens, from scratch <span style="margin-left:auto">▶ Run in Colab</span></div><pre>def attention(Q, K, V):
+    scores = Q @ K.T / np.sqrt(K.shape[-1])
+    w = np.exp(scores - scores.max(-1, keepdims=True))
+    w /= w.sum(-1, keepdims=True)
+    return w @ V, w</pre></div>
+        </div>
+      </div>
+      <div class="peek" id="peek"></div>
+      <div class="cursor" id="cursor"></div>
+    </article>
+  </div>
+  <aside class="pane"><div class="ph"><span>Pinned · Scaled dot-product attention</span><span>Unpin · ✕</span></div><div id="pane-art"></div><p>The pipeline, left to right: match queries against keys, scale, normalise into weights, and use the weights to mix the values.</p></aside>
+  <div class="closeup"><div class="back"></div><div class="cbody">
+    <div class="ch">Figure 2 of 3 · Scaled dot-product attention <span class="sp"></span><span class="btn">Add to notes</span><span class="btn">✕</span></div>
+    <div class="card"><div id="zoom-art"></div><div class="zoom"><span>Fit</span><span>2×</span><span class="on">4×</span></div><div class="mini"><i></i></div><div class="cap">The pipeline, left to right: match queries against keys, scale, normalise into weights, and use the weights to mix the values.</div></div>
+    <div class="chip"><b>Close-up</b> 2 of 3 <span class="sep"></span> <kbd>+</kbd> <kbd>−</kbd> zoom · drag to pan <span class="sep"></span> <kbd>⇥</kbd> next <span class="sep"></span> <kbd>Esc</kbd> back to the page</div>
+  </div></div>
+  <div class="note" id="note"></div>
+</div>
+<script>
+  const svg = document.querySelector('#fig svg').outerHTML;
+  document.getElementById('peek').innerHTML = svg;
+  document.getElementById('pane-art').innerHTML = svg;
+  document.getElementById('zoom-art').innerHTML = svg;
+  const NOTES = {
+    expand: ['B · Expand in place', 'The figure takes the column and the margin; the prose and the cell move down. Bigger, but the page reflows under you and your place in the prose goes.'],
+    peek: ['C · A peek on hover', 'A round glass at 2× follows the pointer, as the PDF’s loupe does. No click, no leaving the page — but nothing to hold on a touch screen, and a vector drawing wants to be seen whole, not a patch at a time.'],
+    pane: ['D · Pinned beside the prose', 'The figure sits in a pane on the right, kept while you read the section; the explanation narrows. Good for a long section, but it is a layout of its own to manage, and the margin layout already keeps the figure beside its paragraph.'],
+    zoom: ['E · Zoom inside the close-up', 'The close-up as built, with + and − and drag to pan, and a map in the corner. Worth adding later for dense figures; the first cut fits the drawing to the window, which is already 2–4× the margin.'],
+  };
+  function setState(state) {
+    const mock = document.querySelector('.mock');
+    mock.dataset.state = state;
+    const [title, text] = NOTES[state];
+    document.getElementById('note').innerHTML = '<b>' + title + '</b>' + text;
+    if (state === 'peek') {
+      const fig = document.querySelector('#fig svg').getBoundingClientRect();
+      const doc = document.querySelector('.doc').getBoundingClientRect();
+      // The glass over the softmax box, its picture offset so the same point sits under the centre.
+      const px = fig.left + fig.width * 0.6, py = fig.top + fig.height * 0.42;
+      const peek = document.getElementById('peek');
+      peek.style.left = (px - doc.left - 150) + 'px'; peek.style.top = (py - doc.top - 150) + 'px';
+      const art = peek.querySelector('svg');
+      art.style.left = (150 - 0.6 * 1120) + 'px'; art.style.top = (150 - 0.42 * 1120 * 150 / 560) + 'px';
+      const cursor = document.getElementById('cursor');
+      cursor.style.left = (px - doc.left - 7) + 'px'; cursor.style.top = (py - doc.top - 7) + 'px';
+    }
+  }
+  window.setState = setState;
+  setState(new URLSearchParams(location.search).get('state') || 'expand');
+</script>
+<script>document.querySelectorAll(".pick button").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".pick button").forEach(o=>o.classList.toggle("on",o===b));setState(b.dataset.s);}));</script></body></html>
