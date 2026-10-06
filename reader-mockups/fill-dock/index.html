@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reader fill-dock mock-ups</title>
+<meta name="description" content="The page bar under a filled PDF spread in the reader, as a dock: a dark frosted lozenge over the foot of the pages, out while the pointer moves, gone while you read, with a hairline that says how far through you are.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+  :root {
+    --paper: #fbfaf6; --surface: #fffdf7; --border: #e2ddce;
+    --ink: #1a1a17; --ink-2: #55524a; --muted: #6f6c63;
+    --accent: #1f5e52; --accent-soft: #e4efe7; --accent-ink: #14403a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+      --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+      --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+    --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+    --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 'IBM Plex Sans', system-ui, sans-serif; }
+  main { max-width: 1120px; margin: 0 auto; padding: 48px 16px 80px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  h1 { font: 500 clamp(30px, 5vw, 44px)/1.15 'Newsreader', Georgia, serif; margin: 0 0 14px; }
+  .lede { color: var(--ink-2); max-width: 68ch; margin: 0 0 12px; }
+  .note { font-size: 14px; color: var(--muted); max-width: 68ch; margin: 0 0 40px; }
+  .note a { color: var(--accent); }
+  .try { display: inline-flex; gap: 10px; align-items: center; margin: 0 0 40px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 15px; }
+  .try a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  .try a:hover { text-decoration: underline; }
+  figure { margin: 0 0 56px; }
+  figure img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 18px 50px -24px rgba(0,0,0,.35); background: var(--surface); }
+  figure.phone img { max-width: 360px; margin: 0 auto; }
+  figcaption { margin-top: 16px; display: grid; grid-template-columns: 40px 1fr; gap: 0 12px; }
+  .num { font: 500 13px 'IBM Plex Sans', sans-serif; color: var(--accent-ink); background: var(--accent-soft); border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; }
+  figcaption h2 { font-size: 17px; font-weight: 600; margin: 3px 0 4px; }
+  figcaption p { margin: 0; color: var(--ink-2); max-width: 75ch; }
+  kbd { font: 500 12px ui-monospace, monospace; border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; background: var(--surface); }
+  .questions { border-top: 1px solid var(--border); padding-top: 32px; }
+  .questions h2 { font: 500 26px 'Newsreader', Georgia, serif; margin: 0 0 12px; }
+  .questions li { margin-bottom: 8px; color: var(--ink-2); }
+  .questions a { color: var(--accent); }
+  .alts { border-top: 1px solid var(--border); padding-top: 32px; margin-bottom: 40px; }
+  .alts h2 { font: 500 26px 'Newsreader', Georgia, serif; margin: 0 0 12px; }
+  .alts > p { color: var(--ink-2); max-width: 70ch; margin: 0 0 32px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Reader · design mock-ups</p>
+  <h1>The dock, under a filled spread</h1>
+  <p class="lede">⤢ Fill gives a PDF's pages the whole frame. The page bar was then a muted bar half under the bottom edge, there only with the pointer on the last pixels of the screen — hard to see at all. It is now a dock: a dark frosted lozenge floating over the foot of the pages, out while the pointer moves, gone while you read, with a hairline along the bottom edge that stays.</p>
+  <p class="note">These are photographs of the app, taken by its smoke test on a two-column paper in the dark theme. The design note is in the reader's repository under <code>docs/fill-dock.md</code>.</p>
+
+  <figure>
+    <img src="fill-1-dock.png" alt="A filled two-page spread, and the dock floating over its foot: the folio, the slider, Snip, Pin, Loupe, Close-up, Fill, the zoom and one page or two" loading="lazy">
+    <figcaption><span class="num">1</span><div>
+      <h2>A lozenge over the pages, not a bar under them</h2>
+      <p>The same dark lozenge the loupe and the close-up say their keys in, so it reads on a white page and in the dark alike. Everything the bar had is on it, in four groups: the folio and the slider; the tools; the zoom; one page or two. A pressed tool is the lozenge's green.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="fill-2-hairline.png" alt="The pointer still: the pages alone, and a hairline along the bottom edge" loading="lazy">
+    <figcaption><span class="num">2</span><div>
+      <h2>Gone while you read</h2>
+      <p>Still for a couple of seconds, the dock goes, and nothing is over the pages. What stays is a hairline along the bottom edge, the accent colour as far as the spread is through the paper. A move of the pointer, or a tap on a touch screen, brings the dock back; it stays while the pointer or the focus is on it, so a slider being dragged never has it go from under it.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="fill-3-turned.png" alt="A page turned with the arrow key: the dock out for a moment, reading Page 2 of 2" loading="lazy">
+    <figcaption><span class="num">3</span><div>
+      <h2>Out for a moment when a page turns</h2>
+      <p>Turn a page with the arrow keys and the dock comes out with the new folio on it, then goes again, so you see where you are without reaching for anything.</p>
+    </div></figcaption>
+  </figure>
+</main>
+</body>
+</html>

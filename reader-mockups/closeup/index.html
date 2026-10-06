@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reader close-up mock-ups</title>
+<meta name="description" content="A figure on the reader's Explain page, close up: click it and it lifts off the page to the middle of the window, as large as the window allows; and the alternatives considered.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+  :root {
+    --paper: #fbfaf6; --surface: #fffdf7; --border: #e2ddce;
+    --ink: #1a1a17; --ink-2: #55524a; --muted: #6f6c63;
+    --accent: #1f5e52; --accent-soft: #e4efe7; --accent-ink: #14403a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+      --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+      --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15161a; --surface: #1d1f25; --border: #2c2f36;
+    --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c;
+    --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 'IBM Plex Sans', system-ui, sans-serif; }
+  main { max-width: 1120px; margin: 0 auto; padding: 48px 16px 80px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  h1 { font: 500 clamp(30px, 5vw, 44px)/1.15 'Newsreader', Georgia, serif; margin: 0 0 14px; }
+  .lede { color: var(--ink-2); max-width: 68ch; margin: 0 0 12px; }
+  .note { font-size: 14px; color: var(--muted); max-width: 68ch; margin: 0 0 40px; }
+  .note a { color: var(--accent); }
+  .try { display: inline-flex; gap: 10px; align-items: center; margin: 0 0 40px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 15px; }
+  .try a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  .try a:hover { text-decoration: underline; }
+  figure { margin: 0 0 56px; }
+  figure img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 18px 50px -24px rgba(0,0,0,.35); background: var(--surface); }
+  figure.phone img { max-width: 360px; margin: 0 auto; }
+  figcaption { margin-top: 16px; display: grid; grid-template-columns: 40px 1fr; gap: 0 12px; }
+  .num { font: 500 13px 'IBM Plex Sans', sans-serif; color: var(--accent-ink); background: var(--accent-soft); border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; }
+  figcaption h2 { font-size: 17px; font-weight: 600; margin: 3px 0 4px; }
+  figcaption p { margin: 0; color: var(--ink-2); max-width: 75ch; }
+  kbd { font: 500 12px ui-monospace, monospace; border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; background: var(--surface); }
+  .questions { border-top: 1px solid var(--border); padding-top: 32px; }
+  .questions h2 { font: 500 26px 'Newsreader', Georgia, serif; margin: 0 0 12px; }
+  .questions li { margin-bottom: 8px; color: var(--ink-2); }
+  .questions a { color: var(--accent); }
+  .alts { border-top: 1px solid var(--border); padding-top: 32px; margin-bottom: 40px; }
+  .alts h2 { font: 500 26px 'Newsreader', Georgia, serif; margin: 0 0 12px; }
+  .alts > p { color: var(--ink-2); max-width: 70ch; margin: 0 0 32px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Reader · design mock-ups</p>
+  <h1>A figure, close up</h1>
+  <p class="lede">The Explain page draws a small figure beside each paragraph. Click one and it lifts off the page to the middle of the window, as large as the window allows, growing from where it sits; the page dims behind it and stays put. Tab goes on to the next figure, Esc puts it back where it came from. A scene opens the same way, on its step.</p>
+  <p class="note">The pictures of the design as built are photographs of the app, taken by its smoke test on <i>Attention Is All You Need</i>. The alternatives below them are frames of a mock-up in the reader's own colours and type. The design note is in the reader's repository under <code>docs/explain-closeup.md</code>.</p>
+  <p class="try">▶ <a href="mock.html">See the alternatives in the mock-up</a> <span style="color:var(--muted)">· expand in place, a peek on hover, a pinned pane, zoom inside the close-up</span></p>
+
+  <figure>
+    <img src="closeup-1-hover.png" alt="The pointer over a figure in the margin of the explanation: a magnifier, and a Close-up mark on the figure's corner" loading="lazy">
+    <figcaption><span class="num">1</span><div>
+      <h2>It says it can be looked at closer</h2>
+      <p>The pointer over a figure is a magnifier, and a small <b>⤢ Close-up</b> mark comes up on its corner. The figure is focusable too, so <kbd>⇥</kbd> reaches it and <kbd>↵</kbd> opens it.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="closeup-2-open.png" alt="The pipeline figure close up: 1,320 pixels wide in the middle of the window, its caption under it, the page dimmed behind, and a chip saying the keys" loading="lazy">
+    <figcaption><span class="num">2</span><div>
+      <h2>Click, and it grows from where it is</h2>
+      <p>The drawing goes to the middle of the window from its place in the margin, growing as it goes, so the eye follows it and knows where it will return to. Figures are SVG, so the close-up is the same drawing set larger: the type stays sharp. Over it, which figure this is and whose section; under it, the caption; under that, the keys.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="closeup-3-next.png" alt="The next figure, after Tab: Figure 3 of 3, the dots moved on" loading="lazy">
+    <figcaption><span class="num">3</span><div>
+      <h2>Tab goes on, Esc goes back</h2>
+      <p><kbd>⇥</kbd> and the arrows go on to the next figure on the page, <kbd>⇧⇥</kbd> back, and the dots say where you are among them. <kbd>Esc</kbd>, the ×, or a click beside the card shrinks it back to where it came from; the focus goes back to the drawing. <b>Add to notes</b> keeps it, as the corner button on the page does.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="closeup-4-scene.png" alt="A scene close up: the token's query, key and value boxes, the softmax bars, and the step's caption under it" loading="lazy">
+    <figcaption><span class="num">4</span><div>
+      <h2>A scene, on its step</h2>
+      <p>A scene opens the same way, as a still of the step it is on, in its own colours, with the scene's title and the step's caption under it.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="closeup-5-beside.png" alt="Beside the paper: the close-up over the whole window, the paper under it on the left" loading="lazy">
+    <figcaption><span class="num">5</span><div>
+      <h2>Every layout</h2>
+      <p>In the Notebook and Beside-the-paper layouts the close-up takes the whole window too, over the paper as well as the explanation.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="closeup-6-dark.png" alt="The close-up in the dark theme: the card in the dark surface, the figure in the dark palette" loading="lazy">
+    <figcaption><span class="num">6</span><div>
+      <h2>In the dark</h2>
+      <p>The dark theme has its own ground; the figure is drawn in the dark palette it has on the page.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="closeup-7-implementation.png" alt="The pipeline figure of an implementation plan, close up" loading="lazy">
+    <figcaption><span class="num">7</span><div>
+      <h2>The Implementation page too</h2>
+      <p>The plan's figures open the same way.</p>
+    </div></figcaption>
+  </figure>
+  <figure class="phone">
+    <img src="closeup-8-phone.png" alt="On a phone: the figure across the width, its caption under it" loading="lazy">
+    <figcaption><span class="num">8</span><div>
+      <h2>On a phone</h2>
+      <p>The card fills the width with a small gutter; the chip is left out, since there are no keys; a tap beside the card closes it.</p>
+    </div></figcaption>
+  </figure>
+  <section class="alts">
+    <h2>The options considered</h2>
+    <p>Four other ways of seeing a figure larger were mocked up and set aside. Each frame carries the reason on a yellow note; <a href="mock.html">the mock-up itself</a> switches between them.</p>
+  <figure>
+    <img src="closeup-alt-expand.png" alt="The figure expanded across the column and the margin, the prose under it" loading="lazy">
+    <figcaption><span class="num">B</span><div>
+      <h2>Expand in place</h2>
+      <p>The figure widens across the reading column and the margin; the prose and the cell move down. Bigger, but the page reflows under you and your place in the prose goes, and the width it can take is the column's, not the window's.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="closeup-alt-peek.png" alt="A round glass over the softmax box of the pipeline figure, at twice the size" loading="lazy">
+    <figcaption><span class="num">C</span><div>
+      <h2>A peek on hover</h2>
+      <p>A round glass at 2× follows the pointer, as the PDF's loupe does. No click, no leaving the page — but a vector drawing wants to be seen whole, not a patch at a time, and there is nothing to hold on a touch screen.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="closeup-alt-pane.png" alt="The explanation narrowed, the figure in a pane on the right, pinned to the section" loading="lazy">
+    <figcaption><span class="num">D</span><div>
+      <h2>Pinned beside the prose</h2>
+      <p>The figure sits in a pane on the right, kept while you read the section. Good for a long section, but a fourth layout to manage; the Margin layout already keeps the figure beside its paragraph. Could come later as a Pin on the close-up.</p>
+    </div></figcaption>
+  </figure>
+  <figure>
+    <img src="closeup-alt-zoom.png" alt="The close-up with the figure at 4×, scrolled under the frame, a zoom control and a map in the corner" loading="lazy">
+    <figcaption><span class="num">E</span><div>
+      <h2>Zoom inside the close-up</h2>
+      <p>The close-up as built, with + and −, drag to pan, and a map in the corner. Worth adding when a figure is dense enough to need it; the first cut fits the drawing to the window, already two to four times the margin.</p>
+    </div></figcaption>
+  </figure>
+  </section>
+</main>
+</body>
+</html>
