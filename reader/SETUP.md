@@ -39,7 +39,7 @@ expects, so redeploy the Worker with a key set:
 
 ```bash
 cd reader                                        # the app repository
-npx --yes wrangler@4 secret put BRAVE_KEY        # Brave Search API — or SERPLY_KEY / SERPAPI_KEY, the keys Scholar has
+npx --yes wrangler@4 secret put TAVILY_KEY       # Tavily, app.tavily.com: a thousand searches a month free — or BRAVE_KEY, or SERPLY_KEY / SERPAPI_KEY, the keys Scholar has
 npm run deploy:worker
 curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "web": true
 ```
