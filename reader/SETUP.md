@@ -11,6 +11,44 @@ run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
 build has no proxy, and every browser has to be told one in Settings.
 
+## Every page has an address, and deep links come through the 404
+
+The reader is one page, but each place in it has its own path:
+`/reader/playground`, `/reader/library`, `/reader/collection/<id>`,
+`/reader/paper/<id>`, `/reader/playground/<id>`. GitHub Pages only serves
+files that exist, so the build writes a copy of `index.html` into a folder for
+each fixed path (`playground/`, `library/`, `reading/`, `unread/`,
+`finished/`, `unsorted/`, `junk/`, `usage/`). `npm run build:pages` does this
+by itself.
+
+A path with an id in it can't be a file. It reaches the site's own 404 page
+(`_pages/404.md`). A few lines at the top of that page send anything under
+`/reader/` (except `/reader/assets/`) on to `/reader/?route=<the path>`, and
+the app puts the path back before it opens. If the 404 page is ever
+rewritten, keep those lines, or links to a paper or a playground will land
+on "Page not found".
+
+## The Playground: Colab, your PC, or a GPU elsewhere
+
+**P**, or the **</>** on the rail, opens the Playground at
+`/reader/playground`. It holds notebooks and projects of your own, not tied
+to a paper. A playground runs on Colab with nothing more to set up than
+**Run in Colab** below. To run on your own PC, or on a GPU somewhere else,
+start a Jupyter server there that lets this site in:
+
+```bash
+pip install jupyter_server ipykernel
+jupyter server --ServerApp.allow_origin='https://saurav717.github.io' --ServerApp.root_dir="$HOME/reader-playgrounds"
+```
+
+Then paste the address it prints (with `?token=`) into **Your compute → +
+Add a server**. For a remote machine, tunnel it with
+`ssh -N -L 8890:localhost:8888 you@host` and add `http://localhost:8890/…`,
+or use a RunPod pod's HTTPS proxy address. The page talks to the server
+directly. The Worker plays no part, and the address and token stay in the
+browser. Use Chrome, Edge or Firefox for a server on `localhost`: Safari will
+not let an `https` page reach it.
+
 ## Gemini, beside Claude and DeepSeek
 
 Ask AI, Explain and Implementation can run on Google's Gemini 3.1 Pro, 3.8
