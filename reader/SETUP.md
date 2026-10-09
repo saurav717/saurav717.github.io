@@ -64,9 +64,15 @@ pairs through that. Chrome, Edge and Firefox reach it directly, so nothing
 leaves the machine. The full description, including what is protected and
 how, is in the reader repository's README, under *Connect this computer*.
 
-`companion.sh`, `companion.ps1` and the wheel in `companion/` are written by
-`npm run build:pages` like the rest of this folder, so a rebuild keeps them
-current.
+**VS Code:** a project on the Companion has **Open in VS Code** in its bar.
+The card's **VS Code** tab installs the Reader Playground extension from
+`reader/vscode/reader-playground.vsix`. It adds a side bar of projects and
+the papers they cite, `¶` citations as links, the Companion's Python for
+notebooks, and **Reader: Start the Companion**.
+
+`companion.sh`, `companion.ps1`, the wheel in `companion/` and the `.vsix` in
+`vscode/` are written by `npm run build:pages` like the rest of this folder,
+so a rebuild keeps them current.
 
 **A GPU somewhere else** is still a Jupyter server you start yourself:
 
