@@ -2,7 +2,7 @@
 # with the VS Code extension, and starts it at every login.
 #   powershell -ExecutionPolicy ByPass -c "irm https://saurav717.github.io/reader/companion-setup.ps1 | iex"
 $ErrorActionPreference = 'Stop'
-$wheel = 'https://saurav717.github.io/reader/companion/reader_companion-0.7.3-py3-none-any.whl'
+$wheel = 'https://saurav717.github.io/reader/companion/reader_companion-0.7.4-py3-none-any.whl'
 $site = 'https://saurav717.github.io/reader/'
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
   Write-Host 'Installing uv, once (https://astral.sh/uv)...'
