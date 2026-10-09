@@ -49,29 +49,39 @@ directly. The Worker plays no part, and the address and token stay in the
 browser. Use Chrome, Edge or Firefox for a server on `localhost`: Safari will
 not let an `https` page reach it.
 
-## Gemini, beside Claude and DeepSeek
+## Claude, DeepSeek and Gemini on the site's keys
 
-Ask AI, Explain and Implementation can run on Google's Gemini 3.1 Pro, 3.8
-Flash or 3.5 Flash-Lite. Nothing is pasted into the site for it: the key is
-the Worker's own secret, and the Worker asks Google for whoever is signed in.
+Ask AI, Explain and Implementation run on the site's own keys by default —
+Claude (Opus 5, Sonnet 5, Haiku 4.5), DeepSeek (V4.1 Flash, V4 Pro) and Gemini
+(3.1 Pro, 3.8 Flash, 3.5 Flash-Lite). Each key is a Worker secret, never in the
+page; the Worker asks the provider for whoever is signed in and tallies the
+tokens on the usage page.
 
 ```bash
 cd reader                                        # the app repository
-npx --yes wrangler@4 secret put GEMINI_KEY       # a key from aistudio.google.com/apikey
+npx --yes wrangler@4 secret put ANTHROPIC_KEY    # a key from console.anthropic.com
+npx --yes wrangler@4 secret put DEEPSEEK_KEY     # platform.deepseek.com — already set if the usage page shows the balance
+npx --yes wrangler@4 secret put GEMINI_KEY       # aistudio.google.com/apikey
 npm run deploy:worker
-curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "gemini": true
+curl https://reader-arxiv-proxy.es16btech11007.workers.dev/health   # "ai": {"anthropic": true, "deepseek": true, "gemini": true}
 ```
 
 Only the owner — `READER_TOKEN`, or a Google account in `READER_OWNERS` — may
-use it, unless `GEMINI_FOR = "everyone"` in `wrangler.toml`, which lets anyone
-signed in spend the key. Its tokens and cost show on the usage page.
+use them, unless `AI_FOR = "everyone"` in `wrangler.toml`, which lets anyone
+signed in spend them. (`GEMINI_FOR`, the older setting, still counts for
+Gemini when `AI_FOR` is unset.)
+
+Anyone can use their own Claude or DeepSeek key instead: **Settings → AI
+models → Use my own key**. It stays in their browser and goes straight to
+api.anthropic.com or api.deepseek.com, never through the Worker; **Use the
+site's key** goes back.
 
 ## The Web button in Ask AI
 
 Beside the Ask AI box is a globe — **Web**, off by default. On, the model may
 search the web and read pages as it answers, and lists each search and page
 above the answer with the sources linked. Claude does it through Anthropic's
-own search, on the visitor's key. DeepSeek — the usual choice — does it
+own search. DeepSeek — the usual choice — does it
 through the Worker, which needs a search key and the routes this build
 expects, so redeploy the Worker with a key set:
 
