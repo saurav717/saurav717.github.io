@@ -17,7 +17,9 @@ else
   curl -LsSf https://astral.sh/uv/install.sh | sh
   UV="$HOME/.local/bin/uv"
 fi
+# uv's own Python, never /usr/bin/python3: on a Mac without Xcode's tools that one asks to install them.
+export UV_PYTHON_PREFERENCE=only-managed
 echo "Installing the Reader Companion…"
-"$UV" tool install --force --quiet --from "$WHEEL" reader-companion
+"$UV" tool install --force --quiet --python 3.12 --from "$WHEEL" reader-companion
 BIN="$("$UV" tool dir --bin 2>/dev/null || echo "$HOME/.local/bin")"
 exec "$BIN/reader-companion" setup --site "$SITE" "$@"
