@@ -33,21 +33,47 @@ on "Page not found".
 **P**, or the **</>** on the rail, opens the Playground at
 `/reader/playground`. It holds notebooks and projects of your own, not tied
 to a paper. A playground runs on Colab with nothing more to set up than
-**Run in Colab** below. To run on your own PC, or on a GPU somewhere else,
-start a Jupyter server there that lets this site in:
+**Run in Colab** below.
+
+**To run on your own computer**, use **Your compute → Connect this computer**.
+It shows one line to paste into a terminal:
+
+```bash
+curl -LsSf https://saurav717.github.io/reader/companion.sh | sh                                  # macOS, Linux
+powershell -ExecutionPolicy ByPass -c "irm https://saurav717.github.io/reader/companion.ps1 | iex"  # Windows
+```
+
+That installs [uv](https://docs.astral.sh/uv/) once if needed, then runs the
+**Reader Companion** from `reader/companion/` here. The Companion starts a
+Jupyter server on `127.0.0.1:47321` that only this site may call, and opens
+the Playground to pair. One click on **Connect** does it, or type the code it
+prints into the card.
+- **Files:** they live in `~/Reader/playgrounds/<name>`.
+- **Your code's Python:** `~/Reader/.venv`, where `pip install` in the console
+  goes. Pass `--python` to use an environment you already have.
+- **Options:** they go after `sh -s --`.
+
+The full description is in the reader repository's README, under *Connect
+this computer*. Use Chrome, Edge or Firefox for this: Safari will not let an
+`https` page reach a program on `127.0.0.1`.
+
+`companion.sh`, `companion.ps1` and the wheel in `companion/` are written by
+`npm run build:pages` like the rest of this folder, so a rebuild keeps them
+current.
+
+**A GPU somewhere else** is still a Jupyter server you start yourself:
 
 ```bash
 pip install jupyter_server ipykernel
 jupyter server --ServerApp.allow_origin='https://saurav717.github.io' --ServerApp.root_dir="$HOME/reader-playgrounds"
 ```
 
-Then paste the address it prints (with `?token=`) into **Your compute → +
-Add a server**. For a remote machine, tunnel it with
+Then paste the address it prints (with `?token=`) into **Your compute →
++ Add a server**. For a remote machine, tunnel it with
 `ssh -N -L 8890:localhost:8888 you@host` and add `http://localhost:8890/…`,
 or use a RunPod pod's HTTPS proxy address. The page talks to the server
 directly. The Worker plays no part, and the address and token stay in the
-browser. Use Chrome, Edge or Firefox for a server on `localhost`: Safari will
-not let an `https` page reach it.
+browser.
 
 ## Claude, DeepSeek and Gemini on the site's keys
 
