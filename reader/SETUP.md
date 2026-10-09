@@ -11,22 +11,23 @@ run in that repository, copied over `reader/`. Rebuild it the same way whenever
 the app changes. `VITE_API_BASE` is the proxy below; leave it off and the
 build has no proxy, and every browser has to be told one in Settings.
 
-## Every page has an address, and deep links come through the 404
+## Every page has an address, and none of them needs the 404
 
-The reader is one page, but each place in it has its own path:
-`/reader/playground`, `/reader/library`, `/reader/collection/<id>`,
-`/reader/paper/<id>`, `/reader/playground/<id>`. GitHub Pages only serves
-files that exist, so the build writes a copy of `index.html` into a folder for
-each fixed path (`playground/`, `library/`, `reading/`, `unread/`,
-`finished/`, `unsorted/`, `junk/`, `usage/`). `npm run build:pages` does this
-by itself.
+The reader is one page, but each place in it has its own address:
+`/reader/playground`, `/reader/library`, `/reader/collection/?id=<id>`,
+`/reader/paper/?id=<id>`, `/reader/playground/?id=<id>`. GitHub Pages only
+serves files that exist, so the build writes a copy of `index.html` into a
+folder for each of them (`playground/`, `paper/`, `collection/`, `library/`,
+`reading/`, `unread/`, `finished/`, `unsorted/`, `junk/`, `usage/`), and a
+page's id rides in the query. A reload is always answered by one of those
+files. `npm run build:pages` does this by itself.
 
-A path with an id in it can't be a file. It reaches the site's own 404 page
-(`_pages/404.md`). A few lines at the top of that page send anything under
-`/reader/` (except `/reader/assets/`) on to `/reader/?route=<the path>`, and
-the app puts the path back before it opens. If the 404 page is ever
-rewritten, keep those lines, or links to a paper or a playground will land
-on "Page not found".
+Older links put the id in the path (`/reader/playground/<id>`), which can't
+be a file. Those reach the site's own 404 page (`_pages/404.md`). A few lines
+at the top of that page send anything under `/reader/` (except
+`/reader/assets/`) on to `/reader/?route=<the path>`, and the app puts the
+path back and rewrites it in the new form. If the 404 page is ever
+rewritten, keep those lines, or old links will land on "Page not found".
 
 ## The Playground: Colab, your PC, or a GPU elsewhere
 
