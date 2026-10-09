@@ -53,13 +53,26 @@ prints into the card.
   goes. Pass `--python` to use an environment you already have.
 - **Options:** they go after `sh -s --`.
 
-The full description is in the reader repository's README, under *Connect
-this computer*. Use Chrome, Edge or Firefox for this: Safari will not let an
-`https` page reach a program on `127.0.0.1`.
+A playground on the Companion opens a **real terminal** in its folder: your
+own shell (zsh with oh-my-zsh, bash, fish), with the project's Python
+activated on top.
 
-`companion.sh`, `companion.ps1` and the wheel in `companion/` are written by
-`npm run build:pages` like the rest of this folder, so a rebuild keeps them
-current.
+**In Safari**, which won't let an `https` page reach `127.0.0.1`, the card's
+command adds `-s -- --tunnel`. The Companion then also opens a Cloudflare
+quick tunnel (an `https://….trycloudflare.com` address, no account needed) and
+pairs through that. Chrome, Edge and Firefox reach it directly, so nothing
+leaves the machine. The full description, including what is protected and
+how, is in the reader repository's README, under *Connect this computer*.
+
+**VS Code:** a project on the Companion has **Open in VS Code** in its bar.
+The card's **VS Code** tab installs the Reader Playground extension from
+`reader/vscode/reader-playground.vsix`. It adds a side bar of projects and
+the papers they cite, `¶` citations as links, the Companion's Python for
+notebooks, and **Reader: Start the Companion**.
+
+`companion.sh`, `companion.ps1`, the wheel in `companion/` and the `.vsix` in
+`vscode/` are written by `npm run build:pages` like the rest of this folder,
+so a rebuild keeps them current.
 
 **A GPU somewhere else** is still a Jupyter server you start yourself:
 
