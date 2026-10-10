@@ -4,7 +4,7 @@
 # Installs uv (https://docs.astral.sh/uv/) once if it isn't there, then runs the
 # Companion with it. Anything after "sh -s --" is passed on: --no-browser, --root DIR.
 set -e
-WHEEL="https://saurav717.github.io/reader/companion/reader_companion-0.7.6-py3-none-any.whl"
+WHEEL="https://saurav717.github.io/reader/companion/reader_companion-0.8.0-py3-none-any.whl"
 SITE="https://saurav717.github.io/reader/"
 if command -v uv >/dev/null 2>&1; then
   UV=uv
