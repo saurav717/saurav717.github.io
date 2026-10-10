@@ -1,7 +1,7 @@
 # Reader Companion: connects this computer to the reader's Playground at https://saurav717.github.io/reader/
 #   powershell -ExecutionPolicy ByPass -c "irm https://saurav717.github.io/reader/companion.ps1 | iex"
 $ErrorActionPreference = 'Stop'
-$wheel = 'https://saurav717.github.io/reader/companion/reader_companion-0.9.0-py3-none-any.whl'
+$wheel = 'https://saurav717.github.io/reader/companion/reader_companion-0.11.0-py3-none-any.whl'
 $site = 'https://saurav717.github.io/reader/'
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
   Write-Host 'Installing uv, once (https://astral.sh/uv)...'
