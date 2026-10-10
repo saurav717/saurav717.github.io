@@ -4,7 +4,7 @@
 #   curl -LsSf https://saurav717.github.io/reader/companion-setup.sh | sh
 # Anything after "sh -s --" is passed on to reader-companion setup: --no-vscode, --no-login, --root DIR.
 set -e
-WHEEL="https://saurav717.github.io/reader/companion/reader_companion-0.7.5-py3-none-any.whl"
+WHEEL="https://saurav717.github.io/reader/companion/reader_companion-0.7.6-py3-none-any.whl"
 SITE="https://saurav717.github.io/reader/"
 if command -v uv >/dev/null 2>&1; then
   UV=uv
