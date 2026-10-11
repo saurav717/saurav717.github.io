@@ -10,6 +10,7 @@ if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
   $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
 }
 Write-Host 'Installing the Reader Companion...'
-uv tool install --force --quiet --from $wheel reader-companion
+# 3.12, as above: a brand-new Python has no pywinpty wheel to install.
+uv tool install --force --quiet --python 3.12 --from $wheel reader-companion
 $bin = uv tool dir --bin
 & (Join-Path $bin 'reader-companion.exe') setup --site $site @args
