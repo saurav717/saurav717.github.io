@@ -1,0 +1,80 @@
+% ACM conference paper (sigconf), on the acmart class that comes with TeX Live.
+% Guidelines: https://www.acm.org/publications/proceedings-template
+% For review, use \documentclass[sigconf,review,anonymous]{acmart}.
+\documentclass[sigconf]{acmart}
+
+\setcopyright{acmlicensed}
+\copyrightyear{2026}
+\acmYear{2026}
+\acmDOI{XXXXXXX.XXXXXXX}
+\acmConference[Conference acronym 'XX]{Make sure to enter the correct conference title from your rights confirmation email}{June 03--05, 2026}{Woodstock, NY}
+\acmISBN{978-1-4503-XXXX-X/2026/06}
+
+\begin{document}
+
+\title{Paper Title}
+
+\author{First Author}
+\affiliation{%
+  \institution{Organization}
+  \city{City}
+  \country{Country}}
+\email{email@example.com}
+
+\author{Second Author}
+\affiliation{%
+  \institution{Organization}
+  \city{City}
+  \country{Country}}
+\email{email@example.com}
+
+\begin{abstract}
+A short summary of the problem, the approach and the results, in one paragraph.
+\end{abstract}
+
+\begin{CCSXML}
+<ccs2012>
+ <concept>
+  <concept_id>10010147.10010257</concept_id>
+  <concept_desc>Computing methodologies~Machine learning</concept_desc>
+  <concept_significance>500</concept_significance>
+ </concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[500]{Computing methodologies~Machine learning}
+
+\keywords{first keyword, second keyword, third keyword}
+
+\maketitle
+
+\section{Introduction}
+Say what the problem is and why it matters, then what this paper does~\cite{lamport1994}.
+
+\section{Method}
+\begin{equation}
+  y = f(x) + \epsilon
+  \label{eq:model}
+\end{equation}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{example-image}
+  \caption{A figure that spans one column.}
+  \Description{A placeholder image.}
+  \label{fig:example}
+\end{figure}
+
+\section{Experiments}
+Results go here; see Figure~\ref{fig:example}.
+
+\section{Conclusion}
+What was shown, and what comes next.
+
+\begin{acks}
+Funding and people to thank.
+\end{acks}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,58 @@
+% Springer Lecture Notes in Computer Science, on the llncs class that comes with TeX Live.
+% Guidelines: https://www.springer.com/gp/computer-science/lncs/conference-proceedings-guidelines
+\documentclass[runningheads]{llncs}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+
+\begin{document}
+
+\title{Paper Title}
+\author{First Author\inst{1}\orcidID{0000-0000-0000-0000} \and
+Second Author\inst{2}}
+\authorrunning{F. Author and S. Author}
+\institute{Organization, City, Country\\
+\email{email@example.com} \and
+Organization, City, Country\\
+\email{email@example.com}}
+
+\maketitle
+
+\begin{abstract}
+A short summary of the problem, the approach and the results, in 150--250 words.
+\keywords{First keyword \and Second keyword \and Third keyword.}
+\end{abstract}
+
+\section{Introduction}
+Say what the problem is and why it matters, then what this paper does~\cite{lamport1994}.
+
+\section{Method}
+\begin{equation}
+  y = f(x) + \epsilon
+  \label{eq:model}
+\end{equation}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\textwidth]{example-image}
+  \caption{A figure.}
+  \label{fig:example}
+\end{figure}
+
+\section{Experiments}
+Results go here; see Fig.~\ref{fig:example}.
+
+\section{Conclusion}
+What was shown, and what comes next.
+
+\begin{credits}
+\subsubsection{\ackname} Funding and people to thank.
+
+\subsubsection{\discintname}
+The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
+
+\bibliographystyle{splncs04}
+\bibliography{references}
+
+\end{document}

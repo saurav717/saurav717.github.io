@@ -1,0 +1,67 @@
+% IEEE conference paper, on the IEEEtran class that comes with TeX Live.
+% Guidelines: https://www.ieee.org/conferences/publishing/templates.html
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{Paper Title}
+
+\author{\IEEEauthorblockN{First Author}
+\IEEEauthorblockA{\textit{Department} \\
+\textit{Organization}\\
+City, Country \\
+email@example.com}
+\and
+\IEEEauthorblockN{Second Author}
+\IEEEauthorblockA{\textit{Department} \\
+\textit{Organization}\\
+City, Country \\
+email@example.com}
+}
+
+\maketitle
+
+\begin{abstract}
+A short summary of the problem, the approach and the results, in one paragraph.
+\end{abstract}
+
+\begin{IEEEkeywords}
+first keyword, second keyword, third keyword
+\end{IEEEkeywords}
+
+\section{Introduction}
+Say what the problem is and why it matters, then what this paper does~\cite{lamport1994}.
+
+\section{Method}
+\begin{equation}
+  y = f(x) + \epsilon
+  \label{eq:model}
+\end{equation}
+Equation~\eqref{eq:model} is referred to by its label.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\columnwidth]{example-image}
+  \caption{A figure that spans one column.}
+  \label{fig:example}
+\end{figure}
+
+\section{Experiments}
+Results go here; see Fig.~\ref{fig:example}.
+
+\section{Conclusion}
+What was shown, and what comes next.
+
+\section*{Acknowledgment}
+Funding and people to thank.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

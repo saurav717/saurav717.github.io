@@ -1,0 +1,62 @@
+% Elsevier journal article, on the elsarticle class that comes with TeX Live.
+% Guidelines: https://www.elsevier.com/researcher/author/policies-and-guidelines/latex-instructions
+\documentclass[preprint,12pt]{elsarticle}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+
+\journal{Journal Name}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Paper Title}
+
+\author[inst1]{First Author}
+\author[inst2]{Second Author}
+\affiliation[inst1]{organization={Organization},
+            city={City},
+            country={Country}}
+\affiliation[inst2]{organization={Organization},
+            city={City},
+            country={Country}}
+
+\begin{abstract}
+A short summary of the problem, the approach and the results, in one paragraph.
+\end{abstract}
+
+\begin{keyword}
+first keyword \sep second keyword \sep third keyword
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+Say what the problem is and why it matters, then what this paper does~\cite{lamport1994}.
+
+\section{Method}
+\begin{equation}
+  y = f(x) + \epsilon
+  \label{eq:model}
+\end{equation}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.7\textwidth]{example-image}
+  \caption{A figure.}
+  \label{fig:example}
+\end{figure}
+
+\section{Experiments}
+Results go here; see Figure~\ref{fig:example}.
+
+\section{Conclusion}
+What was shown, and what comes next.
+
+\section*{Acknowledgements}
+Funding and people to thank.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+
+\end{document}
