@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy · Reader</title>
+  <meta name="description" content="What the paper reader does with your data, and what it never sees." />
+  <link rel="icon" href="../icons/reader-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #fbfaf6; --surface: #fffdf7; --panel: #f4f1e8; --rail: #eeebe1; --border: #e2ddce; --border-soft: #ede9db;
+      --ink: #1a1a17; --ink-2: #55524a; --muted: #6f6c63; --accent: #1f5e52; --accent-soft: #e4efe7; --accent-ink: #14403a; --accent-on: #f6f4ec;
+      --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif; --serif: 'Newsreader', Georgia, 'Times New Roman', serif; --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+      --shadow-sm: 0 1px 2px rgba(26, 26, 23, 0.06);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #15161a; --surface: #1d1f25; --panel: #1a1c21; --rail: #17181c; --border: #2c2f36; --border-soft: #25272d;
+        --ink: #eae7df; --ink-2: #c3bfb4; --muted: #9b978c; --accent: #57a98f; --accent-soft: #1e3a33; --accent-ink: #8fcbb8; --accent-on: #10201c;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--paper); color: var(--ink); }
+    body { font: 15.5px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+    .bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 14px; height: 54px; padding: 0 20px; background: var(--rail); border-bottom: 1px solid var(--border); }
+    .brand { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--accent); color: var(--accent-on); font: 700 18px/1 var(--serif); text-decoration: none; }
+    .bar b { font: 600 15px var(--sans); color: var(--ink); }
+    .bar nav { margin-left: auto; display: flex; gap: 4px; }
+    .bar nav a { padding: 6px 11px; border-radius: 8px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+    .bar nav a:hover { background: rgba(127, 127, 127, 0.12); color: var(--ink); }
+    .bar nav a[aria-current] { background: var(--surface); color: var(--ink); font-weight: 500; box-shadow: var(--shadow-sm); }
+    .bar nav a.go { color: var(--accent-ink); font-weight: 500; }
+    main { max-width: 700px; margin: 0 auto; padding: 44px 20px 90px; }
+    .cap { font: 600 10.5px var(--sans); letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+    h1 { margin: 0 0 10px; font: 600 38px/1.1 var(--serif); letter-spacing: -0.012em; }
+    .lede { margin: 0 0 8px; font: 400 17px/1.5 var(--serif); font-style: italic; color: var(--ink-2); }
+    .when { margin: 0 0 28px; font-size: 12.5px; color: var(--muted); }
+    .short { margin: 0 0 30px; padding: 16px 20px; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow-sm); }
+    .short p { margin: 0; }
+    h2 { margin: 36px 0 10px; font: 600 23px/1.25 var(--serif); letter-spacing: -0.01em; }
+    h3 { margin: 22px 0 6px; font: 600 15px/1.3 var(--sans); }
+    p, li { margin: 0 0 12px; color: var(--ink); }
+    li { margin-bottom: 8px; }
+    ul { padding-left: 22px; }
+    a { color: var(--accent-ink); }
+    code { padding: 1px 5px; border-radius: 5px; background: var(--panel); border: 1px solid var(--border-soft); font: 13px var(--mono); }
+    table { width: 100%; border-collapse: collapse; margin: 6px 0 16px; font-size: 14px; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid var(--border-soft); text-align: left; vertical-align: top; }
+    th { font: 600 11px var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+    td:first-child { white-space: nowrap; font-weight: 500; }
+    .foot { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+    @media (max-width: 600px) { h1 { font-size: 30px; } td:first-child { white-space: normal; } .bar b { display: none; } }
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <a class="brand" href="../" aria-label="Reader">R</a>
+    <b>Reader</b>
+    <nav>
+      <a href="../privacy/" aria-current="page">Privacy</a>
+      <a href="../terms/">Terms</a>
+      <a class="go" href="../">Open Reader →</a>
+    </nav>
+  </header>
+  <main>
+    <p class="cap">Reader</p>
+    <h1>Privacy policy</h1>
+    <p class="lede">What the paper reader at saurav717.github.io/reader/ — “the app” below — does with your data, and what it never sees. This page covers the app and nothing else on this site.</p>
+    <p class="when">Last updated 14 October 2026.</p>
+
+    <div class="short">
+      <p><strong>The short version.</strong> The app runs in your browser. It has no database and no account of its own: your library — the papers you collect, your highlights and notes, your reading progress — lives in your own Google Drive, with a copy cached in your browser. The one server involved is a small proxy that fetches what a browser cannot fetch directly and, for people signed in, runs a few paid features on the site's own keys. Nothing it sees is sold, used for advertising, or used to train anything.</p>
+    </div>
+
+    <h2>What the app stores, and where</h2>
+    <p><strong>In your Google Drive.</strong> When you sign in, your library is a folder in your own Drive, <code>Papers_collection</code>: a <code>library.json</code> with your collections, projects and highlights, and a folder per paper holding its PDF, a JSON file of its details and your highlights, and your notes. These are ordinary files in your Drive. You can read, move or delete them yourself at any time, and deleting them there needs nothing from the app.</p>
+    <p><strong>In this browser.</strong> Settings, the page you were on, and preferences such as the calendar's view are kept in the browser's <code>localStorage</code>. A copy of your library is cached in the browser's IndexedDB, one per account, so the app opens quickly; Drive's copy is the one that counts, and signed in, the app opens on it. Clearing this site's data in your browser removes all of this and nothing else.</p>
+    <p><strong>In a Git repository, only if you configure one.</strong> The app can mirror your notes and bibliography to a repository you name, and keep a project's code in one. See <a href="#github">GitHub</a> below for where the token goes.</p>
+    <p><strong>On the proxy.</strong> The proxy keeps no copy of your library, your papers, your notes or your calendar. What it does keep is set out under <a href="#proxy">The proxy</a>.</p>
+
+    <h2>What the app receives from Google</h2>
+    <p>Signing in with Google is how you open your library, and it is asked for first. Each further permission is asked for only when you first use the feature that needs it, in a window of Google's that names the scope. None of them lets the app see anything beyond what is listed here.</p>
+    <table>
+      <tr><th>When</th><th>Scopes</th><th>What the app does with it</th></tr>
+      <tr><td>Sign in</td><td><code>openid</code>, <code>email</code>, <code>profile</code></td><td>Shows your name, email address and picture so you can see which account is connected, and names your library in Drive as yours. Your email address also goes to the proxy, once per sign-in, to issue you a pass for its routes (below).</td></tr>
+      <tr><td>Sign in</td><td><code>drive.file</code>, <code>drive.appdata</code></td><td>Creates and reads back <strong>only the files the app itself created</strong>: the <code>Papers_collection</code> folder and what is in it, and a small record of its own in Drive's app-data space. These scopes give no access to anything else in your Drive.</td></tr>
+      <tr><td>Calendar, on connecting it</td><td><code>calendar.readonly</code></td><td>Reads the list of your calendars and the events in the span on screen, and shows them on the Calendar page, by day, week or month. <strong>Read only</strong>: nothing in the app writes to a calendar. Calendar data is held in the page while you look at it and is never sent to or stored on any server. If you tag a meeting with one of your projects, the tag — the meeting's id and title — is kept in <code>library.json</code> in your own Drive.</td></tr>
+      <tr><td>Colab, on connecting it</td><td><code>colaboratory</code></td><td>Starts and talks to a Colab runtime as you, to run a notebook's cells. Notebooks and their outputs are kept in your Drive.</td></tr>
+    </table>
+    <p>The access token Google issues lasts about an hour and is held in the browser's session storage, beside whose it is. It is never written to disk by the app and never kept on a server; the app holds no refresh token, so it cannot act on your account when you are not using it. When the hour is up the app asks Google for a new token on the grant already given. <strong>Sign out</strong> revokes the token, and <strong>Forget</strong> beside the calendar in Settings drops that permission in the browser. You can withdraw any of these for good at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p>
+    <p><strong>Limited Use.</strong> The app's use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements. Google user data is used only to provide the features described on this page. It is never sold, never used for advertising, never used to train any model, and never transferred to anyone except as needed to provide those features or as required by law.</p>
+
+    <h2 id="proxy">The proxy</h2>
+    <p>The hosted copy of the app is built with a proxy, a Cloudflare Worker run by me. The browser cannot fetch most PDFs or some search results directly, so those requests go through it. Signed in, your browser sends the proxy your Google sign-in once; the proxy asks Google whose it is and answers with a short-lived pass — your email address and an expiry, signed — which the app then sends with its requests. The proxy records, per account, how much of the site's own keys each person used: PDF fetches, searches, and the AI and web-search calls below. Those totals are visible only to me, on a page nobody else can open. The proxy keeps no copy of what was fetched.</p>
+
+    <h2>What the app sends elsewhere</h2>
+    <p>Searching and opening papers means talking to the places papers live. Your search terms and the identifiers of the papers you open are sent to whichever of these answers the request:</p>
+    <ul>
+      <li>arXiv, OpenAlex, Semantic Scholar, Crossref and Unpaywall, for search results and metadata; Google Scholar, through the proxy, when you choose it;</li>
+      <li>Google (<code>accounts.google.com</code>, <code>googleapis.com</code>), for sign-in, Drive, Calendar and Colab;</li>
+      <li>Google Fonts, for the typefaces the page uses;</li>
+      <li>the proxy above, for PDFs and for everything marked “through the proxy” here;</li>
+      <li>a dictionary and Wikipedia, for the lookup card over a selection.</li>
+    </ul>
+    <p><strong>AI features.</strong> Ask AI, Explain and the lookup card's background paragraph send the text of the paper you are reading — and your question, and, where you ask it, pictures of the pages or figures on screen — to the model you pick: Anthropic's Claude, DeepSeek, or Google's Gemini, through the proxy on the site's keys or directly on a key you enter in Settings. Nothing is sent until you use one of these features. The Web button sends your question to a web search service through the proxy. Answers you keep go into your notes, in your Drive.</p>
+    <p><strong>Writing a paper.</strong> The Write tab sends a draft's LaTeX to a compiler to make its PDF — the Companion on your own computer, a Cloud Run service run by me, or GitHub Actions in your repository — and to Overleaf, if you link an Overleaf project. The compiler keeps nothing once the PDF is returned.</p>
+    <p id="github"><strong>GitHub.</strong> If you connect GitHub — with Reader's GitHub App, a sign-in, or a pasted token — the token goes to the proxy, which checks it with GitHub and keeps it sealed, for your account alone, with a key only the proxy holds. It is never sent back to any page and nothing of it stays in the browser. GitHub calls go through the proxy, which makes only the few the app needs: commits, a repository made, read or turned private. A token unused for six months is forgotten; one revoked on GitHub, at once.</p>
+    <p><strong>Your own computer.</strong> The Reader Companion, if you install it, runs on your machine and talks only to your browser and to the services you point it at; nothing from it passes through the proxy.</p>
+    <p>Each of these services has its own privacy policy, and I have no control over what they log. Beyond these requests the app sends nothing anywhere. It carries no analytics, no advertising and no third-party trackers of any kind, and it sets no cookies.</p>
+
+    <h2>Deleting your data</h2>
+    <ul>
+      <li><strong>From Drive:</strong> delete the <code>Papers_collection</code> folder. Nothing in the app is needed to do it.</li>
+      <li><strong>From this browser:</strong> clear site data for <code>saurav717.github.io</code>, or sign out, which forgets this browser's copy of the library.</li>
+      <li><strong>The connections:</strong> revoke Google's at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>; disconnect GitHub in Settings, which has the proxy forget the token.</li>
+      <li><strong>On the proxy:</strong> write to the address below and the usage totals under your account are deleted.</li>
+    </ul>
+
+    <h2>Children</h2>
+    <p>The app is not directed at children under 13 and knowingly collects nothing from anyone.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes, the date at the top changes with it, and every edit is public in the <a href="https://github.com/saurav717/reader">app's repository</a>, where this page lives as <code>public/privacy/index.html</code>.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this policy, or about the app's use of Google user data: <strong>es16btech11007@gmail.com</strong>.</p>
+
+    <p class="foot">Reader is open source: <a href="https://github.com/saurav717/reader">github.com/saurav717/reader</a>. Its <a href="../terms/">terms of service</a> are a separate page.</p>
+  </main>
+</body>
+</html>
