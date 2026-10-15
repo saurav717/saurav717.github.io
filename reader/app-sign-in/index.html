@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Sign in · Reader</title>
+  <link rel="icon" href="../icons/reader-192.png" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #fbfaf6; --surface: #fffdf7; --border: #e2ddce; --ink: #1a1a17; --muted: #6f6c63; --accent: #1f5e52; --accent-on: #f6f4ec; --bad: #a33a2a;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --paper: #15161a; --surface: #1d1f25; --border: #2c2f36; --ink: #eae7df; --muted: #9b978c; --accent: #57a98f; --accent-on: #10201c; --bad: #e38a7a; }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); }
+    body { font: 15.5px/1.6 system-ui, -apple-system, 'Segoe UI', sans-serif; display: grid; place-items: center; min-height: 100vh; padding: 16px; }
+    main { width: 100%; max-width: 420px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; }
+    h1 { font-size: 20px; margin: 0 0 8px; }
+    p { margin: 0 0 16px; color: var(--muted); }
+    button { font: inherit; font-weight: 600; border: 0; border-radius: 8px; padding: 10px 18px; background: var(--accent); color: var(--accent-on); cursor: pointer; }
+    button[hidden] { display: none; }
+    .bad { color: var(--bad); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="title">Sign in to Reader</h1>
+    <p id="text">Google doesn't allow signing in inside apps, so the Reader app asks you to sign in here, in your browser. Reader then gets access to your Google account; your password stays with Google.</p>
+    <button type="button" id="go" hidden>Continue with Google</button>
+  </main>
+  <script>
+    // The Reader app (desktop/app/main.js) opens this page in the browser, because Google turns sign-in down
+    // inside an app's own window. Here Google's usual popup asks; its answer goes back to the app at
+    // reader-app://google-token, with the app's own `state`, which it checks.
+    (function () {
+      var query = new URLSearchParams(location.search);
+      var state = query.get('state') || '';
+      var clientId = query.get('client_id') || '';
+      var scope = query.get('scope') || '';
+      var prompt = query.get('prompt') || '';
+      var hint = query.get('hint') || '';
+      var title = document.getElementById('title');
+      var text = document.getElementById('text');
+      var go = document.getElementById('go');
+
+      function show(heading, words, bad) {
+        title.textContent = heading;
+        text.textContent = words;
+        text.className = bad ? 'bad' : '';
+      }
+      function answer(values) {
+        var back = new URLSearchParams(Object.assign({ state: state }, values));
+        location.href = 'reader-app://google-token?' + back.toString();
+      }
+
+      if (!/^[A-Za-z0-9_-]{16,}$/.test(state) || !/\.apps\.googleusercontent\.com$/.test(clientId) || !scope) {
+        show('Open this from the Reader app', 'This page signs the Reader app in to Google. Start from the app’s Sign in button.', true);
+        return;
+      }
+
+      var script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.onerror = function () { show('Couldn’t reach Google', 'Check your connection, then reload this page.', true); };
+      script.onload = function () {
+        var client = google.accounts.oauth2.initTokenClient(Object.assign({
+          client_id: clientId,
+          scope: scope,
+          prompt: prompt,
+          callback: function (response) {
+            if (response.error || !response.access_token) {
+              answer({ error: response.error || 'access_denied', error_description: response.error_description || '' });
+              show('Not signed in', 'Google didn’t sign you in. Go back to Reader and try again.', true);
+              return;
+            }
+            answer({ access_token: response.access_token, expires_in: String(response.expires_in || 3600), scope: response.scope || scope });
+            go.hidden = true;
+            show('Signed in', 'Go back to Reader: you can close this tab. (If your browser asked, allow it to open Reader.)', false);
+          },
+          error_callback: function (error) {
+            // The popup closed or blocked: the button stays, to try again. The app waits.
+            show('Sign in to Reader', error && error.type === 'popup_failed_to_open' ? 'Your browser blocked Google’s window. Allow popups for this page, then click again.' : 'Google’s window closed before signing in. Click to try again.', false);
+          },
+        }, hint ? { login_hint: hint, hint: hint } : {}));
+        go.hidden = false;
+        go.onclick = function () { client.requestAccessToken(); };
+      };
+      document.head.appendChild(script);
+    })();
+  </script>
+</body>
+</html>
