@@ -11,8 +11,6 @@ redirect_from:
 # About me
 I am a Data Scientist and AI researcher with a background in Computer Vision and machine learning systems. I completed my Masters in Artificial Intelligence from [Boston University](https://www.bu.edu/), where I conducted research under the guidance of [Dr. Margrit Betke](https://www.cs.bu.edu/faculty/betke/), in collaboration with [Dr. Prakash Ishwar](https://sites.bu.edu/pi/) and [Dr. Swathi Kiran](https://www.bu.edu/sargent/profile/swathi-kiran-ph-d-ccc-slp/), supported by the [Center for Brain Recovery](https://www.bu.edu/cbr/).
 
-I am currently working at [Capital One](https://www.capitalone.com) as a Senior Data Scientist on fraud detection, where I collaborate across the Transaction Fraud, Account Takeover, and Fraud Fusion Cell teams — working alongside fraud investigators to analyze ongoing fraud trends and develop defenses.
-
 Feel free to reach out at `saurav [at] gmail [dot] com` for discussions on ML research, career paths, or collaborations.
 
 My Research Interests
@@ -23,13 +21,12 @@ Personal Interests
 ======
 Outside of research, I enjoy ice skating, western classical music (currently exploring Verdi and Handel), and following Valorant e-sports.
 
+{% comment %} Timeline hidden; delete this line and the endcomment line below to show it again.
 My History
 ======
 
 | Year      | Life update |
 | ----------- | ----------- |
-| 2025 | Looking for the next step of my career. |
-| 2025 | Joined Capital One Financial as a Senior Data Scientist in their fraud division, working on their Transaction Fraud Team, Account Takeover Fraud team and Fraud Fusion Cell, where I collaborated with several fraud investigators in analyzing ongoing fraud trends and recommending defences to counter them so people wont lose their money.|
 | 2023    | Joined Microsoft in their Cloud Hardware and Infrastructure Engineering team in designing, developing and deploying their Azure BIOS packages.  |
 | 2023    | Published [Fusion Approaches on Multi-Modal Neuroimaging Data](https://openaccess.thecvf.com/content/ICCV2023W/CVAMD/papers/Chennuri_Fusion_Approaches_to_Predict_Post-Stroke_Aphasia_Severity_from_Multimodal_Neuroimaging_ICCVW_2023_paper.pdf) work at the ICCV 2023 workshop CVAMD.|
 | 2023    | Graduate with Masters in AI from Boston University |
@@ -45,3 +42,4 @@ My History
 | 2019      | Intern (Data Analyst), [Takanaka Corporation](https://www.takenaka.co.jp/takenaka_e/), Japan       |
 | 2018   | Became Head of [Robotics club, IIT Hyderabad](https://scitech-iith.netlify.app/)        |
 | 2016      | Joined [IIT Hyderabad](https://iith.ac.in/), B.Tech - [Engineering Sciences](https://es.iith.ac.in/)   |
+{% endcomment %}
