@@ -21,6 +21,7 @@ Personal Interests
 ======
 Outside of research, I enjoy ice skating, western classical music (currently exploring Verdi and Handel), and following Valorant e-sports.
 
+{% comment %} Timeline hidden; delete this line and the endcomment line below to show it again.
 My History
 ======
 
@@ -41,3 +42,4 @@ My History
 | 2019      | Intern (Data Analyst), [Takanaka Corporation](https://www.takenaka.co.jp/takenaka_e/), Japan       |
 | 2018   | Became Head of [Robotics club, IIT Hyderabad](https://scitech-iith.netlify.app/)        |
 | 2016      | Joined [IIT Hyderabad](https://iith.ac.in/), B.Tech - [Engineering Sciences](https://es.iith.ac.in/)   |
+{% endcomment %}
