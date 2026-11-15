@@ -28,7 +28,6 @@ My History
 
 | Year      | Life update |
 | ----------- | ----------- |
-| 2025 | Looking for the next step of my career. |
 | 2025 | Joined Capital One Financial as a Senior Data Scientist in their fraud division, working on their Transaction Fraud Team, Account Takeover Fraud team and Fraud Fusion Cell, where I collaborated with several fraud investigators in analyzing ongoing fraud trends and recommending defences to counter them so people wont lose their money.|
 | 2023    | Joined Microsoft in their Cloud Hardware and Infrastructure Engineering team in designing, developing and deploying their Azure BIOS packages.  |
 | 2023    | Published [Fusion Approaches on Multi-Modal Neuroimaging Data](https://openaccess.thecvf.com/content/ICCV2023W/CVAMD/papers/Chennuri_Fusion_Approaches_to_Predict_Post-Stroke_Aphasia_Severity_from_Multimodal_Neuroimaging_ICCVW_2023_paper.pdf) work at the ICCV 2023 workshop CVAMD.|
